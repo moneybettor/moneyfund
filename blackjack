@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack - MoneyFund</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            background: #0D1321;
+            color: #F8FAFC;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.85);
+            border-radius: 10px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+        }
+
+        #log-leaderboard-container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.85);
+            border-radius: 10px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        #stats {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+            z-index: 1;
+        }
+
+        #wallet-container {
+            text-align: center;
+            margin-bottom: 20px;
+            z-index: 1;
+        }
+
+        #wallet-selector, #connectMetaMaskBtn {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        #connectMetaMaskBtn {
+            background-color: #4B5EAA;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 8px;
+        }
+
+        #connectMetaMaskBtn:hover {
+            background-color: #334C8C;
+        }
+
+        h1, h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            z-index: 1;
+        }
+
+        #money {
+            font-size: 20px;
+            text-align: center;
+            margin: 10px 0;
+            z-index: 1;
+        }
+
+        .card {
+            display: inline-block;
+            width: 70px;
+            height: 100px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: black;
+            margin: 5px;
+            border-radius: 5px;
+            line-height: 100px;
+            font-size: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.5);
+            text-align: center;
+            z-index: 1;
+        }
+
+        .player-area, .dealer-area {
+            margin: 20px 0;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+            z-index: 1;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            z-index: 1;
+        }
+
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            font-size: 16px;
+            margin: 0 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            z-index: 1;
+        }
+
+        #message {
+            font-size: 24px;
+            text-align: center;
+            margin: 20px 0;
+            z-index: 1;
+        }
+
+        #game-log {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        .log-entry {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .log-entry.win {
+            color: #00ff00;
+        }
+
+        .log-entry.loss {
+            color: #ff0000;
+        }
+
+        #leaderboards {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            z-index: 1;
+        }
+
+        #leaderboard-selector {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-bottom: 10px;
+        }
+
+        #leaderboard-table {
+            width: 100%;
+            color: white;
+            font-size: 14px;
+            border-collapse: collapse;
+        }
+
+        #leaderboard-table th, #leaderboard-table td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #leaderboard-table th {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #leaderboard-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="stats">Player Wins: <span id="playerWins">0</span> | House Wins: <span id="houseWins">0</span> | Win Rate: <span id="winRate">0%</span></div>
+        <div id="wallet-container">
+            <button id="connectMetaMaskBtn">Connect MetaMask</button>
+            <select id="wallet-selector">
+                <option value="">-- Select Wallet --</option>
+            </select>
+        </div>
+        <h1>Blackjack</h1>
+        <div id="money">Balance: $<span id="playerMoney">0</span></div>
+        <div class="dealer-area">
+            <h2>Dealer's Hand (<span id="dealerScore">0</span>)</h2>
+            <div id="dealerCards"></div>
+        </div>
+        <div class="player-area">
+            <h2>Your Hand (<span id="playerScore">0</span>)</h2>
+            <div id="playerCards"></div>
+        </div>
+        <div id="message"></div>
+        <div class="controls">
+            <input type="number" id="betAmount" min="0.001" step="0.001" placeholder="Enter bet amount">
+            <button id="dealBtn">Deal</button>
+            <button id="hitBtn" disabled>Hit</button>
+            <button id="standBtn" disabled>Stand</button>
+            <button id="doubleBtn" disabled>Double Down</button>
+        </div>
+    </div>
+    <div id="log-leaderboard-container">
+        <div id="game-log"></div>
+        <div id="leaderboards">
+            <select id="leaderboard-selector">
+                <option value="winRate">Top 10 by Win Rate</option>
+                <option value="handsPlayed">Top 10 by Hands Played</option>
+                <option value="largestWin">Top 10 by Largest Single Hand Win</option>
+                <option value="totalBet">Top 10 by Total Bet</option>
+                <option value="totalWinnings">Top 10 by Total Winnings</option>
+                <option value="blackjackCount">Top 10 by Blackjack Count</option>
+                <option value="winStreak">Top 10 by Longest Win Streak</option>
+                <option value="bustRate">Top 10 by Bust Rate</option>
+                <option value="avgBet">Top 10 by Average Bet</option>
+            </select>
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Wallet</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Blackjack Game Logic
+        class Blackjack {
+            constructor() {
+                this.deck = [];
+                this.playerHand = [];
+                this.dealerHand = [];
+                this.currentBet = 0;
+                this.gameInProgress = false;
+                this.suits = ['♠', '♥', '♦', '♣'];
+                this.values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+                this.dealerCards = document.getElementById('dealerCards');
+                this.playerCards = document.getElementById('playerCards');
+                this.dealerScore = document.getElementById('dealerScore');
+                this.playerScore = document.getElementById('playerScore');
+                this.message = document.getElementById('message');
+                this.playerMoneyEl = document.getElementById('playerMoney');
+                this.betAmount = document.getElementById('betAmount');
+                this.wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+                this.balances = JSON.parse(localStorage.getItem('walletBalances') || '{}');
+                this.selectedWallet = null;
+                this.userAccount = null;
+                this.web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                this.playerWins = 0;
+                this.houseWins = 0;
+                this.init();
+            }
+
+            async init() {
+                await this.loadStats();
+                await this.initializeWallets();
+                this.attachEventListeners();
+                this.updateMoneyDisplay();
+                await this.loadGameLog();
+                await this.loadLeaderboards();
+            }
+
+            async loadStats() {
+                try {
+                    const response = await fetch('save_stats.php');
+                    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                    const stats = await response.json();
+                    this.playerWins = stats.playerWins || 0;
+                    this.houseWins = stats.houseWins || 0;
+                    this.updateStatsDisplay();
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                    this.message.textContent = 'Failed to load stats. Please try again.';
+                }
+            }
+
+            updateStatsDisplay() {
+                const total = this.playerWins + this.houseWins;
+                const winRate = total > 0 ? ((this.playerWins / total) * 100).toFixed(2) : 0;
+                document.getElementById('playerWins').textContent = this.playerWins;
+                document.getElementById('houseWins').textContent = this.houseWins;
+                document.getElementById('winRate').textContent = winRate + '%';
+            }
+
+            async saveStats() {
+                try {
+                    const response = await fetch('save_stats.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ playerWins: this.playerWins, houseWins: this.houseWins })
+                    });
+                    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                } catch (error) {
+                    console.error('Error saving stats:', error);
+                    this.message.textContent = 'Failed to save stats. Please try again.';
+                }
+            }
+
+            updateMoneyDisplay() {
+                const balance = this.userAccount && this.balances[this.userAccount] !== undefined ? this.balances[this.userAccount] : 0;
+                this.playerMoneyEl.textContent = balance.toFixed(3);
+            }
+
+            saveBalances() {
+                localStorage.setItem('walletBalances', JSON.stringify(this.balances));
+            }
+
+            async initializeWallets() {
+                this.wallets.forEach(wallet => {
+                    if (this.balances[wallet.address] === undefined) {
+                        this.balances[wallet.address] = 100;
+                    }
+                });
+
+                if (window.ethereum && this.userAccount) {
+                    const metamaskWallet = { address: this.userAccount, type: 'MetaMask', isMetaMask: true };
+                    if (!this.wallets.some(w => w.address === metamaskWallet.address)) {
+                        this.wallets.push(metamaskWallet);
+                        if (this.balances[this.userAccount] === undefined) {
+                            this.balances[this.userAccount] = 100;
+                        }
+                    }
+                }
+
+                this.wallets = this.wallets.map(wallet => ({
+                    ...wallet,
+                    isMetaMask: wallet.type === 'MetaMask'
+                }));
+                localStorage.setItem('wallets', JSON.stringify(this.wallets));
+                this.saveBalances();
+
+                const walletSelector = document.getElementById('wallet-selector');
+                walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+                this.wallets.forEach((wallet, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${wallet.type}: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+                    walletSelector.appendChild(option);
+                });
+
+                const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex')) || 0;
+                if (this.wallets.length > 0 && selectedIndex >= 0 && selectedIndex < this.wallets.length) {
+                    this.selectedWallet = this.wallets[selectedIndex];
+                    walletSelector.value = selectedIndex;
+                    this.userAccount = this.selectedWallet.address;
+                    this.updateMoneyDisplay();
+                }
+            }
+
+            async connectMetaMask() {
+                if (!window.ethereum) {
+                    this.message.textContent = 'Please install MetaMask!';
+                    return;
+                }
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    this.userAccount = accounts[0];
+                    const metamaskWallet = { address: this.userAccount, type: 'MetaMask', isMetaMask: true };
+                    if (!this.wallets.some(w => w.address === this.userAccount)) {
+                        this.wallets.push(metamaskWallet);
+                        if (this.balances[this.userAccount] === undefined) {
+                            this.balances[this.userAccount] = 100;
+                        }
+                        localStorage.setItem('wallets', JSON.stringify(this.wallets));
+                        this.saveBalances();
+                    }
+                    localStorage.setItem('selectedWalletIndex', this.wallets.length - 1);
+                    await this.initializeWallets();
+                } catch (error) {
+                    this.message.textContent = `Error: ${error.message}`;
+                }
+            }
+
+            attachEventListeners() {
+                document.getElementById('dealBtn').addEventListener('click', () => this.startGame());
+                document.getElementById('hitBtn').addEventListener('click', () => this.hit());
+                document.getElementById('standBtn').addEventListener('click', () => this.stand());
+                document.getElementById('doubleBtn').addEventListener('click', () => this.doubleDown());
+                document.getElementById('connectMetaMaskBtn').addEventListener('click', () => this.connectMetaMask());
+                document.getElementById('wallet-selector').addEventListener('change', (e) => {
+                    const index = e.target.value;
+                    if (index !== '') {
+                        this.selectedWallet = this.wallets[index];
+                        this.userAccount = this.selectedWallet.address;
+                        localStorage.setItem('selectedWalletIndex', index);
+                        this.updateMoneyDisplay();
+                    } else {
+                        this.selectedWallet = null;
+                        this.userAccount = null;
+                        this.updateMoneyDisplay();
+                    }
+                });
+                document.getElementById('leaderboard-selector').addEventListener('change', () => this.loadLeaderboards());
+            }
+
+            createDeck() {
+                this.deck = [];
+                for (let suit of this.suits) {
+                    for (let value of this.values) {
+                        this.deck.push({ suit, value });
+                    }
+                }
+                this.shuffleDeck();
+            }
+
+            shuffleDeck() {
+                for (let i = this.deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+                }
+            }
+
+            getCardValue(card) {
+                if (['J', 'Q', 'K'].includes(card.value)) return 10;
+                if (card.value === 'A') return 11;
+                return parseInt(card.value);
+            }
+
+            calculateScore(hand) {
+                let score = 0;
+                let aces = 0;
+                hand.forEach(card => {
+                    let value = this.getCardValue(card);
+                    if (value === 11) aces++;
+                    score += value;
+                });
+                while (score > 21 && aces > 0) {
+                    score -= 10;
+                    aces--;
+                }
+                return score;
+            }
+
+            displayCard(card, element, hidden = false) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card';
+                cardDiv.textContent = hidden ? '?' : `${card.value}${card.suit}`;
+                cardDiv.style.color = (card.suit === '♥' || card.suit === '♦') ? 'red' : 'black';
+                element.appendChild(cardDiv);
+            }
+
+            updateDisplay(hidden = true) {
+                this.dealerCards.innerHTML = '';
+                this.playerCards.innerHTML = '';
+                this.dealerHand.forEach((card, index) => {
+                    this.displayCard(card, this.dealerCards, hidden && index === 0);
+                });
+                this.playerHand.forEach(card => {
+                    this.displayCard(card, this.playerCards);
+                });
+                this.dealerScore.textContent = hidden ? this.calculateScore([this.dealerHand[1]]) : this.calculateScore(this.dealerHand);
+                this.playerScore.textContent = this.calculateScore(this.playerHand);
+            }
+
+            startGame() {
+                if (this.gameInProgress) {
+                    this.message.textContent = 'Game already in progress!';
+                    return;
+                }
+                if (!this.userAccount) {
+                    this.message.textContent = 'Please connect or select a wallet!';
+                    return;
+                }
+                const bet = parseFloat(this.betAmount.value);
+                if (isNaN(bet) || bet <= 0) {
+                    this.message.textContent = 'Please enter a valid bet amount!';
+                    return;
+                }
+                const balance = this.balances[this.userAccount] !== undefined ? this.balances[this.userAccount] : 0;
+                console.log(`startGame: userAccount=${this.userAccount}, bet=${bet}, balance=${balance}`);
+                if (bet > balance) {
+                    this.message.textContent = `Insufficient balance! Bet: $${bet.toFixed(3)}, Balance: $${balance.toFixed(3)}`;
+                    return;
+                }
+                this.currentBet = bet;
+                this.balances[this.userAccount] -= bet;
+                this.saveBalances();
+                this.gameInProgress = true;
+                this.createDeck();
+                this.playerHand = [this.deck.pop(), this.deck.pop()];
+                this.dealerHand = [this.deck.pop(), this.deck.pop()];
+                this.updateDisplay();
+                this.updateMoneyDisplay();
+                document.getElementById('dealBtn').disabled = true;
+                document.getElementById('hitBtn').disabled = false;
+                document.getElementById('standBtn').disabled = false;
+                document.getElementById('doubleBtn').disabled = false;
+                this.checkInitialHands();
+            }
+
+            checkInitialHands() {
+                const playerScore = this.calculateScore(this.playerHand);
+                const dealerScore = this.calculateScore(this.dealerHand);
+                const isPlayerBlackjack = playerScore === 21 && this.playerHand.length === 2;
+                const isDealerBlackjack = dealerScore === 21 && this.dealerHand.length === 2;
+
+                if (isPlayerBlackjack) {
+                    if (isDealerBlackjack) {
+                        this.message.textContent = 'Push! Both have Blackjack!';
+                        this.balances[this.userAccount] += this.currentBet;
+                        this.logGame('Push', playerScore, dealerScore, 0, true);
+                        this.endGame();
+                    } else {
+                        this.message.textContent = 'Blackjack! You win!';
+                        const winAmount = this.currentBet * 2.5;
+                        this.balances[this.userAccount] += winAmount;
+                        this.playerWins++;
+                        this.logGame('Win', playerScore, dealerScore, winAmount, true);
+                        this.saveStats();
+                        this.endGame();
+                    }
+                } else if (isDealerBlackjack) {
+                    this.message.textContent = 'Dealer has Blackjack! You lose!';
+                    this.updateDisplay(false);
+                    this.houseWins++;
+                    this.logGame('Loss', playerScore, dealerScore, 0, false);
+                    this.saveStats();
+                    this.endGame();
+                }
+                this.updateMoneyDisplay();
+                this.saveBalances();
+            }
+
+            hit() {
+                this.playerHand.push(this.deck.pop());
+                this.updateDisplay();
+                const score = this.calculateScore(this.playerHand);
+                if (score > 21) {
+                    this.message.textContent = 'Bust! You lose!';
+                    this.houseWins++;
+                    this.logGame('Loss', score, this.calculateScore(this.dealerHand), 0, false, true);
+                    this.saveStats();
+                    this.endGame();
+                }
+            }
+
+            stand() {
+                if (!this.gameInProgress) return;
+                let dealerScore = this.calculateScore(this.dealerHand);
+                while (dealerScore < 17) {
+                    this.dealerHand.push(this.deck.pop());
+                    dealerScore = this.calculateScore(this.dealerHand);
+                }
+                this.updateDisplay(false);
+                this.determineWinner();
+            }
+
+            doubleDown() {
+                const additionalBet = this.currentBet;
+                const balance = this.balances[this.userAccount] !== undefined ? this.balances[this.userAccount] : 0;
+                console.log(`doubleDown: userAccount=${this.userAccount}, additionalBet=${additionalBet}, balance=${balance}`);
+                if (additionalBet > balance) {
+                    this.message.textContent = `Insufficient balance for double down! Need: $${additionalBet.toFixed(3)}, Balance: $${balance.toFixed(3)}`;
+                    return;
+                }
+                this.balances[this.userAccount] -= additionalBet;
+                this.currentBet *= 2;
+                this.updateMoneyDisplay();
+                this.saveBalances();
+                this.playerHand.push(this.deck.pop());
+                this.updateDisplay();
+                if (this.calculateScore(this.playerHand) > 21) {
+                    this.message.textContent = 'Bust! You lose!';
+                    this.houseWins++;
+                    this.logGame('Loss', this.calculateScore(this.playerHand), this.calculateScore(this.dealerHand), 0, false, true);
+                    this.saveStats();
+                    this.endGame();
+                } else {
+                    this.stand();
+                }
+            }
+
+            determineWinner() {
+                const playerScore = this.calculateScore(this.playerHand);
+                const dealerScore = this.calculateScore(this.dealerHand);
+                let outcome, winAmount = 0;
+                if (dealerScore > 21) {
+                    this.message.textContent = 'Dealer busts! You win!';
+                    winAmount = this.currentBet * 2;
+                    this.balances[this.userAccount] += winAmount;
+                    this.playerWins++;
+                    outcome = 'Win';
+                } else if (playerScore > dealerScore) {
+                    this.message.textContent = 'You win!';
+                    winAmount = this.currentBet * 2;
+                    this.balances[this.userAccount] += winAmount;
+                    this.playerWins++;
+                    outcome = 'Win';
+                } else if (playerScore < dealerScore) {
+                    this.message.textContent = 'Dealer wins!';
+                    this.houseWins++;
+                    outcome = 'Loss';
+                } else {
+                    this.message.textContent = 'Push!';
+                    this.balances[this.userAccount] += this.currentBet;
+                    outcome = 'Push';
+                }
+                this.updateMoneyDisplay();
+                this.logGame(outcome, playerScore, dealerScore, winAmount, false);
+                this.saveStats();
+                this.saveBalances();
+                this.endGame();
+            }
+
+            async logGame(outcome, playerScore, dealerScore, winAmount, isBlackjack = false, isBust = false) {
+                const logData = {
+                    wallet: this.userAccount || 'Anonymous',
+                    bet: this.currentBet.toFixed(3),
+                    outcome,
+                    playerScore,
+                    dealerScore,
+                    winAmount: winAmount.toFixed(3),
+                    isBlackjack,
+                    isBust,
+                    timestamp: new Date().toISOString()
+                };
+                try {
+                    const response = await fetch('save_game.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(logData)
+                    });
+                    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                    await this.loadGameLog();
+                    await this.loadLeaderboards();
+                } catch (error) {
+                    console.error('Error logging game:', error);
+                    this.message.textContent = 'Failed to save game log. Please try again.';
+                }
+            }
+
+            async loadGameLog() {
+                try {
+                    const response = await fetch('game_log.json', { cache: 'no-store' });
+                    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                    const logs = await response.json();
+                    if (!Array.isArray(logs)) throw new Error('Invalid log data');
+                    const logDiv = document.getElementById('game-log');
+                    logDiv.innerHTML = logs.length > 0 ? logs.reverse().map(log => `
+                        <div class="log-entry ${log.outcome.toLowerCase()}">
+                            Wallet: ${log.wallet.slice(0, 6)}...${log.wallet.slice(-4)}<br>
+                            Bet: $${log.bet}<br>
+                            Outcome: ${log.outcome}<br>
+                            Player: ${log.playerScore}, Dealer: ${log.dealerScore}<br>
+                            Time: ${log.timestamp}
+                        </div>
+                    `).join('') : '<div class="log-entry">No logs available.</div>';
+                    logDiv.scrollTop = 0;
+                } catch (error) {
+                    console.error('Error loading game log:', error);
+                    this.message.textContent = 'Failed to load game log. Please try again.';
+                    document.getElementById('game-log').innerHTML = '<div class="log-entry">No logs available.</div>';
+                }
+            }
+
+            async loadLeaderboards() {
+                try {
+                    const response = await fetch('game_log.json', { cache: 'no-store' });
+                    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                    const logs = await response.json();
+                    if (!Array.isArray(logs)) throw new Error('Invalid log data');
+
+                    const leaderboardType = document.getElementById('leaderboard-selector').value;
+                    let leaderboardData = [];
+
+                    if (leaderboardType === 'winRate') {
+                        const walletStats = {};
+                        logs.forEach(log => {
+                            if (!walletStats[log.wallet]) {
+                                walletStats[log.wallet] = { wins: 0, total: 0 };
+                            }
+                            walletStats[log.wallet].total++;
+                            if (log.outcome === 'Win') {
+                                walletStats[log.wallet].wins++;
+                            }
+                        });
+                        leaderboardData = Object.entries(walletStats)
+                            .map(([wallet, stats]) => ({
+                                wallet,
+                                value: stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(2) + '%' : '0%'
+                            }))
+                            .filter(entry => entry.value !== '0%')
+                            .sort((a, b) => parseFloat(b.value) - parseFloat(a.value))
+                            .slice(0, 10);
+                    } else if (leaderboardType === 'handsPlayed') {
+                        const walletHands = {};
+                        logs.forEach(log => {
+                            walletHands[log.wallet] = (walletHands[log.wallet] || 0) + 1;
+                        });
+                        leaderboardData = Object.entries(walletHands)
+                            .map(([wallet, hands]) => ({ wallet, value: hands }))
+                            .sort((a, b) => b.value - a.value)
+                            .slice(0, 10);
+                    } else if (leaderboardType === 'largestWin') {
+                        leaderboardData = logs
+                            .filter(log => log.outcome === 'Win' && parseFloat(log.winAmount) > 0)
+                            .map(log => ({
+                                wallet: log.wallet,
+                                value: parseFloat(log.winAmount).toFixed(3)
+                            }))
+                            .sort((a, b) => parseFloat(b.value) - parseFloat(a.value))
+                            .slice(0, 10);
+                    } else if (leaderboardType === 'totalBet') {
+                        const walletBets = {};
+                        logs.forEach(log => {
+                            walletBets[log.wallet] = (walletBets[log.wallet] || 0) + parseFloat(log.bet);
+                        });
+                        leaderboardData = Object.entries(walletBets)
+                            .map(([wallet, total]) => ({ wallet, value: total.toFixed(3) }))
+                            .sort((a, b) => b.value - a.value)
+                            .slice(0, 10);
+                    } else if (leaderboardType === 'totalWinnings') {
+                        const walletWinnings = {};
+                        logs.forEach(log => {
+                            if (log.outcome === 'Win') {
+                                walletWinnings[log.wallet] = (walletWinnings[log.wallet] || 0) + parseFloat(log.winAmount);
+                            }
+                        });
+                        leaderboardData = Object.entries(walletWinnings)
+                            .map(([wallet, total]) => ({ wallet, value: total.toFixed(3) }))
+                            .sort((a, b) => b.value - a.value)
+                            .slice(0, 10);
+                    } else if (leaderboardType === 'blackjackCount') {
+                        const walletBlackjacks = {};
+                        logs.forEach(log => {
+                            if (log.isBlackjack) {
+                                walletBlackjacks[log.wallet] = (walletBlackjacks[log.wallet] || 0) + 1;
+                            }
+                        });
+                        leaderboardData = Object.entries(walletBlackjacks)
+                            .map(([wallet, count]) => ({ wallet, value: count }))
+                            .sort((a, b) => b.value - a.value)
+                            .slice(0, 10);
+                    } else if (leaderboardType === 'winStreak') {
+                        const walletStreaks = {};
+                        logs.forEach(log => {
+                            if (!walletStreaks[log.wallet]) {
+                                walletStreaks[log.wallet] = { current: 0, max: 0 };
+                            }
+                            if (log.outcome === 'Win') {
+                                walletStreaks[log.wallet].current++;
+                                walletStreaks[log.wallet].max = Math.max(walletStreaks[log.wallet].max, walletStreaks[log.wallet].current);
+                            } else {
+                                walletStreaks[log.wallet].current = 0;
+                            }
+                        });
+                        leaderboardData = Object.entries(walletStreaks)
+                            .map(([wallet, streaks]) => ({ wallet, value: streaks.max }))
+                            .sort((a, b) => b.value - a.value)
+                            .slice(0, 10);
+                    } else if (leaderboardType === 'bustRate') {
+                        const walletBusts = {};
+                        logs.forEach(log => {
+                            if (!walletBusts[log.wallet]) {
+                                walletBusts[log.wallet] = { busts: 0, total: 0 };
+                            }
+                            walletBusts[log.wallet].total++;
+                            if (log.isBust) {
+                                walletBusts[log.wallet].busts++;
+                            }
+                        });
+                        leaderboardData = Object.entries(walletBusts)
+                            .map(([wallet, stats]) => ({
+                                wallet,
+                                value: stats.total > 0 ? ((stats.busts / stats.total) * 100).toFixed(2) + '%' : '0%'
+                            }))
+                            .filter(entry => entry.value !== '0%')
+                            .sort((a, b) => parseFloat(b.value) - parseFloat(a.value))
+                            .slice(0, 10);
+                    } else if (leaderboardType === 'avgBet') {
+                        const walletBets = {};
+                        logs.forEach(log => {
+                            if (!walletBets[log.wallet]) {
+                                walletBets[log.wallet] = { total: 0, count: 0 };
+                            }
+                            walletBets[log.wallet].total += parseFloat(log.bet);
+                            walletBets[log.wallet].count++;
+                        });
+                        leaderboardData = Object.entries(walletBets)
+                            .map(([wallet, stats]) => ({
+                                wallet,
+                                value: (stats.total / stats.count).toFixed(3)
+                            }))
+                            .sort((a, b) => parseFloat(b.value) - parseFloat(a.value))
+                            .slice(0, 10);
+                    }
+
+                    const leaderboardBody = document.getElementById('leaderboard-body');
+                    leaderboardBody.innerHTML = leaderboardData.length > 0 ? leaderboardData.map((entry, index) => `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${entry.wallet.slice(0, 6)}...${entry.wallet.slice(-4)}</td>
+                            <td>${entry.value}</td>
+                        </tr>
+                    `).join('') : '<tr><td colspan="3">No data available.</td></tr>';
+                } catch (error) {
+                    console.error('Error loading leaderboards:', error);
+                    this.message.textContent = 'Failed to load leaderboards. Please try again.';
+                    document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="3">No data available.</td></tr>';
+                }
+            }
+
+            endGame() {
+                this.gameInProgress = false;
+                document.getElementById('dealBtn').disabled = false;
+                document.getElementById('hitBtn').disabled = true;
+                document.getElementById('standBtn').disabled = true;
+                document.getElementById('doubleBtn').disabled = true;
+                this.updateStatsDisplay();
+                setTimeout(() => this.message.textContent = '', 2000);
+            }
+        }
+
+        const game = new Blackjack();
+    </script>
+</body>
+</html>
