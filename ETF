@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyFund ETF Launchpad</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #E5E7EB;
+            padding: 20px;
+            min-height: 100vh;
+            line-height: 1.5;
+            background: #1F2937;
+        }
+
+        .flex-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .full-width-container {
+            flex: 1;
+            min-width: 0;
+            padding: 15px;
+            background: #374151;
+            border-radius: 10px;
+            border: 1px solid #4B5563;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .launch-etf-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        .bottom-bar {
+            max-width: 1200px;
+            margin: 15px auto;
+            background: #374151;
+            border: 1px solid #4B5563;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .bottom-bar-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 1200px;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            background: #3B82F6;
+            color: #FFFFFF;
+            font-weight: 600;
+            transition: background 0.3s ease, transform 0.2s;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        button:hover {
+            background: #2563EB;
+            transform: scale(1.02);
+        }
+
+        #connect-wallet-button, #launch-etf-button, #refresh-etfs-button {
+            padding: 10px 20px;
+            margin: 5px;
+        }
+
+        .mint-etf-button, .burn-etf-button {
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            margin: 0 3px;
+        }
+
+        .update-price-button {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            margin-left: 5px;
+            background: #6B7280;
+        }
+
+        .update-price-button:hover {
+            background: #4B5563;
+        }
+
+        .copy-button {
+            padding: 3px 6px;
+            font-size: 0.75rem;
+            background: #6B7280;
+            margin-left: 5px;
+        }
+
+        .copy-button:hover {
+            background: #4B5563;
+        }
+
+        .close-button {
+            padding: 2px 5px;
+            font-size: 0.75rem;
+            background: #EF4444;
+            margin-left: 5px;
+        }
+
+        .close-button:hover {
+            background: #DC2626;
+            transform: none;
+        }
+
+        input, select {
+            padding: 8px;
+            margin: 3px 0;
+            width: 100%;
+            border: 1px solid #4B5563;
+            border-radius: 6px;
+            background: #2D3748;
+            color: #E5E7EB;
+            font-size: 0.95rem;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .etf-amount-input {
+            width: 100px;
+            margin-right: 5px;
+        }
+
+        input:hover, select:hover {
+            background: #374151;
+            border-color: #6B7280;
+        }
+
+        input::placeholder {
+            color: #9CA3AF;
+            opacity: 0.8;
+        }
+
+        select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23E5E7EB%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 8px auto;
+            padding-right: 25px;
+            max-width: 180px;
+        }
+
+        h2, h3 {
+            color: #FFFFFF;
+            text-align: center;
+            word-wrap: break-word;
+        }
+
+        h2 { font-size: 1.6em; margin-bottom: 8px; }
+        h3 { font-size: 1.2em; margin: 8px 0 6px; }
+
+        #walletAddress {
+            font-size: 0.85em;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.4;
+            color: #E5E7EB;
+            margin: 5px;
+        }
+
+        label {
+            color: #E5E7EB;
+            margin: 5px 0 2px;
+            display: block;
+            font-weight: 600;
+            text-align: left;
+            font-size: 0.85em;
+        }
+
+        .status-message, .error-message {
+            margin-top: 5px;
+            font-size: 0.8em;
+            text-align: center;
+            padding: 6px;
+            border-radius: 4px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            background: #2D3748;
+        }
+
+        .status-message { color: #10B981; }
+        .error-message { color: #F87171; }
+
+        #log {
+            margin-top: 5px;
+            max-height: 80px;
+            overflow-y: auto;
+            border: 1px solid #4B5563;
+            padding: 8px;
+            font-size: 0.8em;
+            background: #2D3748;
+            color: #E5E7EB;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        #etf-list {
+            margin-top: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 8px;
+            background: #374151;
+            border-radius: 8px;
+            border: 1px solid #4B5563;
+            scrollbar-width: thin;
+            scrollbar-color: #6B7280 transparent;
+        }
+
+        #etf-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #etf-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #etf-list::-webkit-scrollbar-thumb {
+            background: #6B7280;
+            border-radius: 3px;
+        }
+
+        .etf-card {
+            background: #2D3748;
+            border: 1px solid #4B5563;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .etf-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .etf-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #4B5563;
+            padding-bottom: 5px;
+        }
+
+        .etf-card-header h3 {
+            font-size: 1.1em;
+            margin: 0;
+            color: #FFFFFF;
+        }
+
+        .etf-card-header span {
+            font-size: 0.95em;
+            color: #3B82F6;
+            font-weight: 600;
+        }
+
+        .etf-card-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+
+        .etf-card-details div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .etf-card-details label {
+            font-weight: 600;
+            color: #9CA3AF;
+            margin-bottom: 1px;
+        }
+
+        .etf-card-details span {
+            color: #E5E7EB;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .etf-card-details .price-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .etf-card-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .etf-card-actions .etf-amount-input {
+            flex: 0 0 100px;
+        }
+
+        .etf-card-actions .mint-etf-button,
+        .etf-card-actions .burn-etf-button {
+            flex: 0 0 auto;
+        }
+
+        .etf-card-actions .status-message,
+        .etf-card-actions .error-message {
+            flex: 1 1 100%;
+            text-align: left;
+            margin-top: 5px;
+        }
+
+        .action-cell {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: nowrap;
+            flex-direction: row;
+        }
+
+        .action-cell > * {
+            flex-shrink: 0;
+        }
+
+        .token-container {
+            max-height: 60px;
+            overflow-y: auto;
+            padding: 4px;
+            border: 1px solid #4B5563;
+            border-radius: 4px;
+            background: #2D3748;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #6B7280 transparent;
+        }
+
+        .token-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .token-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .token-container::-webkit-scrollbar-thumb {
+            background: #6B7280;
+            border-radius: 2px;
+        }
+
+        .token-block {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            color: #E5E7EB;
+            transition: background 0.2s ease;
+        }
+
+        .token-block:hover {
+            background: #4B5563;
+        }
+
+        .token-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        .token-weight {
+            margin-left: 4px;
+            color: #A3E635;
+            font-weight: 500;
+        }
+
+        .expanded-token {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            background: #4B5563;
+            border-radius: 4px;
+            font-size: 0.8em;
+            color: #E5E7EB;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .pie-chart-container {
+            width: 120px;
+            height: 120px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .flex-container {
+                flex-direction: column;
+            }
+            body { padding: 10px; }
+            .flex-container { gap: 10px; padding: 0 8px; }
+            .full-width-container { padding: 10px; }
+            .bottom-bar { padding: 10px; }
+            h2 { font-size: 1.3em; }
+            h3 { font-size: 1.1em; }
+            button { font-size: 0.9em; }
+            input, select { font-size: 0.9em; padding: 6px; }
+            #connect-wallet-button, #launch-etf-button, #refresh-etfs-button { padding: 8px 16px; }
+            #walletAddress { font-size: 0.8em; }
+            .bottom-bar-content {
+                flex-direction: column;
+                gap: 6px;
+                align-items: flex-start;
+                justify-content: flex-start;
+            }
+            #log { max-width: 100%; }
+            .action-cell {
+                flex-wrap: nowrap;
+            }
+            .etf-card-details {
+                grid-template-columns: 1fr;
+            }
+            .etf-card {
+                padding: 8px;
+            }
+            .etf-card-header h3 {
+                font-size: 1em;
+            }
+            .etf-card-header span {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .full-width-container { flex: 1; min-width: 45%; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 5px; -webkit-text-size-adjust: 100%; }
+            .flex-container { padding: 0 5px; }
+            .full-width-container { padding: 8px; }
+            .bottom-bar { padding: 8px; }
+            h2 { font-size: 1.2em; }
+            h3 { font-size: 1em; }
+            button { padding: 6px 10px; font-size: 0.85em; }
+            input, select { padding: 5px; font-size: 0.85em; }
+            #connect-wallet-button, #launch-etf-button, #refresh-etfs-button { padding: 6px 12px; }
+            #walletAddress { font-size: 0.75em; }
+            .etf-amount-input { width: 90px; }
+            .action-cell {
+                flex-wrap: nowrap;
+            }
+            .mint-etf-button, .burn-etf-button {
+                padding: 5px 8px;
+                font-size: 0.8rem;
+            }
+            .etf-card {
+                padding: 6px;
+            }
+            .etf-card-header h3 {
+                font-size: 0.95em;
+            }
+            .etf-card-header span {
+                font-size: 0.85em;
+            }
+            .etf-card-details {
+                font-size: 0.75em;
+            }
+            .pie-chart-container {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .flex-container { padding: 0 10px; }
+            h2 { font-size: 1.5em; }
+            h3 { font-size: 1.2em; }
+            #connect-wallet-button, #launch-etf-button, #refresh-etfs-button { padding: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="flex-container">
+        <div class="full-width-container">
+            <h2>Launch an ETF</h2>
+            <label for="etf-name">Name:</label>
+            <input id="etf-name" type="text" placeholder="e.g., MoneyFund ETF" />
+            <label for="etf-symbol">Ticker:</label>
+            <input id="etf-symbol" type="text" placeholder="e.g., METF" />
+            <label for="etf-tokens">Token Addresses:</label>
+            <input id="etf-tokens" type="text" placeholder="e.g., 0xToken1,0xToken2" />
+            <label for="etf-weights">Weights (Sum to 10000 basis points):</label>
+            <input id="etf-weights" type="text" placeholder="e.g., 5000,5000" />
+            <label for="etf-third-fee-receiver">Fee Receiver Address:</label>
+            <input id="etf-third-fee-receiver" type="text" placeholder="e.g., 0xFeeReceiver" />
+            <label for="etf-third-fee-bps">Fee Amount (bps):</label>
+            <input id="etf-third-fee-bps" type="number" placeholder="e.g., 100" min="0" max="10000" step="1" />
+            <div class="launch-etf-container">
+                <button id="launch-etf-button" onclick="createETF()">Launch ETF</button>
+            </div>
+            <p id="create-status" class="status-message"></p>
+            <p id="create-error" class="error-message"></p>
+        </div>
+
+        <div class="full-width-container">
+            <h2>All ETFs</h2>
+            <div id="etf-list">
+                <div id="etf-card-container"></div>
+            </div>
+            <p id="etf-list-status" class="status-message"></p>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="bottom-bar-content">
+            <button id="connect-wallet-button" onclick="connectWallet()">Connect Wallet</button>
+            <select id="wallet-selector" onchange="selectWallet(this.value)">
+                <option value="">-- Select Wallet --</option>
+            </select>
+            <p id="walletAddress">Wallet Address: Not connected</p>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        const tokenColors = [
+            '#3B82F6',
+            '#10B981',
+            '#F59E0B',
+            '#EF4444',
+            '#8B5CF6',
+            '#FCD34D',
+            '#6EE7B7',
+            '#F472B6',
+            '#60A5FA',
+            '#34D399',
+            '#FBBF24',
+            '#F87171',
+            '#A78BFA',
+            '#FDE68A',
+            '#4ADE80',
+            '#FB923C',
+            '#93C5FD',
+            '#FCA5A5',
+            '#A3E635',
+            '#D4D4D8',
+            '#2DD4BF',
+            '#FDA4AF',
+            '#67E8F9',
+            '#FACC15',
+            '#F871A1',
+            '#C4B5FD',
+            '#BEF264'
+        ];
+
+        // Contract address (Ethereum Mainnet)
+        const MANAGER_ADDRESS = "0xc24b308dbfc4aaf8c4d8530ed32e2c942313ab0f";
+
+        // Hardcoded RPC configuration for Ethereum Mainnet
+        const RPC_ENDPOINTS = [
+            'https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73',
+            'https://rpc.ankr.com/eth',
+            'https://cloudflare-eth.com'
+        ];
+        let currentRpcIndex = 0;
+
+        // ABI for ETFManager
+        const managerAbi = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "etfAmount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "burn",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "inputs": [],
+                "name": "ReentrancyGuardReentrantCall",
+                "type": "error"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "user",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "ethReceived",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "Burned",
+                "type": "event"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "symbol",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "address[]",
+                        "name": "tokens",
+                        "type": "address[]"
+                    },
+                    {
+                        "internalType": "uint256[]",
+                        "name": "weights",
+                        "type": "uint256[]"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "thirdFeeReceiver",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "thirdFeeBps",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "createETF",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    }
+                ],
+                "name": "ETFCreated",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "user",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "ethUsed",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "Minted",
+                "type": "event"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "etfAmount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "mintWithEth",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
+            },
+            {
+                "stateMutability": "payable",
+                "type": "receive"
+            },
+            {
+                "inputs": [],
+                "name": "getAllETFs",
+                "outputs": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "etfToken",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address[]",
+                                "name": "tokens",
+                                "type": "address[]"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "weights",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "creator",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "createdAt",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "startingPrice",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "currentPrice",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "int256",
+                                "name": "percentAppreciation",
+                                "type": "int256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "thirdFeeReceiver",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "thirdFeeBps",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct ETFManager.ETFInfo[]",
+                        "name": "",
+                        "type": "tuple[]"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "returnPrice",
+                        "type": "bool"
+                    }
+                ],
+                "name": "getPriceOrGain",
+                "outputs": [
+                    {
+                        "internalType": "int256",
+                        "name": "",
+                        "type": "int256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    }
+                ],
+                "name": "getPricePerEtf",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    }
+                ],
+                "name": "getWeiPerEtf",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "priceFeed",
+                "outputs": [
+                    {
+                        "internalType": "contract AggregatorV3Interface",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "uniswapRouter",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "weth",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        // ABI for ETFToken
+        const tokenAbi = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "account",
+                        "type": "address"
+                    }
+                ],
+                "name": "balanceOf",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "spender",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "approve",
+                "outputs": [
+                    {
+                        "internalType": "bool",
+                        "name": "",
+                        "type": "bool"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "name",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "symbol",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        function getWeb3() {
+            return new Web3(RPC_ENDPOINTS[currentRpcIndex]);
+        }
+
+        let web3 = getWeb3();
+        let userAccount = null;
+        let signer = null;
+        let selectedWallet = null;
+        let wallets = [];
+
+        async function switchRpc() {
+            currentRpcIndex = (currentRpcIndex + 1) % RPC_ENDPOINTS.length;
+            web3 = getWeb3();
+            logMessage(`Switched to RPC: ${RPC_ENDPOINTS[currentRpcIndex]}`);
+        }
+
+        async function checkNetwork() {
+            try {
+                const chainId = await web3.eth.getChainId();
+                if (chainId !== 1) {
+                    throw new Error(`Incorrect network! Expected Ethereum Mainnet (chainId 1), got chainId ${chainId}.`);
+                }
+                logMessage(`Connected to Ethereum Mainnet (chainId 1)`);
+            } catch (error) {
+                logMessage(`Network check failed: ${error.message}`);
+                throw error;
+            }
+        }
+
+        async function withRetry(fn, maxRetries = 3, delayMs = 1000) {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    await checkNetwork();
+                    return await fn();
+                } catch (error) {
+                    if (attempt === maxRetries) {
+                        throw error;
+                    }
+                    logMessage(`Attempt ${attempt} failed: ${error.message}. Retrying with RPC ${RPC_ENDPOINTS[currentRpcIndex]}...`);
+                    await switchRpc();
+                    await new Promise(resolve => setTimeout(resolve, delayMs));
+                }
+            }
+        }
+
+        function logMessage(message) {
+            console.log(message);
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('p');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    logMessage("Please install MetaMask to use this feature.");
+                    document.getElementById("create-error").innerText = "Please install MetaMask to use this feature.";
+                    document.getElementById("create-error").className = "error-message";
+                    return;
+                }
+                web3 = new Web3(window.ethereum);
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+
+                await window.ethereum.request({ method: "eth_requestAccounts" });
+                userAccount = (await web3.eth.getAccounts())[0];
+                document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
+                document.getElementById("create-status").innerText = "Wallet connected successfully!";
+                document.getElementById("create-status").className = "status-message";
+
+                await initializeWallets();
+                await refreshETFs();
+            } catch (error) {
+                logMessage(`Wallet connection error: ${error.message}`);
+                document.getElementById("create-error").innerText = `Failed to connect wallet: ${error.message}`;
+                document.getElementById("create-error").className = "error-message";
+            }
+        }
+
+        async function initializeWallets() {
+            try {
+                logMessage("Initializing wallets...");
+                wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+
+                if (window.ethereum && userAccount) {
+                    const metamaskWallet = { address: userAccount, type: 'MetaMask', isMetaMask: true };
+                    if (!wallets.some(w => w.address === metamaskWallet.address && w.type === 'MetaMask')) {
+                        wallets = wallets.filter(w => w.type !== 'MetaMask');
+                        wallets.push(metamaskWallet);
+                    }
+                }
+
+                wallets = wallets.map(wallet => {
+                    if (wallet.type === 'MoneyFund' && wallet.privateKey) {
+                        return { ...wallet, isMetaMask: false };
+                    }
+                    return wallet;
+                });
+
+                localStorage.setItem('wallets', JSON.stringify(wallets));
+
+                const walletSelector = document.getElementById('wallet-selector');
+                walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+                wallets.forEach((wallet, index) => {
+                    if (wallet.address) {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = `${wallet.type}: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+                        walletSelector.appendChild(option);
+                    } else {
+                        logMessage(`Invalid wallet at index ${index}: missing address`);
+                    }
+                });
+
+                const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex'));
+                logMessage(`Stored selectedWalletIndex: ${selectedIndex}`);
+
+                if (wallets.length > 0 && !isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < wallets.length) {
+                    selectedWallet = wallets[selectedIndex];
+                    userAccount = selectedWallet.address;
+                    walletSelector.value = selectedIndex;
+                    document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
+                    if (selectedWallet.isMetaMask && window.ethereum) {
+                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        if (!accounts || accounts.length === 0 || accounts[0].toLowerCase() !== selectedWallet.address.toLowerCase()) {
+                            logMessage("MetaMask selected but not connected. Requesting connection.");
+                            await connectWallet();
+                        } else {
+                            signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+                        }
+                    } else if (!selectedWallet.isMetaMask) {
+                        if (!web3) {
+                            web3 = getWeb3();
+                        }
+                        signer = null;
+                    }
+                    logMessage(`Selected wallet: ${userAccount}`);
+                    await refreshETFs();
+                } else {
+                    selectedWallet = null;
+                    userAccount = null;
+                    walletSelector.value = "";
+                    document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                    logMessage("No valid wallet selected");
+                }
+            } catch (error) {
+                logMessage(`Wallet initialization error: ${error.message}`);
+                document.getElementById("walletAddress").innerText = "Wallet Address: Error loading wallets";
+            }
+        }
+
+        function selectWallet(index) {
+            try {
+                const idx = parseInt(index);
+                document.getElementById("create-status").innerText = "";
+                document.getElementById("create-error").innerText = "";
+                if (idx >= 0 && idx < wallets.length && wallets[idx].address) {
+                    selectedWallet = wallets[idx];
+                    localStorage.setItem('selectedWalletIndex', idx);
+                    userAccount = selectedWallet.address;
+                    document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
+
+                    if (selectedWallet.isMetaMask) {
+                        if (window.ethereum) {
+                            connectWallet();
+                        } else {
+                            logMessage("MetaMask extension not detected.");
+                            document.getElementById("create-error").innerText = "MetaMask extension not detected.";
+                            document.getElementById("create-error").className = "error-message";
+                            selectedWallet = null;
+                            userAccount = null;
+                            document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                            document.getElementById('wallet-selector').value = "";
+                            localStorage.removeItem('selectedWalletIndex');
+                        }
+                    } else {
+                        web3 = getWeb3();
+                        signer = null;
+                    }
+                    logMessage(`Selected wallet: ${userAccount}`);
+                    refreshETFs();
+                } else {
+                    selectedWallet = null;
+                    userAccount = null;
+                    signer = null;
+                    localStorage.removeItem('selectedWalletIndex');
+                    document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                    document.getElementById('wallet-selector').value = "";
+                    web3 = getWeb3();
+                    logMessage("Invalid wallet selection");
+                }
+            } catch (error) {
+                logMessage(`Wallet selection error: ${error.message}`);
+                document.getElementById("create-error").innerText = `Failed to select wallet: ${error.message}`;
+                document.getElementById("create-error").className = "error-message";
+            }
+        }
+
+        async function getGasPrice() {
+            return await withRetry(async () => {
+                const baseGasPrice = BigInt(await web3.eth.getGasPrice());
+                const baseGasPriceGwei = Number(web3.utils.fromWei(baseGasPrice.toString(), 'gwei'));
+                const adjustedGasPriceGwei = Math.max(1, baseGasPriceGwei * 1.25);
+                return web3.utils.toWei(adjustedGasPriceGwei.toFixed(0), 'gwei');
+            });
+        }
+
+        async function createETF() {
+            try {
+                logMessage("createETF function triggered");
+                const status = document.getElementById("create-status");
+                const error = document.getElementById("create-error");
+                status.innerText = "Initiating ETF creation...";
+                status.className = "status-message";
+                error.innerText = "";
+                error.className = "error-message";
+
+                if (!selectedWallet || !userAccount) {
+                    logMessage("No wallet selected or connected");
+                    error.innerText = "Please connect and select a wallet first.";
+                    status.innerText = "";
+                    return;
+                }
+                logMessage(`Wallet connected: ${userAccount}`);
+
+                const name = document.getElementById("etf-name").value.trim();
+                const symbol = document.getElementById("etf-symbol").value.trim().toUpperCase();
+                const tokensInput = document.getElementById("etf-tokens").value.trim();
+                const weightsInput = document.getElementById("etf-weights").value.trim();
+                const thirdFeeReceiver = document.getElementById("etf-third-fee-receiver").value.trim();
+                const thirdFeeBps = document.getElementById("etf-third-fee-bps").value.trim();
+
+                logMessage(`Inputs: name=${name}, symbol=${symbol}, tokens=${tokensInput}, weights=${weightsInput}, thirdFeeReceiver=${thirdFeeReceiver}, thirdFeeBps=${thirdFeeBps}`);
+
+                if (!name || !symbol || !tokensInput || !weightsInput || !thirdFeeReceiver || !thirdFeeBps) {
+                    logMessage("Missing input fields");
+                    error.innerText = "Please fill in all fields.";
+                    status.innerText = "";
+                    return;
+                }
+
+                const tokens = tokensInput.split(',').map(t => t.trim()).filter(t => t);
+                const weights = weightsInput.split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+
+                logMessage(`Parsed tokens: ${tokens}, weights: ${weights}`);
+
+                if (tokens.length === 0 || weights.length === 0 || tokens.length !== weights.length) {
+                    logMessage("Invalid tokens or weights length");
+                    error.innerText = "Invalid tokens or weights. Ensure they match and are non-empty.";
+                    status.innerText = "";
+                    return;
+                }
+
+                for (const token of tokens) {
+                    if (!web3.utils.isAddress(token)) {
+                        logMessage(`Invalid token address: ${token}`);
+                        error.innerText = `Invalid token address: ${token}`;
+                        status.innerText = "";
+                        return;
+                    }
+                }
+
+                const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+                if (totalWeight !== 10000) {
+                    logMessage("Weights do not sum to 10000");
+                    error.innerText = "Weights must sum to 10,000.";
+                    status.innerText = "";
+                    return;
+                }
+
+                if (!web3.utils.isAddress(thirdFeeReceiver)) {
+                    logMessage(`Invalid third fee receiver address: ${thirdFeeReceiver}`);
+                    error.innerText = `Invalid third fee receiver address: ${thirdFeeReceiver}`;
+                    status.innerText = "";
+                    return;
+                }
+
+                const thirdFeeBpsNum = parseInt(thirdFeeBps);
+                if (isNaN(thirdFeeBpsNum) || thirdFeeBpsNum < 0 || thirdFeeBpsNum > 10000) {
+                    logMessage("Invalid third fee bps");
+                    error.innerText = "Third fee amount must be between 0 and 10,000 basis points.";
+                    status.innerText = "";
+                    return;
+                }
+
+                status.innerText = "Preparing to launch ETF...";
+                logMessage("Creating contract instance");
+                const manager = new web3.eth.Contract(managerAbi, MANAGER_ADDRESS);
+
+                let gasEstimate;
+                try {
+                    logMessage("Estimating gas");
+                    gasEstimate = await withRetry(() =>
+                        manager.methods.createETF(name, symbol, tokens, weights, thirdFeeReceiver, thirdFeeBpsNum).estimateGas({ from: userAccount })
+                    );
+                    gasEstimate = Math.ceil(Number(gasEstimate) * 1.2);
+                    logMessage(`Estimated gas limit: ${gasEstimate}`);
+                } catch (err) {
+                    gasEstimate = 1500000;
+                    logMessage(`Gas estimation failed, using default ${gasEstimate}: ${err.message}`);
+                }
+
+                const gasPrice = await getGasPrice();
+                logMessage(`Gas price: ${web3.utils.fromWei(gasPrice, 'gwei')} Gwei`);
+
+                status.innerText = selectedWallet.isMetaMask ? "Launching ETF... Please confirm in MetaMask." : "Launching ETF... Signing with MoneyFund wallet.";
+                logMessage("Initiating transaction");
+
+                let tx;
+                if (selectedWallet.isMetaMask) {
+                    logMessage("Using MetaMask for transaction");
+                    const managerEthers = new ethers.Contract(MANAGER_ADDRESS, managerAbi, signer);
+                    tx = await managerEthers.createETF(name, symbol, tokens, weights, thirdFeeReceiver, thirdFeeBpsNum, {
+                        gasLimit: gasEstimate,
+                        gasPrice: gasPrice
+                    });
+                    logMessage("Waiting for transaction confirmation");
+                    await tx.wait();
+                } else {
+                    logMessage("Using MoneyFund wallet for transaction");
+                    const txData = manager.methods.createETF(name, symbol, tokens, weights, thirdFeeReceiver, thirdFeeBpsNum).encodeABI();
+                    const nonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
+                    const transactionObject = {
+                        from: userAccount,
+                        to: MANAGER_ADDRESS,
+                        data: txData,
+                        gas: gasEstimate,
+                        gasPrice: gasPrice,
+                        nonce: nonce
+                    };
+                    const signedTx = await web3.eth.accounts.signTransaction(transactionObject, selectedWallet.privateKey);
+                    tx = await withRetry(() => web3.eth.sendSignedTransaction(signedTx.rawTransaction));
+                    logMessage("Transaction sent and confirmed");
+                }
+
+                const etfTokenAddress = tx.logs.find(log => {
+                    try {
+                        const iface = new ethers.utils.Interface(managerAbi);
+                        const parsedLog = iface.parseLog(log);
+                        return parsedLog.name === 'ETFCreated';
+                    } catch (e) {
+                        return false;
+                    }
+                })?.args.etfToken;
+
+                if (!web3.utils.isAddress(etfTokenAddress)) {
+                    throw new Error("Invalid ETF token address received.");
+                }
+
+                status.innerText = `ETF ${name} (${symbol}) launched at Token: ${etfTokenAddress}! Tx: ${tx.transactionHash || tx.hash}`;
+                logMessage(`ETF ${name} (${symbol}) launched at Token: ${etfTokenAddress}: ${tx.transactionHash || tx.hash}`);
+                await refreshETFs();
+            } catch (err) {
+                logMessage(`ETF creation failed: ${err.message}`);
+                document.getElementById("create-error").innerText = `ETF creation failed: ${err.message}`;
+                document.getElementById("create-error").className = "error-message";
+                document.getElementById("create-status").innerText = "";
+                alert(`Failed to create ETF: ${err.message}. Check the console and log for details.`);
+            }
+        }
+
+        async function mintETF(tokenAddress, amount) {
+            logMessage(`Attempting to mint ${amount} ETF tokens for ${tokenAddress}`);
+
+            if (!selectedWallet) {
+                logMessage("Please select a wallet.");
+                return { error: "Please select a wallet." };
+            }
+
+            if (!web3.utils.isAddress(tokenAddress)) {
+                logMessage(`Invalid ETF token address: ${tokenAddress}`);
+                return { error: "Invalid ETF token address." };
+            }
+
+            if (!amount || parseFloat(amount) <= 0) {
+                logMessage(`Invalid ETF amount: ${amount}`);
+                return { error: "Please enter a valid ETF amount." };
+            }
+
+            let etfAmountWei;
+            try {
+                etfAmountWei = web3.utils.toWei(amount.toString(), 'ether');
+            } catch (error) {
+                logMessage(`Failed to convert amount to wei: ${error.message}`);
+                return { error: "Invalid amount format." };
+            }
+
+            try {
+                const manager = new web3.eth.Contract(managerAbi, MANAGER_ADDRESS);
+
+                const walletBalance = await withRetry(() => web3.eth.getBalance(userAccount));
+                const walletBalanceEth = web3.utils.fromWei(walletBalance, 'ether');
+                logMessage(`Wallet ETH balance: ${walletBalanceEth}`);
+
+                const weiPerEtf = await withRetry(() => manager.methods.getWeiPerEtf(tokenAddress).call());
+                const totalEthNeeded = web3.utils.toBN(weiPerEtf)
+                    .mul(web3.utils.toBN(etfAmountWei))
+                    .div(web3.utils.toBN('1000000000000000000'));
+                const totalEthWithBuffer = totalEthNeeded
+                    .mul(web3.utils.toBN(1005))
+                    .div(web3.utils.toBN(1000));
+
+                let gasEstimate;
+                try {
+                    gasEstimate = await withRetry(() =>
+                        manager.methods.mintWithEth(tokenAddress, etfAmountWei).estimateGas({
+                            from: userAccount,
+                            value: totalEthWithBuffer.toString()
+                        })
+                    );
+                    gasEstimate = Math.ceil(Number(gasEstimate) * 1.2);
+                    logMessage(`Estimated gas limit: ${gasEstimate}`);
+                } catch (error) {
+                    gasEstimate = 1500000;
+                    logMessage(`Gas estimation failed, using default ${gasEstimate}: ${error.message}`);
+                }
+
+                const gasPrice = await getGasPrice();
+                logMessage(`Gas price: ${web3.utils.fromWei(gasPrice, 'gwei')} Gwei`);
+
+                const gasCost = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(gasEstimate));
+                const totalCost = totalEthWithBuffer.add(gasCost);
+
+                if (web3.utils.toBN(walletBalance).lt(totalCost)) {
+                    const requiredEth = web3.utils.fromWei(totalCost, 'ether');
+                    logMessage(`Insufficient ETH: need ${requiredEth} ETH, have ${walletBalanceEth} ETH`);
+                    return { error: `Insufficient ETH: need ${requiredEth} ETH, have ${walletBalanceEth} ETH` };
+                }
+
+                let tx;
+                if (selectedWallet.isMetaMask) {
+                    if (!signer) {
+                        logMessage("MetaMask signer not initialized");
+                        return { error: "MetaMask not properly connected. Please reconnect wallet." };
+                    }
+                    logMessage("Using MetaMask for transaction");
+                    const managerEthers = new ethers.Contract(MANAGER_ADDRESS, managerAbi, signer);
+                    tx = await managerEthers.mintWithEth(tokenAddress, etfAmountWei, {
+                        gasLimit: gasEstimate,
+                        gasPrice: gasPrice,
+                        value: totalEthWithBuffer.toString()
+                    });
+                    logMessage(`Transaction sent: ${tx.hash}`);
+                    await tx.wait();
+                    logMessage(`Transaction confirmed: ${tx.hash}`);
+                } else {
+                    logMessage("Using MoneyFund wallet for transaction");
+                    const txData = manager.methods.mintWithEth(tokenAddress, etfAmountWei).encodeABI();
+                    const nonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
+                    const transactionObject = {
+                        from: userAccount,
+                        to: MANAGER_ADDRESS,
+                        data: txData,
+                        value: totalEthWithBuffer.toString(),
+                        gas: gasEstimate,
+                        gasPrice: gasPrice,
+                        nonce: nonce
+                    };
+                    const signedTx = await web3.eth.accounts.signTransaction(transactionObject, selectedWallet.privateKey);
+                    tx = await withRetry(() => web3.eth.sendSignedTransaction(signedTx.rawTransaction));
+                    logMessage(`Transaction confirmed: ${tx.transactionHash}`);
+                }
+
+                logMessage(`Minted ${amount} ETF tokens at Token: ${tokenAddress}: ${tx.transactionHash || tx.hash}`);
+                return { success: `Minted ${amount} ETF tokens successfully! Tx: ${tx.transactionHash || tx.hash}` };
+            } catch (error) {
+                console.log("Mint error details:", error);
+                logMessage(`Mint failed: ${error.message}`);
+                return { error: `Mint failed: ${error.message}` };
+            }
+        }
+
+        async function burnETF(tokenAddress, amount) {
+            logMessage(`Attempting to burn ${amount} ETF tokens for ${tokenAddress}`);
+
+            if (!selectedWallet) {
+                logMessage("Please select a wallet.");
+                return { error: "Please select a wallet." };
+            }
+
+            if (!web3.utils.isAddress(tokenAddress)) {
+                logMessage(`Invalid ETF token address: ${tokenAddress}`);
+                return { error: "Invalid ETF token address." };
+            }
+
+            if (!amount || parseFloat(amount) <= 0) {
+                logMessage(`Invalid ETF amount: ${amount}`);
+                return { error: "Please enter a valid ETF amount." };
+            }
+
+            const etfAmountWei = web3.utils.toWei(amount.toString(), 'ether');
+
+            try {
+                const manager = new web3.eth.Contract(managerAbi, MANAGER_ADDRESS);
+                const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
+
+                const etfBalance = await withRetry(() => tokenContract.methods.balanceOf(userAccount).call());
+                if (web3.utils.toBN(etfBalance).lt(web3.utils.toBN(etfAmountWei))) {
+                    throw new Error(
+                        `Insufficient ETF balance: need ${amount} tokens, have ${web3.utils.fromWei(etfBalance, 'ether')} tokens`
+                    );
+                }
+
+                let approveGasEstimate;
+                try {
+                    approveGasEstimate = await withRetry(() =>
+                        tokenContract.methods.approve(MANAGER_ADDRESS, etfAmountWei).estimateGas({ from: userAccount })
+                    );
+                    approveGasEstimate = Math.ceil(Number(approveGasEstimate) * 1.2);
+                } catch (error) {
+                    approveGasEstimate = 100000;
+                    logMessage(`Approve gas estimation failed, using default ${approveGasEstimate}: ${error.message}`);
+                }
+
+                const gasPrice = await getGasPrice();
+                logMessage(`Gas price: ${web3.utils.fromWei(gasPrice, 'gwei')} Gwei`);
+
+                let approveTx;
+                if (selectedWallet.isMetaMask) {
+                    const tokenEthers = new ethers.Contract(tokenAddress, tokenAbi, signer);
+                    approveTx = await tokenEthers.approve(MANAGER_ADDRESS, etfAmountWei, {
+                        gasLimit: approveGasEstimate,
+                        gasPrice: gasPrice
+                    });
+                    await approveTx.wait();
+                } else {
+                    const approveTxData = tokenContract.methods.approve(MANAGER_ADDRESS, etfAmountWei).encodeABI();
+                    const approveNonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
+                    const approveTransactionObject = {
+                        from: userAccount,
+                        to: tokenAddress,
+                        data: approveTxData,
+                        gas: approveGasEstimate,
+                        gasPrice: gasPrice,
+                        nonce: approveNonce
+                    };
+                    const signedApproveTx = await web3.eth.accounts.signTransaction(approveTransactionObject, selectedWallet.privateKey);
+                    approveTx = await withRetry(() => web3.eth.sendSignedTransaction(signedApproveTx.rawTransaction));
+                }
+
+                let burnGasEstimate;
+                try {
+                    burnGasEstimate = await withRetry(() =>
+                        manager.methods.burn(tokenAddress, etfAmountWei).estimateGas({ from: userAccount })
+                    );
+                    burnGasEstimate = Math.ceil(Number(burnGasEstimate) * 1.2);
+                    logMessage(`Burn gas limit: ${burnGasEstimate}`);
+                } catch (error) {
+                    burnGasEstimate = 1500000;
+                    logMessage(`Burn gas estimation failed, using default ${burnGasEstimate}: ${error.message}`);
+                }
+
+                let tx;
+                if (selectedWallet.isMetaMask) {
+                    const managerEthers = new ethers.Contract(MANAGER_ADDRESS, managerAbi, signer);
+                    tx = await managerEthers.burn(tokenAddress, etfAmountWei, {
+                        gasLimit: burnGasEstimate,
+                        gasPrice: gasPrice
+                    });
+                    await tx.wait();
+                } else {
+                    const txData = manager.methods.burn(tokenAddress, etfAmountWei).encodeABI();
+                    const nonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
+                    const transactionObject = {
+                        from: userAccount,
+                        to: MANAGER_ADDRESS,
+                        data: txData,
+                        gas: burnGasEstimate,
+                        gasPrice: gasPrice,
+                        nonce: nonce
+                    };
+                    const signedTx = await web3.eth.accounts.signTransaction(transactionObject, selectedWallet.privateKey);
+                    tx = await withRetry(() => web3.eth.sendSignedTransaction(signedTx.rawTransaction));
+                }
+
+                logMessage(`Burned ${amount} ETF tokens at Token: ${tokenAddress}: ${tx.transactionHash || tx.hash}`);
+                return { success: `Burned ${amount} ETF tokens successfully! Tx: ${tx.transactionHash || tx.hash}` };
+            } catch (error) {
+                console.log("Burn error details:", error);
+                logMessage(`Burn failed: ${error.message}`);
+                return { error: `Burn failed: ${error.message}` };
+            }
+        }
+
+        async function updateETFPrice(tokenAddress) {
+            logMessage(`Attempting to update price for ${tokenAddress}`);
+            try {
+                const manager = new web3.eth.Contract(managerAbi, MANAGER_ADDRESS);
+                
+                const price = await withRetry(() => manager.methods.getPricePerEtf(tokenAddress).call());
+                const priceUsd = Number(web3.utils.fromWei(price, 'ether')).toFixed(2);
+                const percentAppreciation = await withRetry(() => manager.methods.getPriceOrGain(tokenAddress, false).call());
+                const appreciationPercent = (Number(percentAppreciation) / 100).toFixed(2); // Convert bps to percentage
+                return { price: priceUsd, appreciation: appreciationPercent };
+            } catch (error) {
+                console.log("Update price error details:", error);
+                logMessage(`Failed to update price for ${tokenAddress}: ${error.message}`);
+                return { error: `Failed to update price: ${error.message}` };
+            }
+        }
+
+        // Object to store updated price and appreciation for each ETF
+        const updatedValues = {};
+
+        async function refreshETFs() {
+            const statusMessage = document.getElementById("etf-list-status");
+            statusMessage.innerText = "Loading ETFs...";
+            statusMessage.className = "status-message";
+
+            try {
+                const manager = new web3.eth.Contract(managerAbi, MANAGER_ADDRESS);
+                logMessage(`Checking getAllETFs availability: ${typeof manager.methods.getAllETFs === 'function'}`);
+                const etfs = await withRetry(() => manager.methods.getAllETFs().call());
+
+                const cardContainer = document.getElementById("etf-card-container");
+                cardContainer.innerHTML = "";
+
+                if (etfs.length === 0) {
+                    cardContainer.innerHTML = '<p style="text-align: center; color: #E5E7EB;">No ETFs found.</p>';
+                    statusMessage.innerText = "No ETFs available.";
+                    statusMessage.className = "status-message";
+                    return;
+                }
+
+                for (const etf of etfs) {
+                    // Fetch name and symbol from the ETF token contract
+                    const tokenContract = new web3.eth.Contract(tokenAbi, etf.etfToken);
+                    let name = "Unknown";
+                    let symbol = "UNK";
+                    try {
+                        name = await withRetry(() => tokenContract.methods.name().call());
+                        symbol = await withRetry(() => tokenContract.methods.symbol().call());
+                    } catch (error) {
+                        logMessage(`Failed to fetch name/symbol for ${etf.etfToken}: ${error.message}`);
+                    }
+
+                    const createdAt = new Date(Number(etf.createdAt) * 1000).toLocaleDateString();
+                    const thirdFeeBps = etf.thirdFeeBps;
+
+                    // Use stored values if available, otherwise use placeholder
+                    const priceDisplay = updatedValues[etf.etfToken]?.price ? `$${updatedValues[etf.etfToken].price}` : "Update to view";
+                    const appreciationDisplay = updatedValues[etf.etfToken]?.appreciation ? `${updatedValues[etf.etfToken].appreciation}%` : "Update to view";
+
+                    const card = document.createElement("div");
+                    card.className = "etf-card";
+
+                    // Create token blocks with click functionality and weights
+                    let tokenBlocks = '';
+                    etf.tokens.forEach((token, index) => {
+                        const tokenLabel = `Token ${index + 1}`;
+                        const shortAddress = token.slice(0, 6);
+                        const color = tokenColors[index % tokenColors.length];
+                        const weightPercent = (etf.weights[index] / 100).toFixed(2);
+                        tokenBlocks += `
+                            <div class="token-block" id="token-${etf.etfToken}-${index}" data-address="${token}" data-name="${tokenLabel}">
+                                <span class="token-dot" style="background-color: ${color};"></span>
+                                ${shortAddress}
+                                <span class="token-weight">(${weightPercent}%)</span>
+                            </div>
+                        `;
+                    });
+
+                    // Create pie chart container
+                    const chartId = `chart-${etf.etfToken}`;
+                    const weightsPercent = etf.weights.map(weight => (weight / 100).toFixed(2));
+                    const chartColors = etf.tokens.map((_, index) => tokenColors[index % tokenColors.length]);
+
+                    card.innerHTML = `
+                        <div class="etf-card-header">
+                            <h3>${name}</h3>
+                            <span>${symbol}</span>
+                        </div>
+                        <div class="etf-card-details">
+                            <div>
+                                <label>Fund Address</label>
+                                <span>${etf.etfToken.slice(0, 6)}...${etf.etfToken.slice(-4)}</span>
+                            </div>
+                            <div>
+                                <label>Underlying Tokens</label>
+                                <div class="token-container" id="token-container-${etf.etfToken}">
+                                    ${tokenBlocks}
+                                </div>
+                            </div>
+                            <div>
+                                <label>Distribution</label>
+                                <div class="pie-chart-container">
+                                    <canvas id="${chartId}"></canvas>
+                                </div>
+                            </div>
+                            <div>
+                                <label>Live Price (USD)</label>
+                                <div class="price-container">
+                                    <span id="price-${etf.etfToken}">${priceDisplay}</span>
+                                    <button class="update-price-button" data-token="${etf.etfToken}">Update</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label>Overall Return</label>
+                                <span id="appreciation-${etf.etfToken}">${appreciationDisplay}</span>
+                            </div>
+                            <div>
+                                <label>Created At</label>
+                                <span>${createdAt}</span>
+                            </div>
+                            <div>
+                                <label>Creator Fee (bps)</label>
+                                <span>${thirdFeeBps}</span>
+                            </div>
+                        </div>
+                        <div class="etf-card-actions">
+                            <input type="number" class="etf-amount-input" id="amount-${etf.etfToken}" placeholder="Amount" min="0.01" step="0.01">
+                            <button class="mint-etf-button" data-token="${etf.etfToken}">Mint</button>
+                            <button class="burn-etf-button" data-token="${etf.etfToken}">Burn</button>
+                            <p id="action-status-${etf.etfToken}" class="status-message"></p>
+                            <p id="action-error-${etf.etfToken}" class="error-message"></p>
+                        </div>
+                    `;
+                    cardContainer.appendChild(card);
+
+                    // Create pie chart
+                    new Chart(document.getElementById(chartId), {
+                        type: 'pie',
+                        data: {
+                            labels: etf.tokens.map((_, index) => `Token ${index + 1}`),
+                            datasets: [{
+                                data: weightsPercent,
+                                backgroundColor: chartColors,
+                                borderWidth: 1,
+                                borderColor: '#374151'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+
+                    // Add click event listeners to token blocks
+                    etf.tokens.forEach((_, index) => {
+                        const tokenBlock = document.getElementById(`token-${etf.etfToken}-${index}`);
+                        tokenBlock.addEventListener('click', () => {
+                            const container = document.getElementById(`token-container-${etf.etfToken}`);
+                            const tokenAddress = tokenBlock.getAttribute('data-address');
+                            const tokenName = tokenBlock.getAttribute('data-name');
+                            const color = tokenColors[index % tokenColors.length];
+                            const weightPercent = (etf.weights[index] / 100).toFixed(2);
+
+                            // Replace the clicked token block with expanded version
+                            const expandedBlock = document.createElement('div');
+                            expandedBlock.className = 'expanded-token';
+                            expandedBlock.innerHTML = `
+                                <span class="token-dot" style="background-color: ${color};"></span>
+                                ${tokenAddress}
+                                <span class="token-weight">(${weightPercent}%)</span>
+                                <button class="copy-button" data-address="${tokenAddress}">Copy</button>
+                                <button class="close-button">X</button>
+                            `;
+                            container.replaceChild(expandedBlock, tokenBlock);
+
+                            // Add event listener to copy button
+                            expandedBlock.querySelector('.copy-button').addEventListener('click', () => {
+                                navigator.clipboard.writeText(tokenAddress).then(() => {
+                                    logMessage(`Copied address ${tokenAddress} to clipboard`);
+                                }).catch(err => {
+                                    logMessage(`Failed to copy address: ${err.message}`);
+                                });
+                            });
+
+                            // Add event listener to close button
+                            expandedBlock.querySelector('.close-button').addEventListener('click', () => {
+                                const newTokenBlock = document.createElement('div');
+                                newTokenBlock.className = 'token-block';
+                                newTokenBlock.id = `token-${etf.etfToken}-${index}`;
+                                newTokenBlock.setAttribute('data-address', tokenAddress);
+                                newTokenBlock.setAttribute('data-name', tokenName);
+                                newTokenBlock.innerHTML = `
+                                    <span class="token-dot" style="background-color: ${color};"></span>
+                                    ${tokenAddress.slice(0, 6)}
+                                    <span class="token-weight">(${weightPercent}%)</span>
+                                `;
+                                container.replaceChild(newTokenBlock, expandedBlock);
+
+                                // Reattach click event to the new token block
+                                newTokenBlock.addEventListener('click', arguments.callee);
+                            });
+                        });
+                    });
+                }
+
+                document.querySelectorAll('.mint-etf-button').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const token = button.getAttribute('data-token');
+                        const amountInput = document.getElementById(`amount-${token}`);
+                        const amount = amountInput.value;
+                        const status = document.getElementById(`action-status-${token}`);
+                        const error = document.getElementById(`action-error-${token}`);
+                        status.innerText = "";
+                        error.innerText = "";
+
+                        logMessage(`Mint button clicked for token ${token} with amount ${amount}`);
+                        
+                        // Validate amount before calling mintETF
+                        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+                            logMessage(`Invalid amount entered: ${amount}`);
+                            error.innerText = "Please enter a valid positive amount.";
+                            return;
+                        }
+
+                        const result = await mintETF(token, amount);
+                        if (result.success) {
+                            status.innerText = result.success;
+                            // Refresh ETFs to update price
+                            await refreshETFs();
+                        } else {
+                            error.innerText = result.error;
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.burn-etf-button').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const token = button.getAttribute('data-token');
+                        const amountInput = document.getElementById(`amount-${token}`);
+                        const amount = amountInput.value;
+                        const status = document.getElementById(`action-status-${token}`);
+                        const error = document.getElementById(`action-error-${token}`);
+                        status.innerText = "";
+                        error.innerText = "";
+
+                        logMessage(`Burn button clicked for token ${token} with amount ${amount}`);
+                        
+                        // Validate amount before calling burnETF
+                        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+                            logMessage(`Invalid amount entered: ${amount}`);
+                            error.innerText = "Please enter a valid positive amount.";
+                            return;
+                        }
+
+                        const result = await burnETF(token, amount);
+                        if (result.success) {
+                            status.innerText = result.success;
+                            // Refresh ETFs to update price
+                            await refreshETFs();
+                        } else {
+                            error.innerText = result.error;
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.update-price-button').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const token = button.getAttribute('data-token');
+                        const status = document.getElementById(`action-status-${token}`);
+                        const error = document.getElementById(`action-error-${token}`);
+                        status.innerText = "";
+                        error.innerText = "";
+
+                        logMessage(`Update price button clicked for token ${token}`);
+                        
+                        const result = await updateETFPrice(token);
+                        if (result.error) {
+                            error.innerText = result.error;
+                        } else {
+                            // Store the updated values
+                            updatedValues[token] = { price: result.price, appreciation: result.appreciation };
+                            document.getElementById(`price-${token}`).innerText = `$${result.price}`;
+                            document.getElementById(`appreciation-${token}`).innerText = `${result.appreciation}%`;
+                            status.innerText = "Price updated successfully!";
+                        }
+                    });
+                });
+
+                statusMessage.innerText = `Loaded ${etfs.length} ETFs successfully!`;
+                statusMessage.className = "status-message";
+            } catch (error) {
+                console.log("Refresh ETFs error details:", error);
+                logMessage(`Failed to load ETFs: ${error.message}`);
+                statusMessage.innerText = `Failed to load ETFs: ${error.message}. Try refreshing the page.`;
+                statusMessage.className = "error-message";
+            }
+        }
+
+        window.addEventListener('load', async () => {
+            await initializeWallets();
+            // Add click event listener to ensure button is responsive
+            const launchButton = document.getElementById('launch-etf-button');
+            launchButton.addEventListener('click', () => {
+                logMessage("Launch ETF button clicked");
+                createETF();
+            });
+        });
+
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', async (accounts) => {
+                if (accounts.length === 0) {
+                    selectedWallet = null;
+                    userAccount = null;
+                    document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                    document.getElementById('wallet-selector').value = "";
+                    localStorage.removeItem('selectedWalletIndex');
+                    logMessage("MetaMask disconnected.");
+                } else if (selectedWallet && selectedWallet.isMetaMask && accounts[0].toLowerCase() !== selectedWallet.address.toLowerCase()) {
+                    await connectWallet();
+                }
+            });
+
+            window.ethereum.on('chainChanged', () => {
+                window.location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
