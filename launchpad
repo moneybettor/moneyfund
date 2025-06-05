@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shitcoin Launcher & Liquidity</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%);
+            color: #E2E8F0;
+            padding: 20px;
+            min-height: 100vh;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .flex-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .full-width-container {
+            width: 100%;
+            flex: 1;
+            min-width: 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 20px;
+            z-index: 1;
+        }
+
+        .coin-list {
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .ticker-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto 20px auto;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            z-index: 1;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .ticker-tape {
+            display: flex;
+            white-space: nowrap;
+            will-change: transform;
+        }
+
+        .ticker-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker-content span {
+            padding: 0 20px;
+            font-size: 1rem;
+            color: #E2E8F0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .ticker-content span:hover {
+            color: #10B981;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .ticker-tape:hover {
+            animation-play-state: paused;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background: #10B981;
+            color: #F1F5F9;
+            font-weight: 600;
+            transition: background 0.3s ease, transform 0.2s;
+            margin: 5px 0;
+            font-size: 1rem;
+            display: inline-block;
+            text-align: center;
+            max-width: 100%;
+        }
+
+        button:hover {
+            background: #059669;
+            transform: scale(1.02);
+        }
+
+        #launch-coin-button {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 30px 70px;
+            width: auto;
+            max-width: 90%;
+            background: #10B981;
+        }
+
+        #launch-coin-button:hover {
+            background: #059669;
+        }
+
+        #toggle-liquidity-button {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: auto;
+            max-width: 90%;
+            background: #10B981;
+        }
+
+        #toggle-liquidity-button:hover {
+            background: #059669;
+        }
+
+        input, input[type="file"], select {
+            padding: 12px;
+            margin: 5px 0;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #F1F5F9;
+            font-size: 1rem;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        input:hover, input[type="file"]:hover, select:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        input::placeholder {
+            color: #A0AEC0;
+            opacity: 0.8;
+        }
+
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23E2E8F0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px auto;
+            padding-right: 30px;
+        }
+
+        h2, h3 {
+            color: #FFFFFF;
+            text-align: center;
+            word-wrap: break-word;
+        }
+
+        h2 { font-size: 1.8em; }
+        h3 { font-size: 1.4em; margin-top: 10px; margin-bottom: 8px; }
+
+        .coin-block {
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .coin-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .coin-header-text {
+            flex: 1;
+        }
+
+        .coin-header h4 {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0;
+        }
+
+        .coin-header .ticker {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #10B981;
+            margin-top: 2px;
+        }
+
+        .coin-image {
+            display: block;
+            max-width: 120px;
+            max-height: 120px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .no-image-text {
+            text-align: center;
+            margin: 5px 0;
+            color: #A0AEC0;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .coin-details {
+            display: grid;
+            gap: 8px;
+            padding: 10px 0;
+        }
+
+        .coin-info-item {
+            display: flex;
+            flex-direction: column;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .coin-info-item.supply {
+            background: rgba(16, 185, 129, 0.1);
+            padding: 6px 10px;
+            border-radius: 6px;
+            color: #10B981;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .coin-info-item strong {
+            color: #A0AEC0;
+            font-weight: 500;
+            font-size: 0.85em;
+            margin-bottom: 2px;
+        }
+
+        .coin-info-item span {
+            color: #E2E8F0;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .coin-actions {
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reaction {
+            display: flex;
+            gap: 12px;
+            font-size: 1.1em;
+        }
+
+        .comment-button, .like-button, .dislike-button {
+            background: none;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            padding: 5px;
+            color: #10B981;
+            line-height: 1;
+            font-family: 'Segoe UI Emoji', 'Segoe UI Symbol', 'Inter', sans-serif;
+        }
+
+        .comment-button:hover, .like-button:hover, .dislike-button:hover {
+            color: #059669;
+        }
+
+        .coin-block > button.comment-button {
+            display: block;
+            width: auto;
+            background: #10B981;
+            font-family: 'Inter', sans-serif;
+            padding: 10px;
+            margin: 0;
+        }
+
+        .coin-block > button.comment-button:hover {
+            background: #059669;
+        }
+
+        .comments-container {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: none;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .comment {
+            font-size: 0.85em;
+            color: #E2E8F0;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .comment:last-child {
+            border-bottom: none;
+        }
+
+        .comment-username {
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-right: 5px;
+        }
+
+        .comment-input {
+            margin-top: 8px;
+            font-size: 0.85em;
+        }
+
+        label {
+            color: #E2E8F0;
+            margin-top: 8px;
+            margin-bottom: 3px;
+            display: block;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .status-message, .error-message, .loading-message {
+            margin-top: 8px;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 8px;
+            border-radius: 5px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-message { color: #10B981; }
+        .error-message { color: #F87171; }
+        .loading-message { color: #A0AEC0; }
+
+        .liquidity-section {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        #liquidity-section iframe {
+            max-width: 100%;
+            display: block;
+            border-radius: 5px;
+        }
+
+        #liquidity-section button {
+            margin-top: 8px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            background: #10B981;
+        }
+
+        #liquidity-section button:hover {
+            background: #059669;
+        }
+
+        @media (max-width: 768px) {
+            .flex-container {
+                flex-direction: column;
+            }
+            body {
+                padding: 10px;
+            }
+            .flex-container {
+                gap: 15px;
+                padding: 0 10px;
+            }
+            .ticker-container {
+                margin: 0 10px 15px 10px;
+            }
+            .full-width-container {
+                padding: 15px;
+            }
+            h2 { font-size: 1.4em; }
+            h3 { font-size: 1.2em; }
+            button { font-size: 0.95em; }
+            input, select { font-size: 0.95em; padding: 7px; }
+            #launch-coin-button {
+                padding: 15px 30px;
+                font-size: 1em;
+            }
+            #toggle-liquidity-button, #liquidity-section button {
+                max-width: 95%;
+                padding: 10px 20px;
+            }
+            .coin-header h4 { font-size: 1.6em; }
+            .coin-header .ticker { font-size: 1.2em; }
+            .coin-info-item.supply { font-size: 1.1em; }
+            .coin-info-item strong { font-size: 0.8em; }
+            .coin-info-item span { font-size: 0.8em; }
+            #walletAddress { font-size: 0.85em; }
+            .coin-image {
+                max-width: 100px;
+                max-height: 100px;
+            }
+            .reaction { gap: 10px; }
+            .comment-button, .like-button, .dislike-button { font-size: 1em; }
+        }
+
+        @media (min-width: 769px) {
+            .full-width-container {
+                max-width: 48%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+                -webkit-text-size-adjust: 100%;
+            }
+            .flex-container {
+                padding: 0 5px;
+            }
+            .ticker-container {
+                margin: 0 5px 10px 5px;
+            }
+            .full-width-container {
+                padding: 10px;
+            }
+            h2 { font-size: 1.25em; }
+            h3 { font-size: 1.1em; }
+            button { padding: 8px 12px; font-size: 0.9em; }
+            input, select { padding: 6px; font-size: 0.9em; }
+            #launch-coin-button {
+                padding: 12px 20px;
+                font-size: 0.95em;
+            }
+            #toggle-liquidity-button, #liquidity-section button,
+            .coin-block > button.comment-button {
+                padding: 9px 18px;
+            }
+            .coin-header h4 { font-size: 1.4em; }
+            .coin-header .ticker { font-size: 1.1em; }
+            .coin-info-item.supply { font-size: 1em; }
+            .coin-info-item strong { font-size: 0.75em; }
+            .coin-info-item span { font-size: 0.75em; }
+            #walletAddress { font-size: 0.8em; }
+            .coin-image {
+                max-width: 80px;
+                max-height: 80px;
+            }
+            .reaction { gap: 8px; }
+            .comment-button, .like-button, .dislike-button { font-size: 0.95em; }
+            .ticker-content span {
+                font-size: 0.9em;
+                padding: 0 15px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .flex-container {
+                padding: 0 15px;
+            }
+            .ticker-container {
+                padding: 0 15px;
+            }
+            h2 { font-size: 1.6em; }
+            h3 { font-size: 1.3em; }
+            #launch-coin-button { padding: 25px 50px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ticker-container">
+        <div class="ticker-tape" id="ticker-tape"></div>
+    </div>
+
+    <div class="flex-container">
+        <div class="full-width-container">
+            <h2>MoneyFund Launchpad</h2>
+            <button onclick="connectWallet()">Connect Wallet</button>
+            <select id="wallet-selector" onchange="selectWallet(this.value)">
+                <option value="">-- Select Wallet --</option>
+            </select>
+            <p id="walletAddress">Wallet Address: Not connected</p>
+
+            <h3>Launch a Coin</h3>
+            <label for="token-name">Name:</label>
+            <input id="token-name" type="text" placeholder="e.g., MoneyFund" />
+            <label for="token-symbol">Ticker:</label>
+            <input id="token-symbol" type="text" placeholder="e.g., MONEY" />
+            <label for="initial-supply">Supply:</label>
+            <input id="initial-supply" type="number" placeholder="e.g., 1000000000" />
+            <label for="token-image">Image:</label>
+            <input id="token-image" type="file" accept="image/*" />
+            <button id="launch-coin-button" onclick="createToken()">Launch Coin</button>
+            <p id="status-message" class="status-message"></p>
+
+            <button id="toggle-liquidity-button" onclick="toggleLiquiditySection()">Add Liquidity</button>
+            <div id="liquidity-section" class="liquidity-section">
+                <iframe src="https://moneyfund.com/dex/" width="100%" height="500px" style="border:none;" title="MoneyFund Liquidity"></iframe>
+                <button onclick="window.open('https://moneyfund.com/dex/', '_blank');">
+                    Open Liquidity Page in New Tab
+                </button>
+            </div>
+        </div>
+
+        <div class="full-width-container">
+            <h2>All MoneyFund Coins</h2>
+            <div id="coin-list" class="coin-list">
+                <p class="loading-message">Loading coins...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let web3, userAccount, signer;
+        let latestTokenAddress = null;
+        const factoryAddress = "0x3962895a933aa0b1613aed997901e601b2cc0821";
+        const moneyTokenAddress = "0x100DB67F41A2dF3c32cC7c0955694b98339B7311";
+        const UNISWAP_ROUTER_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+        let wallets = [];
+        let selectedWallet = null;
+
+        const factoryAbi = [
+            {
+                "inputs": [
+                    { "internalType": "string", "name": "name", "type": "string" },
+                    { "internalType": "string", "name": "symbol", "type": "string" },
+                    { "internalType": "uint256", "name": "totalSupply", "type": "uint256" }
+                ],
+                "name": "createToken",
+                "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    { "indexed": true, "internalType": "address", "name": "tokenAddress", "type": "address" },
+                    { "indexed": true, "internalType": "address", "name": "creator", "type": "address" },
+                    { "indexed": false, "internalType": "string", "name": "name", "type": "string" },
+                    { "indexed": false, "internalType": "string", "name": "symbol", "type": "string" },
+                    { "indexed": false, "internalType": "uint256", "name": "totalSupply", "type": "uint256" },
+                    { "indexed": false, "internalType": "uint256", "name": "createdAt", "type": "uint256" }
+                ],
+                "name": "TokenCreated",
+                "type": "event"
+            },
+            {
+                "inputs": [
+                    { "internalType": "uint256", "name": "", "type": "uint256" }
+                ],
+                "name": "deployedTokens",
+                "outputs": [
+                    { "internalType": "address", "name": "tokenAddress", "type": "address" },
+                    { "internalType": "address", "name": "creator", "type": "address" },
+                    { "internalType": "string", "name": "name", "type": "string" },
+                    { "internalType": "string", "name": "symbol", "type": "string" },
+                    { "internalType": "uint256", "name": "totalSupply", "type": "uint256" },
+                    { "internalType": "uint256", "name": "createdAt", "type": "uint256" }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "FEE_RECIPIENT_1",
+                "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "FEE_RECIPIENT_2",
+                "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getDeployedTokens",
+                "outputs": [
+                    {
+                        "components": [
+                            { "internalType": "address", "name": "tokenAddress", "type": "address" },
+                            { "internalType": "address", "name": "creator", "type": "address" },
+                            { "internalType": "string", "name": "name", "type": "string" },
+                            { "internalType": "string", "name": "symbol", "type": "string" },
+                            { "internalType": "uint256", "name": "totalSupply", "type": "uint256" },
+                            { "internalType": "uint256", "name": "createdAt", "type": "uint256" }
+                        ],
+                        "internalType": "struct ERC20TokenFactory.TokenInfo[]",
+                        "name": "",
+                        "type": "tuple[]"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getTokenCount",
+                "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    { "internalType": "address", "name": "creator", "type": "address" }
+                ],
+                "name": "getTokensByCreator",
+                "outputs": [{ "internalType": "address[]", "name": "", "type": "address[]" }],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        const moneyTokenAbi = [
+            {
+                "constant": true,
+                "inputs": [{ "name": "_owner", "type": "address" }],
+                "name": "balanceOf",
+                "outputs": [{ "name": "", "type": "uint256" }],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        const UNISWAP_ROUTER_ABI = [
+            {
+                "inputs": [
+                    { "internalType": "address", "name": "token", "type": "address" },
+                    { "internalType": "uint256", "name": "amountTokenDesired", "type": "uint256" },
+                    { "internalType": "uint256", "name": "amountTokenMin", "type": "uint256" },
+                    { "internalType": "uint256", "name": "amountETHMin", "type": "uint256" },
+                    { "internalType": "address", "name": "to", "type": "address" },
+                    { "internalType": "uint256", "name": "deadline", "type": "uint256" }
+                ],
+                "name": "addLiquidityETH",
+                "outputs": [
+                    { "internalType": "uint256", "name": "amountToken", "type": "uint256" },
+                    { "internalType": "uint256", "name": "amountETH", "type": "uint256" },
+                    { "internalType": "uint256", "name": "liquidity", "type": "uint256" }
+                ],
+                "stateMutability": "payable",
+                "type": "function"
+            }
+        ];
+
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    alert("Please install MetaMask to use this feature with MetaMask wallets.");
+                    return;
+                }
+                web3 = new Web3(window.ethereum);
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+
+                await window.ethereum.request({ method: "eth_requestAccounts" });
+                userAccount = (await web3.eth.getAccounts())[0];
+                document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
+                const statusMessage = document.getElementById("status-message");
+                statusMessage.innerText = "Wallet connected successfully!";
+                statusMessage.className = "status-message";
+
+                await initializeWallets();
+                if (userAccount) {
+                    checkMoneyTokenBalance();
+                    loadCreatedCoins();
+                }
+            } catch (error) {
+                console.error("Wallet connection error:", error);
+                const statusMessage = document.getElementById("status-message");
+                statusMessage.innerText = `Failed to connect wallet: ${error.message}`;
+                statusMessage.className = "error-message";
+            }
+        }
+
+        async function initializeWallets() {
+            wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+
+            if (window.ethereum && userAccount) {
+                const metamaskWallet = { address: userAccount, type: 'MetaMask', isMetaMask: true };
+                if (!wallets.some(w => w.address === metamaskWallet.address && w.type === 'MetaMask')) {
+                    wallets = wallets.filter(w => w.type !== 'MetaMask');
+                    wallets.push(metamaskWallet);
+                }
+            }
+
+            wallets = wallets.map(wallet => {
+                if (wallet.type === 'moneyfund' && wallet.privateKey) {
+                    return { ...wallet, isMetaMask: false };
+                }
+                return wallet;
+            });
+
+            localStorage.setItem('wallets', JSON.stringify(wallets));
+
+            const walletSelector = document.getElementById('wallet-selector');
+            walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+            wallets.forEach((wallet, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${wallet.type}: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+                walletSelector.appendChild(option);
+            });
+
+            const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex'));
+            if (wallets.length > 0 && !isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < wallets.length) {
+                selectedWallet = wallets[selectedIndex];
+                walletSelector.value = selectedIndex;
+                userAccount = selectedWallet.address;
+                document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
+                if (selectedWallet.isMetaMask && window.ethereum) {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (!accounts || accounts.length === 0 || accounts[0].toLowerCase() !== selectedWallet.address.toLowerCase()) {
+                        console.log("MetaMask selected but not connected or wrong account. Requesting connection.");
+                        await connectWallet();
+                    } else {
+                        signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+                    }
+                } else if (!selectedWallet.isMetaMask) {
+                    if (!web3 || !selectedWallet.privateKey) {
+                        web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                    }
+                    signer = null;
+                }
+            } else {
+                selectedWallet = null;
+                userAccount = null;
+                document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                walletSelector.value = "";
+            }
+        }
+
+        function selectWallet(index) {
+            const idx = parseInt(index);
+            const statusMessage = document.getElementById("status-message");
+            statusMessage.innerText = "";
+            if (idx >= 0 && idx < wallets.length) {
+                selectedWallet = wallets[idx];
+                localStorage.setItem('selectedWalletIndex', idx);
+                userAccount = selectedWallet.address;
+                document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
+
+                if (selectedWallet.isMetaMask) {
+                    if (window.ethereum) {
+                        connectWallet();
+                    } else {
+                        alert("MetaMask is selected, but the extension is not detected. Please install MetaMask.");
+                        statusMessage.innerText = "MetaMask extension not detected.";
+                        statusMessage.className = "error-message";
+                        selectedWallet = null;
+                        userAccount = null;
+                        document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                        document.getElementById('wallet-selector').value = "";
+                        localStorage.removeItem('selectedWalletIndex');
+                    }
+                } else {
+                    web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                    signer = null;
+                    checkMoneyTokenBalance();
+                    loadCreatedCoins();
+                }
+            } else {
+                selectedWallet = null;
+                userAccount = null;
+                signer = null;
+                localStorage.removeItem('selectedWalletIndex');
+                document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+            }
+        }
+
+        async function getGasPrice() {
+            if (!web3) {
+                web3 = new Web3(window.ethereum || "https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+            }
+            const baseGasPrice = BigInt(await web3.eth.getGasPrice());
+            const baseGasPriceGwei = Number(web3.utils.fromWei(baseGasPrice.toString(), 'gwei'));
+            const adjustedGasPriceGwei = Math.max(1, baseGasPriceGwei * 1.25);
+            return web3.utils.toWei(adjustedGasPriceGwei.toFixed(0), 'gwei');
+        }
+
+        async function estimateGasCost(gasLimit) {
+            try {
+                const gasPrice = BigInt(await getGasPrice());
+                const gasLimitBigInt = BigInt(gasLimit);
+                const gasCostWei = gasPrice * gasLimitBigInt;
+                return ethers.utils.formatEther(gasCostWei.toString());
+            } catch (error) {
+                console.error("Error estimating gas cost:", error);
+                return "N/A";
+            }
+        }
+
+        async function checkMoneyTokenBalance() {
+            if (!web3 || !userAccount) {
+                console.warn("Cannot check balance: Web3 provider or user account not available.");
+                return;
+            }
+            const statusMessage = document.getElementById("status-message");
+            statusMessage.innerText = "";
+            try {
+                const moneyToken = new web3.eth.Contract(moneyTokenAbi, moneyTokenAddress);
+                const balance = await moneyToken.methods.balanceOf(userAccount).call();
+                const minBalance = ethers.utils.parseUnits("1", 18);
+                console.log(`$Money balance for ${userAccount}: ${balance.toString()}`);
+                if (ethers.BigNumber.from(balance).lt(minBalance)) {
+                    alert("Warning: You must hold at least 1 $Money to launch a shitter.");
+                    statusMessage.innerText = "Warning: Low $Money balance.";
+                    statusMessage.className = "status-message";
+                }
+            } catch (error) {
+                console.error("Error checking $Money token balance:", error);
+                statusMessage.innerText = `Error checking $Money balance: ${error.message}`;
+                statusMessage.className = "error-message";
+            }
+        }
+
+        async function createToken() {
+            const name = document.getElementById("token-name").value;
+            const symbol = document.getElementById("token-symbol").value;
+            const initialSupplyInput = document.getElementById("initial-supply").value;
+            const imageFile = document.getElementById("token-image").files[0];
+            const statusMessage = document.getElementById("status-message");
+            const coinList = document.getElementById("coin-list");
+
+            if (!name || !symbol || !initialSupplyInput) {
+                statusMessage.innerText = "Please fill out all required fields.";
+                statusMessage.className = "error-message";
+                return;
+            }
+
+            if (!userAccount || !selectedWallet) {
+                statusMessage.innerText = "Please connect and select a wallet first!";
+                statusMessage.className = "error-message";
+                return;
+            }
+
+            await checkMoneyTokenBalance();
+            if (statusMessage.innerText.includes("Warning") || statusMessage.className === "error-message") {
+                console.warn("Proceeding with token creation despite balance warning/error.");
+            }
+
+            let totalSupply;
+            try {
+                totalSupply = ethers.utils.parseUnits(initialSupplyInput, 18).toString();
+            } catch (error) {
+                console.error("Error parsing input values:", error);
+                statusMessage.innerText = "Invalid supply amount. Please enter a valid number.";
+                statusMessage.className = "error-message";
+                return;
+            }
+
+            try {
+                statusMessage.innerText = "Estimating gas for token creation...";
+                statusMessage.className = "status-message";
+
+                if (!web3) throw new Error("Web3 provider not initialized.");
+
+                const factory = new web3.eth.Contract(factoryAbi, factoryAddress);
+
+                let gasEstimate;
+                try {
+                    gasEstimate = await factory.methods.createToken(name, symbol, totalSupply).estimateGas({ from: userAccount });
+                } catch (gasError) {
+                    console.error("Gas estimation failed:", gasError);
+                    gasEstimate = 500000;
+                    statusMessage.innerText = `Gas estimation failed, using default: ${gasEstimate}. Creating token...`;
+                }
+
+                const gasWithBuffer = Math.ceil(Number(gasEstimate) * 1.5);
+                const gasCostEth = await estimateGasCost(gasWithBuffer);
+                statusMessage.innerText = `Estimated Gas: ${gasWithBuffer} units (~${gasCostEth} ETH). Creating token... Please confirm in your wallet.`;
+
+                let tx;
+                const currentGasPrice = await getGasPrice();
+
+                if (selectedWallet.isMetaMask) {
+                    if (!signer) throw new Error("MetaMask Signer not available.");
+                    const factoryEthers = new ethers.Contract(factoryAddress, factoryAbi, signer);
+                    tx = await factoryEthers.createToken(name, symbol, totalSupply, {
+                        gasLimit: gasWithBuffer,
+                        gasPrice: currentGasPrice
+                    });
+                    const receipt = await tx.wait();
+                    tx = receipt;
+                    console.log("MetaMask Transaction Receipt:", receipt);
+                } else {
+                    if (!selectedWallet.privateKey) throw new Error("Private key not available for selected wallet.");
+                    const txData = factory.methods.createToken(name, symbol, totalSupply).encodeABI();
+                    const nonce = await web3.eth.getTransactionCount(userAccount, 'latest');
+                    const transactionObject = {
+                        from: userAccount,
+                        to: factoryAddress,
+                        data: txData,
+                        gas: gasWithBuffer,
+                        gasPrice: currentGasPrice,
+                        nonce: nonce
+                    };
+                    const signedTx = await web3.eth.accounts.signTransaction(transactionObject, selectedWallet.privateKey);
+                    tx = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+                    console.log("Manual Sign Transaction Receipt:", tx);
+                }
+
+                if (!tx || (tx.status !== undefined && !tx.status)) {
+                    throw new Error(`Transaction failed: ${tx.transactionHash || 'No hash available'}`);
+                }
+
+                let tokenAddress;
+                const eventAbi = factoryAbi.find(item => item.name === "TokenCreated" && item.type === "event");
+                const eventSignature = web3.eth.abi.encodeEventSignature(eventAbi);
+                const tokenCreatedLog = tx.logs?.find(log => log.topics[0] === eventSignature && log.address.toLowerCase() === factoryAddress.toLowerCase());
+
+                if (tokenCreatedLog) {
+                    const decodedLog = web3.eth.abi.decodeLog(eventAbi.inputs, tokenCreatedLog.data, tokenCreatedLog.topics.slice(1));
+                    tokenAddress = decodedLog.tokenAddress;
+                    console.log("Token address from event log:", tokenAddress);
+                } else {
+                    console.error("TokenCreated event log not found in transaction receipt:", tx.logs);
+                    throw new Error("Could not determine created token address from transaction logs.");
+                }
+
+                latestTokenAddress = tokenAddress;
+                const timestamp = new Date().toLocaleString();
+                const txHash = tx.transactionHash;
+
+                const imageObjectURL = imageFile ? URL.createObjectURL(imageFile) : null;
+                const newCoinHTML = `
+                    <div class="coin-block" id="coin-${tokenAddress}">
+                        <div class="coin-header">
+                            ${imageObjectURL ? `<img src="${imageObjectURL}" class="coin-image" alt="${name} image">` : '<p class="no-image-text">No image</p>'}
+                            <div class="coin-header-text">
+                                <h4>${name}</h4>
+                                <span class="ticker">${symbol}</span>
+                            </div>
+                        </div>
+                        <div class="coin-details">
+                            <div class="coin-info-item supply">
+                                <strong>Supply:</strong>
+                                <span>${initialSupplyInput}</span>
+                            </div>
+                            <div class="coin-info-item">
+                                <strong>Contract:</strong>
+                                <span>${tokenAddress}</span>
+                            </div>
+                            <div class="coin-info-item">
+                                <strong>Dev:</strong>
+                                <span>${userAccount}</span>
+                            </div>
+                            <div class="coin-info-item">
+                                <strong>Created:</strong>
+                                <span>${timestamp}</span>
+                            </div>
+                            <div class="coin-info-item">
+                                <strong>Tx Hash:</strong>
+                                <span>${txHash}</span>
+                            </div>
+                        </div>
+                        <div class="coin-actions">
+                            <div class="reaction">
+                                <button class="like-button" onclick="likeToken('${tokenAddress}')">ðŸš€ 0</button>
+                                <button class="dislike-button" onclick="dislikeToken('${tokenAddress}')">ðŸŒˆ 0</button>
+                            </div>
+                            <button class="comment-button" onclick="toggleComments('${tokenAddress}')">ðŸ’¬ View Comments</button>
+                            <div id="comments-${tokenAddress}" class="comments-container" style="display: none;">
+                                <input type="text" class="comment-input" placeholder="Add a comment..." onkeydown="submitComment(event, '${tokenAddress}')"/>
+                            </div>
+                        </div>
+                    </div>`;
+
+                const loadingMsg = coinList.querySelector('.loading-message');
+                if (loadingMsg) loadingMsg.remove();
+                const noCoinsMsg = coinList.querySelector('p');
+                if (noCoinsMsg && noCoinsMsg.textContent.includes("No coins found")) {
+                    coinList.innerHTML = newCoinHTML;
+                } else {
+                    coinList.insertAdjacentHTML('afterbegin', newCoinHTML);
+                }
+
+                statusMessage.innerText = `Token created at ${tokenAddress}. Saving details...`;
+
+                const formData = new FormData();
+                if (imageFile) formData.append('image', imageFile);
+                formData.append('action', 'save');
+                formData.append('tokenAddress', tokenAddress);
+                formData.append('name', name);
+                formData.append('symbol', symbol);
+                formData.append('supply', initialSupplyInput);
+                formData.append('devAddress', userAccount);
+                formData.append('timestamp', timestamp);
+                formData.append('txHash', txHash);
+                formData.append('renounced', 'false');
+
+                try {
+                    const response = await fetch('coin_handler.php', { method: 'POST', body: formData });
+                    if (!response.ok) {
+                        let errorMsg = `HTTP error! Status: ${response.status}`;
+                        try {
+                            const errorText = await response.text();
+                            let errorData;
+                            try {
+                                errorData = JSON.parse(errorText);
+                                errorMsg = errorData.error || errorMsg;
+                            } catch (e) {
+                                errorMsg = `Non-JSON response: ${errorText || 'Unknown error'}`;
+                            }
+                            throw new Error(`Failed to save token data: ${errorMsg}`);
+                        } catch (e) {
+                            throw new Error(`Failed to save token data: ${e.message}`);
+                        }
+                    }
+
+                    let result;
+                    try {
+                        result = await response.json();
+                    } catch (e) {
+                        throw new Error(`Failed to parse JSON response: ${e.message}`);
+                    }
+
+                    console.log("Backend save response:", result);
+                    if (!result.success) {
+                        throw new Error(`Failed to save token data: ${result.error || 'Unknown error'}`);
+                    }
+
+                    statusMessage.innerText = `Token ${name} (${symbol}) created at ${tokenAddress} and saved successfully!`;
+                    statusMessage.className = "status-message";
+
+                    if (result.imageUrl) {
+                        const imgElement = document.querySelector(`#coin-${tokenAddress} .coin-image`);
+                        if (imgElement && imageObjectURL) {
+                            URL.revokeObjectURL(imageObjectURL);
+                            imgElement.src = result.imageUrl;
+                        } else if (imgElement && !imageObjectURL && result.imageUrl) {
+                            imgElement.src = result.imageUrl;
+                        }
+                    }
+
+                    loadCreatedCoins();
+                } catch (backendError) {
+                    console.error("Backend save error:", backendError);
+                    statusMessage.innerText = `Token created at ${tokenAddress}, but failed to save details to backend: ${backendError.message}`;
+                    statusMessage.className = "error-message";
+                }
+            } catch (error) {
+                console.error("Error in createToken:", error);
+                statusMessage.innerText = `Error creating token: ${error.message || error}`;
+                statusMessage.className = "error-message";
+            }
+        }
+
+        async function loadCreatedCoins() {
+            const coinList = document.getElementById("coin-list");
+            const tickerTape = document.getElementById("ticker-tape");
+            const statusMessage = document.getElementById("status-message");
+
+            let existingCoinIds = new Set();
+            coinList.querySelectorAll('.coin-block').forEach(coin => {
+                const id = coin.id.split('-')[1];
+                if (id) existingCoinIds.add(id.toLowerCase());
+            });
+
+            try {
+                statusMessage.innerText = "Loading coins from backend...";
+                statusMessage.className = "status-message";
+
+                const response = await fetch('coin_handler.php?action=get', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store'
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const coins = await response.json();
+
+                const loadingMsg = coinList.querySelector('.loading-message');
+                if (loadingMsg) loadingMsg.remove();
+                const noCoinsMsg = coinList.querySelector('p');
+                if (noCoinsMsg && noCoinsMsg.textContent.includes("No coins found")) {
+                    coinList.innerHTML = '';
+                }
+
+                if (!coins || coins.length === 0) {
+                    if (coinList.innerHTML.trim() === '') {
+                        coinList.innerHTML = "<p>No coins found. Launch one!</p>";
+                    }
+                    tickerTape.innerHTML = '<span>No tickers available</span>';
+                    statusMessage.innerText = "";
+                    return;
+                }
+
+                coins.sort((a, b) => {
+                    const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
+                    const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
+                    return dateB - dateA;
+                });
+
+                let newHTML = '';
+                let tickerHTML = '';
+                coins.forEach(coin => {
+                    if (coin.symbol && coin.tokenAddress) {
+                        tickerHTML += `<span onclick="scrollToCoin('${coin.tokenAddress}')">${coin.symbol}</span>`;
+                    }
+                });
+                tickerTape.innerHTML = `<div class="ticker-content">${tickerHTML}</div><div class="ticker-content" aria-hidden="true">${tickerHTML}</div>`;
+                const tickerDuration = Math.max(20, coins.length * 2);
+                tickerTape.style.animation = `ticker ${tickerDuration}s linear infinite`;
+
+                coins.forEach((coin, index) => {
+                    if (!coin.tokenAddress) return;
+
+                    const lowerCaseTokenAddress = coin.tokenAddress.toLowerCase();
+                    const existingBlock = document.getElementById(`coin-${coin.tokenAddress}`);
+
+                    const storedComments = JSON.parse(localStorage.getItem(`comments_${coin.tokenAddress}`)) || [];
+                    const storedLikes = JSON.parse(localStorage.getItem(`likes_${coin.tokenAddress}`)) || 0;
+                    const storedDislikes = JSON.parse(localStorage.getItem(`dislikes_${coin.tokenAddress}`)) || 0;
+
+                    const coinBlockHTML = `
+                        <div class="coin-header">
+                            ${coin.imageUrl ? `<img src="${coin.imageUrl}" class="coin-image" alt="${coin.name || 'Coin'} image">` : '<p class="no-image-text">No image</p>'}
+                            <div class="coin-header-text">
+                                <h4>${coin.name || 'N/A'}</h4>
+                                <span class="ticker">${coin.symbol || 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="coin-details">
+                            <div class="coin-info-item supply">
+                                <strong>Supply:</strong>
+                                <span>${coin.supply || 'N/A'}</span>
+                            </div>
+                            <div class="coin-info-item">
+                                <strong>Contract:</strong>
+                                <span>${coin.tokenAddress}</span>
+                            </div>
+                            <div class="coin-info-item">
+                                <strong>Dev:</strong>
+                                <span>${coin.devAddress || 'N/A'}</span>
+                            </div>
+                            <div class="coin-info-item">
+                                <strong>Created:</strong>
+                                <span>${coin.timestamp || 'N/A'}</span>
+                            </div>
+                            <div class="coin-info-item">
+                                <strong>Tx Hash:</strong>
+                                <span>${coin.txHash || 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="coin-actions">
+                            <div class="reaction">
+                                <button class="like-button" onclick="likeToken('${coin.tokenAddress}')">ðŸš€ ${storedLikes}</button>
+                                <button class="dislike-button" onclick="dislikeToken('${coin.tokenAddress}')">ðŸŒˆ ${storedDislikes}</button>
+                            </div>
+                            <button class="comment-button" onclick="toggleComments('${coin.tokenAddress}')">ðŸ’¬ View Comments</button>
+                            <div id="comments-${coin.tokenAddress}" class="comments-container" style="display: none;">
+                                ${storedComments.map(comment => `
+                                    <div class="comment">
+                                        <span class="comment-username">${comment.username || 'Anon'}:</span> ${comment.text || ''}
+                                    </div>
+                                `).join('')}
+                                <input type="text" class="comment-input" placeholder="Add a comment..." onkeydown="submitComment(event, '${coin.tokenAddress}')"/>
+                            </div>
+                        </div>
+                    `;
+
+                    if (existingBlock) {
+                        existingBlock.innerHTML = coinBlockHTML;
+                    } else if (!existingCoinIds.has(lowerCaseTokenAddress)) {
+                        newHTML += `<div class="coin-block" id="coin-${coin.tokenAddress}">${coinBlockHTML}</div>`;
+                        existingCoinIds.add(lowerCaseTokenAddress);
+                    }
+                });
+
+                if (newHTML) {
+                    coinList.insertAdjacentHTML('afterbegin', newHTML);
+                }
+
+                statusMessage.innerText = "Coins loaded successfully.";
+                setTimeout(() => {
+                    if (statusMessage.innerText === "Coins loaded successfully.") {
+                        statusMessage.innerText = "";
+                    }
+                }, 3000);
+            } catch (error) {
+                console.error("Error loading coins:", error);
+                statusMessage.innerText = `Error loading coins: ${error.message}`;
+                statusMessage.className = "error-message";
+                if (coinList.innerHTML.trim() === '' || coinList.querySelector('.loading-message')) {
+                    coinList.innerHTML = `<p class="error-message">Error loading coins: ${error.message}</p>`;
+                }
+                tickerTape.innerHTML = '<span>Error loading tickers</span>';
+            }
+        }
+
+        function scrollToCoin(tokenAddress) {
+            const coinBlock = document.getElementById(`coin-${tokenAddress}`);
+            if (coinBlock) {
+                const coinList = document.getElementById('coin-list');
+                coinBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                coinList.scrollTop = coinBlock.offsetTop - coinList.offsetTop;
+            }
+        }
+
+        function toggleComments(tokenAddress) {
+            const commentsContainer = document.getElementById(`comments-${tokenAddress}`);
+            if (commentsContainer) {
+                commentsContainer.style.display = commentsContainer.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+
+        function submitComment(event, tokenAddress) {
+            if (event.key === "Enter") {
+                const input = event.target;
+                const commentText = input.value.trim();
+                if (commentText) {
+                    const comments = JSON.parse(localStorage.getItem(`comments_${tokenAddress}`)) || [];
+                    const username = userAccount ? `${userAccount.slice(0, 6)}...${userAccount.slice(-4)}` : 'Anon';
+                    comments.push({ username, text: commentText });
+                    localStorage.setItem(`comments_${tokenAddress}`, JSON.stringify(comments));
+
+                    const commentsDiv = document.getElementById(`comments-${tokenAddress}`);
+                    if (commentsDiv) {
+                        const commentsHTML = comments.map(comment => `
+                            <div class="comment">
+                                <span class="comment-username">${comment.username}:</span> ${comment.text}
+                            </div>`).join('');
+                        const inputElementHTML = `<input type="text" class="comment-input" placeholder="Add a comment..." onkeydown="submitComment(event, '${tokenAddress}')"/>`;
+                        commentsDiv.innerHTML = commentsHTML + inputElementHTML;
+                        const newInput = commentsDiv.querySelector('.comment-input');
+                        if (newInput) {
+                            newInput.value = "";
+                            newInput.focus();
+                        }
+                    }
+                }
+            }
+        }
+
+        function likeToken(tokenAddress) {
+            const likes = (JSON.parse(localStorage.getItem(`likes_${tokenAddress}`)) || 0) + 1;
+            localStorage.setItem(`likes_${tokenAddress}`, JSON.stringify(likes));
+            const button = document.querySelector(`#coin-${tokenAddress} .like-button`);
+            if (button) button.textContent = `ðŸš€ ${likes}`;
+        }
+
+        function dislikeToken(tokenAddress) {
+            const dislikes = (JSON.parse(localStorage.getItem(`dislikes_${tokenAddress}`)) || 0) + 1;
+            localStorage.setItem(`dislikes_${tokenAddress}`, JSON.stringify(dislikes));
+            const button = document.querySelector(`#coin-${tokenAddress} .dislike-button`);
+            if (button) button.textContent = `ðŸŒˆ ${dislikes}`;
+        }
+
+        async function addLiquidity() {
+            const statusMessage = document.getElementById("status-message");
+            statusMessage.innerText = "";
+            if (!signer && !selectedWallet) {
+                statusMessage.innerText = "Please connect and select a wallet first!";
+                statusMessage.className = "error-message";
+                return;
+            }
+            statusMessage.innerText = "Liquidity form is replaced. Use the embedded page or the 'Open Page' button.";
+            statusMessage.className = "status-message";
+        }
+
+        function toggleLiquiditySection() {
+            const section = document.getElementById("liquidity-section");
+            if (section) {
+                section.style.display = section.style.display === "none" ? "block" : "none";
+            }
+        }
+
+        window.onload = async function() {
+            web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+            await initializeWallets();
+            loadCreatedCoins();
+        };
+    </script>
+</body>
+</html>
