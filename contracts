@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyFund Contracts</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #dbe4ff 100%);
+            color: #1a1a1a;
+            margin: 0;
+            padding: 12px;
+        }
+
+        .contract-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .contract-list {
+            width: 1088px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            margin: 0 auto;
+            transition: transform 0.3s ease;
+        }
+
+        .contract-list:hover {
+            transform: translateY(-5px);
+        }
+
+        .contract-list h1 {
+            text-align: center;
+            color: #000000;
+            margin: 0 0 12px;
+            font-size: 14.4px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .contract-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+            transition: background 0.3s ease;
+        }
+
+        .contract-item:last-child {
+            border-bottom: none;
+        }
+
+        .contract-item:hover {
+            background: rgba(30, 58, 138, 0.05);
+            border-radius: 8px;
+        }
+
+        .contract-left {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .contract-icon {
+            font-size: 18px;
+            margin-right: 9px;
+            width: 18px;
+            height: 18px;
+            line-height: 18px;
+            text-align: center;
+            background: #fff;
+            color: #000000;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .contract-item:hover .contract-icon {
+            transform: scale(1.1);
+        }
+
+        .contract-details {
+            flex-grow: 1;
+        }
+
+        .contract-title {
+            font-size: 10.8px;
+            font-weight: 500;
+            color: #000000;
+            margin: 0;
+        }
+
+        .contract-address {
+            font-size: 9.6px;
+            color: #3b82f6;
+            word-break: break-all;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contract-address:hover {
+            color: #ff6b6b;
+            text-decoration: underline;
+        }
+
+        .contract-arrow {
+            font-size: 14.4px;
+            margin: 0 12px;
+            width: 18px;
+            text-align: center;
+            color: #1e3a8a;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .contract-item:hover .contract-arrow {
+            transform: translateX(5px);
+        }
+
+        .contract-description {
+            width: 108px;
+            font-size: 8.4px;
+            color: #5a5a5a;
+            flex-shrink: 0;
+            text-align: right;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .contract-list {
+                width: 100%;
+                padding: 9px;
+            }
+
+            .contract-list h1 {
+                font-size: 12px;
+            }
+
+            .contract-item {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 6px 0;
+            }
+
+            .contract-title {
+                font-size: 9.6px;
+            }
+
+            .contract-address {
+                font-size: 8.4px;
+            }
+
+            .contract-icon {
+                font-size: 15px;
+                width: 15px;
+                height: 15px;
+                line-height: 15px;
+            }
+
+            .contract-arrow {
+                font-size: 12px;
+                margin: 6px 0;
+                width: 15px;
+            }
+
+            .contract-description {
+                width: 72px;
+                font-size: 7.2px;
+                text-align: left;
+                margin-top: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="contract-container">
+        <div class="contract-list">
+            <h1>MoneyFund Contracts</h1>
+            <div class="contract-item">
+                <div class="contract-left">
+                    <span class="contract-icon"><i class="fas fa-coins"></i></span>
+                    <div class="contract-details">
+                        <div class="contract-title">MONEY</div>
+                        <a href="https://etherscan.io/address/0x100DB67F41A2dF3c32cC7c0955694b98339B7311" class="contract-address" target="_blank">0x100DB67F41A2dF3c32cC7c0955694b98339B7311</a>
+                    </div>
+                </div>
+                <span class="contract-arrow"></span>
+                <div class="contract-description">MF native token</div>
+            </div>
+            <div class="contract-item">
+                <div class="contract-left">
+                    <span class="contract-icon"><i class="fas fa-dollar-sign"></i></span>
+                    <div class="contract-details">
+                        <div class="contract-title">USDM</div>
+                        <a href="https://etherscan.io/address/0x33d5be7c0584f77b3168b1d38e1a6215af242d4f" class="contract-address" target="_blank">0x33d5be7c0584f77b3168b1d38e1a6215af242d4f</a>
+                    </div>
+                </div>
+                <span class="contract-arrow"></span>
+                <div class="contract-description">Pegged to USD, basketized, uncensorable.</div>
+            </div>
+            <div class="contract-item">
+                <div class="contract-left">
+                    <span class="contract-icon"><i class="fas fa-exchange-alt"></i></span>
+                    <div class="contract-details">
+                        <div class="contract-title">DEX</div>
+                        <a href="https://etherscan.io/address/0x2E24553474bE9136785303689C65aF45c55F0F55" class="contract-address" target="_blank">0x2E24553474bE9136785303689C65aF45c55F0F55</a>
+                    </div>
+                </div>
+                <span class="contract-arrow"></span>
+                <div class="contract-description">Decentralized exchange</div>
+            </div>
+            <div class="contract-item">
+                <div class="contract-left">
+                    <span class="contract-icon"><i class="fas fa-lock"></i></span>
+                    <div class="contract-details">
+                        <div class="contract-title">Staking</div>
+                        <a href="https://etherscan.io/address/0x9759883ea07e2cA1E2d32E97f42d254841616AB5" class="contract-address" target="_blank">0x9759883ea07e2cA1E2d32E97f42d254841616AB5</a>
+                    </div>
+                </div>
+                <span class="contract-arrow"></span>
+                <div class="contract-description">Earn dividends by staking MONEY</div>
+            </div>
+            <div class="contract-item">
+                <div class="contract-left">
+                    <span class="contract-icon"><i class="fas fa-vote-yea"></i></span>
+                    <div class="contract-details">
+                        <div class="contract-title">DAO</div>
+                        <a href="https://etherscan.io/address/0x8cF5E3797AabB62698f9C4a3F0234667Fd981754" class="contract-address" target="_blank">0x8cF5E3797AabB62698f9C4a3F0234667Fd981754</a>
+                    </div>
+                </div>
+                <span class="contract-arrow"></span>
+                <div class="contract-description">Vote on the MoneyFund treasury</div>
+            </div>
+            <div class="contract-item">
+                <div class="contract-left">
+                    <span class="contract-icon"><i class="fas fa-rocket"></i></span>
+                    <div class="contract-details">
+                        <div class="contract-title">Fund Launcher</div>
+                        <a href="https://etherscan.io/address/0xc24b308dbfc4aaf8c4d8530ed32e2c942313ab0f" class="contract-address" target="_blank">0xc24b308dbfc4aaf8c4d8530ed32e2c942313ab0f</a>
+                    </div>
+                </div>
+                <span class="contract-arrow"></span>
+                <div class="contract-description">Create and manage ETFs</div>
+            </div>
+            <div class="contract-item">
+                <div class="contract-left">
+                    <span class="contract-icon"><i class="fas fa-coins"></i></span>
+                    <div class="contract-details">
+                        <div class="contract-title">Coin Launcher</div>
+                        <a href="https://etherscan.io/address/0x3962895A933aa0B1613aED997901e601B2CC0821" class="contract-address" target="_blank">0x3962895A933aa0B1613aED997901e601B2CC0821</a>
+                    </div>
+                </div>
+                <span class="contract-arrow"></span>
+                <div class="contract-description">Launch an Eth coin in 30 seconds.</div>
+            </div>
+            <div class="contract-item">
+                <div class="contract-left">
+                    <span class="contract-icon"><i class="fas fa-parachute-box"></i></span>
+                    <div class="contract-details">
+                        <div class="contract-title">Airdropper</div>
+                        <a href="https://etherscan.io/address/0x6785cD86A65f3d8336fDC3b0e54C78215501dCa2" class="contract-address" target="_blank">0x6785cD86A65f3d8336fDC3b0e54C78215501dCa2</a>
+                    </div>
+                </div>
+                <span class="contract-arrow"></span>
+                <div class="contract-description">Saves over 40% on gas.</div>
+            </div>
+            <div class="contract-item">
+                <div class="contract-left">
+                    <span class="contract-icon"><i class="fas fa-globe"></i></span>
+                    <div class="contract-details">
+                        <div class="contract-title">Solana Wormhole</div>
+                        <a href="https://solscan.io/account/Hi3w7Niu46dxwk8not3LihcFT4Aa4yMvLSGECykE9iEp" class="contract-address" target="_blank">Hi3w7Niu46dxwk8not3LihcFT4Aa4yMvLSGECykE9iEp</a>
+                    </div>
+                </div>
+                <span class="contract-arrow"></span>
+                <div class="contract-description">Cross-chain token bridge</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
