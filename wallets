@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyFund Wallets</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%);
+            color: #F1F5F9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .section {
+            width: 90%;
+            max-width: 900px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1, h2, h3 {
+            color: #FFFFFF;
+            margin-bottom: 10px;
+            font-size: clamp(1.5rem, 5vw, 2rem);
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: clamp(16px, 4vw, 18px);
+            color: #FFFFFF;
+            background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+        }
+
+        button:not(.button) {
+            background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            font-size: clamp(14px, 3.5vw, 16px);
+        }
+
+        button:hover:not(.button) {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+        }
+
+        #transferFundsBtn {
+            background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+        }
+
+        #transferFundsBtn:hover {
+            background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+        }
+
+        #wallet-interface {
+            padding: 15px;
+        }
+
+        #wallet-interface input,
+        #wallet-interface button,
+        #wallet-interface select {
+            padding: 10px;
+            margin: 5px;
+            font-size: clamp(14px, 3.5vw, 16px);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #F1F5F9;
+            transition: background 0.3s ease, border-color 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #wallet-interface input:hover,
+        #wallet-interface select:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        #wallet-interface input::placeholder,
+        #wallet-interface select option {
+            color: #A5F3FC;
+            opacity: 0.7;
+        }
+
+        #walletInfo,
+        #wallet-interface .function-section {
+            margin-top: 20px;
+            display: none;
+        }
+
+        #statusDisplay,
+        #swapStatus {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #F1F5F9;
+            font-size: clamp(14px, 3.5vw, 16px);
+        }
+
+        #walletSelector {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            color: #F1F5F9;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            padding: 10px;
+            font-size: clamp(14px, 3.5vw, 16px);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        #walletSelector:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin: 20px 0;
+            width: 100%;
+        }
+
+        .menu-btn {
+            background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 6px;
+            padding: 6px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: clamp(10px, 2vw, 12px);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+            aspect-ratio: 1 / 1;
+        }
+
+        .menu-btn span.emoji {
+            font-size: clamp(12px, 2vw, 16px);
+            margin-bottom: 8px;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 8px rgba(6, 182, 212, 0.4);
+        }
+
+        .mobile-dropdown {
+            display: none;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            color: #F1F5F9;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 10px;
+            font-size: clamp(14px, 3.5vw, 16px);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .mobile-dropdown:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        #sendTypeSelect {
+            display: block;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        #swapSettings,
+        #moneySettings {
+            margin-top: 10px;
+        }
+
+        #transactionLog {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .input-group {
+            display: none;
+            margin-bottom: 10px;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .top-buttons-container {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        .top-button {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: clamp(16px, 4vw, 18px);
+            color: #FFFFFF;
+            background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            margin: 0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .top-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+        }
+
+        #swapDirectionSelect,
+        #moneyActionSelect,
+        #gasPriceOption,
+        #slippageTolerance,
+        #gasLimit,
+        #moneySlippageTolerance,
+        #moneyGasLimit,
+        #action {
+            padding: 10px;
+        }
+
+        .wallet-address span:first-child {
+            color: #F1F5F9;
+        }
+
+        .preview-window {
+            width: 100%;
+            height: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 10px;
+            overflow: hidden;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        #walletInfo {
+            text-align: center;
+        }
+
+        #connectedWalletAddress {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: clamp(8px, 2.5vw, 8.5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        #copyAddressBtn {
+            background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: clamp(10px, 3vw, 12px);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #copyAddressBtn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+        }
+
+        #status-box {
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), 0 3px 8px rgba(0, 0, 0, 0.15);
+            color: #F1F5F9;
+            z-index: 1;
+        }
+
+        #status-box h3 {
+            margin: 0 0 10px;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            color: #FFFFFF;
+            border-bottom: 2px solid #14B8A6;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        #status-list {
+            list-style: none;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        #status-list li {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            transition: transform 0.2s ease, background 0.3s ease;
+        }
+
+        #status-list li:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        #status-list li:last-child {
+            border-bottom: none;
+        }
+
+        #status-list li::before {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 10px;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        #status-list li.pending::before {
+            background: #F59E0B;
+        }
+
+        #status-list li.success::before {
+            background: #14B8A6;
+        }
+
+        #status-list li.error::before {
+            background: #F28B82;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        #status-list li a {
+            color: #14B8A6;
+            text-decoration: none;
+        }
+
+        #status-list li a:hover {
+            text-decoration: underline;
+        }
+
+        #backupSection {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #backupSection button {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        #importWalletFile {
+            display: none;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-label {
+            font-size: clamp(12px, 3vw, 14px);
+            color: #F1F5F9;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #475569;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: #FFFFFF;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: #14B8A6;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .balance-box {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-align: left;
+        }
+
+        .balance-box p {
+            margin: 8px 0;
+            font-size: clamp(14px, 3.5vw, 16px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .balance-box p strong {
+            color: #FFFFFF;
+            font-weight: 500;
+        }
+
+        .balance-box p span {
+            color: #A5F3FC;
+            font-weight: 400;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .section {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .toggle-container {
+                margin-top: 10px;
+            }
+
+            .button, .top-button {
+                padding: 10px;
+                font-size: clamp(14px, 4vw, 16px);
+            }
+
+            #wallet-interface {
+                padding: 10px;
+            }
+
+            #status-box {
+                padding: 10px;
+            }
+
+            .balance-box {
+                padding: 10px;
+                margin: 10px 0;
+            }
+
+            .balance-box p {
+                font-size: clamp(12px, 3.5vw, 14px);
+            }
+
+            #connectedWalletAddress {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 5px;
+            }
+
+            .menu-btn {
+                width: 48px;
+                height: 48px;
+                border-radius: 5px;
+                padding: 5px;
+            }
+
+            .menu-btn span.emoji {
+                font-size: clamp(10px, 2vw, 14px);
+                margin-bottom: 6px;
+            }
+
+            .mobile-dropdown {
+                display: block;
+            }
+
+            .preview-window {
+                height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1, h2, h3 {
+                font-size: clamp(1.2rem, 5vw, 1.5rem);
+            }
+
+            #wallet-interface input,
+            #wallet-interface button,
+            #wallet-interface select {
+                margin: 3px;
+                padding: 8px;
+            }
+
+            #status-list li {
+                padding: 8px;
+                font-size: clamp(0.8rem, 3.5vw, 1rem);
+            }
+
+            .menu-grid {
+                display: none;
+            }
+
+            .menu-btn {
+                width: 30px;
+                height: 30px;
+                border-radius: 3px;
+                padding: 3px;
+                font-size: clamp(8px, 2vw, 10px);
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            }
+
+            .menu-btn span.emoji {
+                font-size: clamp(8px, 2vw, 12px);
+                margin-bottom: 4px;
+            }
+
+            .preview-window {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <div class="section-header">
+            <h1>MoneyFund Wallets</h1>
+            <div class="toggle-container">
+                <span class="toggle-label">0x100 Mode</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="vanityModeToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="top-buttons-container">
+            <button class="top-button" id="createMoneyFundBtn">Create MoneyFund Wallet</button>
+        </div>
+        <select id="walletSelector" onchange="walletInterface.selectWallet(this.value)">
+            <option value="">-- Select Wallet --</option>
+        </select>
+        <div id="connectedWalletAddress" style="display: none;">
+            <span><strong></strong> <span id="connectedAddressText"></span></span>
+            <button id="copyAddressBtn">Copy</button>
+        </div>
+        <div id="wallet-interface">
+            <select id="walletFunction" class="mobile-dropdown" onchange="walletInterface.handleWalletFunction(this.value)">
+                <option value="">-- Main Menu --</option>
+                <option value="getMoney">💰 Get MONEY</option>
+                <option value="fiatSwap">📎 Create Pair</option>
+                <option value="getFund">🚀 Launch a Fund</option>
+                <option value="createCoin">🪙 Launch a Coin</option>
+                <option value="getEth">🌐 Get .eth</option>
+                <option value="airdrop">🎁 Airdrop</option>
+                <option value="swap">🔄 Swap Coins</option>
+                <option value="send">✈️ Send Coins</option>
+                <option value="myCoins">📖 My Coins</option>
+                <option value="volumeBot">🤖 Volume Bot</option>
+                <option value="dividends">📈 Dividends</option>
+                <option value="vote">📊 Vote</option>
+                <option value="manageLiquidity">🃏 Play Blackjack</option>
+                <option value="dm">✉️ DMs</option>
+                <option value="chat">💬 Chat</option>
+                <option value="explorer">🔍 Block Explorer</option>
+            </select>
+            <div class="menu-grid">
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('getMoney')"><span class="emoji">💰</span>Get MONEY</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('fiatSwap')"><span class="emoji">📎</span>Create Pair</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('getFund')"><span class="emoji">🚀</span>Launch Fund</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('createCoin')"><span class="emoji">🪙</span>Launch Coin</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('getEth')"><span class="emoji">🌐</span>Get .eth</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('airdrop')"><span class="emoji">🎁</span>Airdrop</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('swap')"><span class="emoji">🔄</span>Swap Coins</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('send')"><span class="emoji">✈️</span>Send Coins</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('myCoins')"><span class="emoji">📖</span>My Coins</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('volumeBot')"><span class="emoji">🤖</span>Volume Bot</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('dividends')"><span class="emoji">📈</span>Dividends</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('vote')"><span class="emoji">📊</span>Vote</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('manageLiquidity')"><span class="emoji">🃏</span>Blackjack</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('dm')"><span class="emoji">✉️</span>DMs</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('chat')"><span class="emoji">💬</span>Chat</button>
+                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('explorer')"><span class="emoji">🔍</span> Block Explorer</button>
+            </div>
+            <div id="walletInfo" style="display: block;">
+                <div class="balance-box">
+                    <p><strong>Money Balance:</strong> <span id="myMoney">0 MONEY</span></p>
+                    <p><strong>Ethereum Balance:</strong> <span id="balanceDisplay">0 ETH</span></p>
+                    <p><strong>USDM Balance:</strong> <span id="usdmBalance">0 USDM</span></p>
+                </div>
+                <p id="generationInfo"></p>
+            </div>
+            <div id="transactionSection" class="function-section">
+                <h3>Send ETH or Coins</h3>
+                <select id="sendTypeSelect" onchange="walletInterface.toggleSendType()">
+                    <option value="ETH">Send ETH</option>
+                    <option value="Token">Send Coin</option>
+                </select>
+                <input type="text" id="recipientAddress" placeholder="Recipient Address or ENS">
+                <input type="number" id="amount" placeholder="Amount to Transfer" step="0.0001">
+                <div id="tokenDetails" style="display: none;">
+                    <input type="text" id="tokenAddress" placeholder="Token Address">
+                </div>
+                <div>
+                    <label for="gasPriceOption">Gas Price Option:</label>
+                    <select id="gasPriceOption" onchange="walletInterface.toggleGasPriceInput()">
+                        <option value="manual">Manual</option>
+                        <option value="auto">Auto Estimate</option>
+                    </select>
+                </div>
+                <div id="gasPriceInput" style="display: none;">
+                    <input type="number" id="gasPrice" placeholder="Gas Price (Gwei, optional)">
+                </div>
+                <button id="transferFundsBtn">Transfer Funds</button>
+                <div id="statusDisplay">Status: Ready</div>
+            </div>
+            <div id="swapSection" class="function-section">
+                <h3>Swap Coins</h3>
+                <select id="swapDirectionSelect">
+                    <option value="ethToToken">ETH to Coin</option>
+                    <option value="tokenToEth">Coin to ETH</option>
+                </select>
+                <input type="text" id="swapTokenAddress" placeholder="Coin CA">
+                <input type="number" id="swapAmount" placeholder="Amount to Swap" step="0.0001">
+                <div id="swapSettings">
+                    <label for="slippageTolerance">Slippage Tolerance (%):</label>
+                    <select id="slippageTolerance" onchange="walletInterface.updateSlippage()">
+                        <option value="0.1">0.1%</option>
+                        <option value="0.5">0.5%</option>
+                        <option value="1" selected>1%</option>
+                        <option value="3">3%</option>
+                        <option value="5">5%</option>
+                        <option value="10">10%</option>
+                    </select>
+                    <label for="gasLimit">Gas Limit:</label>
+                    <select id="gasLimit" onchange="walletInterface.updateGasLimit()">
+                        <option value="200000">200,000</option>
+                        <option value="300000">300,000</option>
+                        <option value="400000">400,000</option>
+                        <option value="500000" selected>500,000</option>
+                    </select>
+                </div>
+                <button id="swapBtn">Swap</button>
+                <div id="swapStatus"></div>
+            </div>
+            <div id="explorerSection" class="function-section">
+                <h3>Block Explorer</h3>
+                <label for="action">Select Action:</label>
+                <select id="action" onchange="walletInterface.toggleInputs()">
+                    <option value="">-- Choose an action --</option>
+                    <option value="balance">Get ETH Balance</option>
+                    <option value="txlist">List Transactions</option>
+                    <option value="tokentx">List Token Transactions</option>
+                    <option value="tokennfttx">List NFT Transactions</option>
+                    <option value="txlistinternal">List Internal Transactions</option>
+                    <option value="gettxreceiptstatus">Get Transaction Status</option>
+                    <option value="getblockbytime">Get Block by Timestamp</option>
+                    <option value="getabi">Get Contract ABI</option>
+                    <option value="tokensupply">Get Token Supply</option>
+                    <option value="tokenbalance">Get Token Balance</option>
+                    <option value="gasoracle">Get Gas Prices</option>
+                    <option value="ethsupply">Get ETH Supply</option>
+                    <option value="ethprice">Get ETH Price</option>
+                    <option value="getlogs">Get Event Logs</option>
+                </select>
+                <div id="addressInput" class="input-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" placeholder="e.g., 0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae">
+                </div>
+                <div id="txHashInput" class="input-group">
+                    <label for="txHash">Transaction Hash:</label>
+                    <input type="text" id="txHash" placeholder="e.g., 0x...">
+                </div>
+                <div id="blockTimeInput" class="input-group">
+                    <label for="blockTime">Timestamp (UNIX):</label>
+                    <input type="number" id="blockTime" placeholder="e.g., 1677654321">
+                </div>
+                <div id="contractAddressInput" class="input-group">
+                    <label for="contractAddress">Contract Address:</label>
+                    <input type="text" id="contractAddress" placeholder="e.g., 0xdac17f958d2ee523a2206206994597c13d831ec7">
+                </div>
+                <div id="logInputs" class="input-group">
+                    <label for="logAddress">Contract Address:</label>
+                    <input type="text" id="logAddress" placeholder="e.g., 0xdac17f958d2ee523a2206206994597c13d831ec7">
+                    <label for="fromBlock">From Block:</label>
+                    <input type="number" id="fromBlock" placeholder="e.g., 0">
+                    <label for="toBlock">To Block:</label>
+                    <input type="number" id="toBlock" placeholder="e.g., 99999999">
+                </div>
+                <button id="explorerButton">Search</button>
+                <div id="result">Results will appear here...</div>
+            </div>
+            <div id="getMoneySection" class="function-section">
+                <h3>Get $Money</h3>
+                <select id="moneyActionSelect">
+                    <option value="buy">Buy $Money</option>
+                    <option value="sell">Sell $Money</option>
+                </select>
+                <input type="number" id="moneyAmount" placeholder="Amount of Eth" step="0.0001">
+                <div id="moneySettings">
+                    <label for="moneySlippageTolerance">Slippage Tolerance (%):</label>
+                    <select id="moneySlippageTolerance" onchange="walletInterface.updateMoneySlippage()">
+                        <option value="0.1">0.1%</option>
+                        <option value="0.5">0.5%</option>
+                        <option value="1" selected>1%</option>
+                        <option value="3">3%</option>
+                        <option value="5">5%</option>
+                        <option value="10">10%</option>
+                    </select>
+                    <label for="moneyGasLimit">Gas Limit:</label>
+                    <select id="moneyGasLimit" onchange="walletInterface.updateMoneyGasLimit()">
+                        <option value="200000">200,000</option>
+                        <option value="300000">300,000</option>
+                        <option value="400000">400,000</option>
+                        <option value="500000" selected>500,000</option>
+                    </select>
+                </div>
+                <button id="executeMoneyBtn">Execute</button>
+            </div>
+            <div id="myCoinsSection" class="function-section">
+                <h3>My Coins</h3>
+                <input type="text" id="coinContractAddress" placeholder="Enter Token Contract Address">
+                <button id="importCoinBtn">Import Coin</button>
+                <div id="coinList">No coins imported yet.</div>
+            </div>
+            <div id="fiatSwapSection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/dex/"></iframe>
+                <button class="button" id="fiatSwapBtn">Create a Pair</button>
+            </div>
+            <div id="getFundSection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/launcher/"></iframe>
+                <button class="button" id="getFundBtn">Launch a Fund</button>
+            </div>
+            <div id="createCoinSection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/deploy/"></iframe>
+                <button class="button" id="createCoinBtn">Launch a Coin</button>
+            </div>
+            <div id="getEthSection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/etf/"></iframe>
+                <button class="button" id="getEthBtn">Get .eth</button>
+            </div>
+            <div id="airdropSection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/airdrop"></iframe>
+                <button class="button" id="airdropBtn">Airdrop</button>
+            </div>
+            <div id="volumeBotSection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/volume"></iframe>
+                <button class="button" id="volumeBotBtn">Volume Bot</button>
+            </div>
+            <div id="dividendsSection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/dividends"></iframe>
+                <button class="button" id="dividendsBtn">Dividends</button>
+            </div>
+            <div id="voteSection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/vote/"></iframe>
+                <button class="button" id="voteBtn">Vote</button>
+            </div>
+            <div id="manageLiquiditySection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/blackjack"></iframe>
+                <button class="button" id="manageLiquidityBtn">Play</button>
+            </div>
+            <div id="dmSection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/dm"></iframe>
+                <button class="button" id="dmBtn">Visit My DMs</button>
+            </div>
+            <div id="chatSection" class="function-section">
+                <iframe class="preview-window" src="https://moneyfund.com/chat"></iframe>
+                <button class="button" id="chatBtn">Chat</button>
+            </div>
+            <div id="backupSection">
+                <button id="exportWalletsBtn">Export Wallets as JSON</button>
+                <label for="importWalletFile" class="button">Import Wallets from JSON</label>
+                <input type="file" id="importWalletFile" accept=".json">
+            </div>
+        </div>
+        <div id="status-box">
+            <h3>Status</h3>
+            <ul id="status-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Storage utility
+        const Storage = {
+            get: (key) => {
+                try {
+                    return JSON.parse(localStorage.getItem(key) || '[]');
+                } catch (error) {
+                    console.error(`Error parsing ${key}:`, error);
+                    return [];
+                }
+            },
+            set: (key, data) => {
+                try {
+                    localStorage.setItem(key, JSON.stringify(data));
+                } catch (error) {
+                    console.error(`Error setting ${key}:`, error);
+                }
+            },
+            clear: (key) => localStorage.removeItem(key)
+        };
+
+        // Status box update function
+        function updateStatusBox({ message, status = 'pending', txHash = null, address = null, quantity = null, direction = null, earnedMoney = null }) {
+            const statusList = document.getElementById('status-list');
+            const li = document.createElement('li');
+            li.className = status;
+            let text = message;
+            if (quantity) text += ` | Quantity: ${quantity}`;
+            if (direction) text += ` | Direction: ${direction}`;
+            if (txHash) text += ` | Tx: <a href="https://etherscan.io/tx/${txHash}" target="_blank">${txHash.slice(0, 6)}...${txHash.slice(-4)}</a>`;
+            if (address) text += ` | Address: ${address}`;
+            if (earnedMoney) text += ` | Earned: ${earnedMoney} $Money`;
+            li.innerHTML = text;
+            statusList.prepend(li);
+            if (statusList.children.length > 10) statusList.removeChild(statusList.lastChild);
+
+            const statusEntry = {
+                message,
+                status,
+                txHash,
+                address,
+                quantity,
+                direction,
+                earnedMoney,
+                timestamp: Date.now()
+            };
+            const statuses = Storage.get('statuses');
+            statuses.unshift(statusEntry);
+            if (statuses.length > 50) statuses.pop();
+            Storage.set('statuses', statuses);
+        }
+
+        // Load statuses from storage
+        function loadStatusesFromStorage() {
+            const statuses = Storage.get('statuses');
+            const statusList = document.getElementById('status-list');
+            statusList.innerHTML = '';
+            statuses.forEach(({ message, status, txHash, address, quantity, direction, earnedMoney }) => {
+                const li = document.createElement('li');
+                li.className = status;
+                let text = message;
+                if (quantity) text += ` | Quantity: ${quantity}`;
+                if (direction) text += ` | Direction: ${direction}`;
+                if (txHash) text += ` | Tx: <a href="https://etherscan.io/tx/${txHash}" target="_blank">${txHash.slice(0, 6)}...${txHash.slice(-4)}</a>`;
+                if (address) text += ` | Address: ${address}`;
+                if (earnedMoney) text += ` | Earned: ${earnedMoney} $Money`;
+                li.innerHTML = text;
+                statusList.appendChild(li);
+            });
+            if (statusList.children.length > 10) {
+                while (statusList.children.length > 10) {
+                    statusList.removeChild(statusList.lastChild);
+                }
+            }
+        }
+
+        let selectedWallet = null;
+        let vanityMode = false;
+
+        // WalletInterface class
+        class WalletInterface {
+            constructor() {
+                this.wallets = [];
+                this.web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                this.uniswapRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
+                this.moneyContractAddress = '0x100DB67F41A2dF3c32cC7c0955694b98339B7311';
+                this.usdmContractAddress = '0x33d5be7c0584f77b3168b1d38e1a6215af242d4f';
+                this.fundContractAddress = '0x758b92B13693B678eB0067452580C00f20413A5B';
+                this.uniswapRouterABI = [
+                    {"constant": false, "inputs": [{"name": "amountOutMin", "type": "uint256"}, {"name": "path", "type": "address[]"}, {"name": "to", "type": "address"}, {"name": "deadline", "type": "uint256"}], "name": "swapExactETHForTokens", "outputs": [{"name": "amounts", "type": "uint256[]"}], "payable": true, "stateMutability": "payable", "type": "function"},
+                    {"constant": false, "inputs": [{"name": "amountIn", "type": "uint256"}, {"name": "amountOutMin", "type": "uint256"}, {"name": "path", "type": "address[]"}, {"name": "to", "type": "address"}, {"name": "deadline", "type": "uint256"}], "name": "swapExactTokensForETH", "outputs": [{"name": "amounts", "type": "uint256[]"}], "payable": false, "stateMutability": "nonpayable", "type": "function"},
+                    {"constant": true, "inputs": [{"name": "amountIn", "type": "uint256"}, {"name": "path", "type": "address[]"}], "name": "getAmountsOut", "outputs": [{"name": "amounts", "type": "uint256[]"}], "type": "function"}
+                ];
+                this.erc20ABI = [
+                    {"constant": true, "inputs": [{"name": "_owner", "type": "address"}], "name": "balanceOf", "outputs": [{"name": "balance", "type": "uint256"}], "type": "function"},
+                    {"constant": true, "inputs": [], "name": "decimals", "outputs": [{"name": "", "type": "uint8"}], "type": "function"},
+                    {"constant": false, "inputs": [{"name": "_spender", "type": "address"}, {"name": "_value", "type": "uint256"}], "name": "approve", "outputs": [{"name": "", "type": "bool"}], "type": "function"},
+                    {"constant": false, "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}], "name": "transfer", "outputs": [{"name": "success", "type": "bool"}], "type": "function"}
+                ];
+                this.uniswapRouter = new this.web3.eth.Contract(this.uniswapRouterABI, this.uniswapRouterAddress);
+                this.moneyContract = new this.web3.eth.Contract(this.erc20ABI, this.moneyContractAddress);
+                this.usdmContract = new this.web3.eth.Contract(this.erc20ABI, this.usdmContractAddress);
+                this.fundContract = new this.web3.eth.Contract(this.erc20ABI, this.fundContractAddress);
+                this.slippageTolerance = 1;
+                this.gasLimit = 500000;
+                this.moneySlippageTolerance = 1;
+                this.moneyGasLimit = 500000;
+                this.API_KEY = "MB89VXUF27QJHA7QYJMPE9W55UGYZNV39C";
+                this.BASE_URL = "https://api.etherscan.io/api";
+                this.coinList = [];
+            }
+
+            init() {
+                this.loadWalletsFromBrowser();
+                this.attachEventListeners();
+                this.loadCoinsFromStorage();
+                loadStatusesFromStorage();
+            }
+
+            attachEventListeners() {
+                document.getElementById('createMoneyFundBtn').addEventListener('click', () => this.createMoneyFundWallet());
+                document.getElementById('transferFundsBtn').addEventListener('click', () => this.handleTransferFunds());
+                document.getElementById('swapBtn').addEventListener('click', () => this.executeSwap());
+                document.getElementById('explorerButton').addEventListener('click', () => this.searchExplorer());
+                document.getElementById('executeMoneyBtn').addEventListener('click', () => this.executeMoneyAction());
+                document.getElementById('importCoinBtn').addEventListener('click', () => this.importCoin());
+                document.getElementById('fiatSwapBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/dollar/', '_blank');
+                });
+                document.getElementById('getFundBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/launcher/', '_blank');
+                });
+                document.getElementById('createCoinBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/deploy/', '_blank');
+                });
+                document.getElementById('getEthBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/etf/', '_blank');
+                });
+                document.getElementById('airdropBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/airdrop', '_blank');
+                });
+                document.getElementById('volumeBotBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/volume', '_blank');
+                });
+                document.getElementById('dividendsBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/dividends', '_blank');
+                });
+                document.getElementById('voteBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/DAO/', '_blank');
+                });
+                document.getElementById('manageLiquidityBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/blackjack', '_blank');
+                });
+                document.getElementById('dmBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/dm', '_blank');
+                });
+                document.getElementById('chatBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/chat', '_blank');
+                });
+                document.getElementById('copyAddressBtn').addEventListener('click', () => this.copyWalletAddress());
+                document.getElementById('recipientAddress').addEventListener('input', this.debounce(this.resolveENS.bind(this), 500));
+                document.getElementById('exportWalletsBtn').addEventListener('click', () => this.exportWallets());
+                document.getElementById('importWalletFile').addEventListener('change', (event) => this.importWallets(event));
+                document.getElementById('vanityModeToggle').addEventListener('change', (event) => {
+                    vanityMode = event.target.checked;
+                    updateStatusBox({
+                        message: `0x100 Mode ${vanityMode ? 'Enabled' : 'Disabled'}`,
+                        status: 'success'
+                    });
+                });
+
+                const inputs = ['address', 'txHash', 'blockTime', 'contractAddress', 'logAddress', 'fromBlock', 'toBlock'];
+                inputs.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.addEventListener('input', this.debouncedSearchExplorer);
+                    }
+                });
+            }
+
+            debounce(fn, delay) {
+                let timeout;
+                return (...args) => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => fn.apply(this, args), delay);
+                };
+            }
+
+            debouncedSearchExplorer = this.debounce(function(e) {
+                const action = document.getElementById('action').value;
+                if (action && e.target.value) {
+                    this.searchExplorer();
+                }
+            }, 500);
+
+            async resolveENS() {
+                const recipientInput = document.getElementById('recipientAddress');
+                const inputValue = recipientInput.value.trim();
+                if (inputValue.endsWith('.eth')) {
+                    updateStatusBox({ message: 'Resolving ENS name...', status: 'pending' });
+                    try {
+                        const resolvedAddress = await this.web3.eth.ens.getAddress(inputValue);
+                        if (resolvedAddress) {
+                            recipientInput.value = resolvedAddress;
+                            updateStatusBox({
+                                message: `ENS resolved: ${inputValue} → ${resolvedAddress}`,
+                                status: 'success',
+                                address: resolvedAddress
+                            });
+                        } else {
+                            updateStatusBox({
+                                message: `No address found for ENS name: ${inputValue}`,
+                                status: 'error'
+                            });
+                        }
+                    } catch (error) {
+                        updateStatusBox({
+                            message: `Failed to resolve ENS: ${error.message}`,
+                            status: 'error'
+                        });
+                    }
+                }
+            }
+
+            async getCurrentGasPrice() {
+                try {
+                    const gasPrice = await this.web3.eth.getGasPrice();
+                    return this.web3.utils.toBN(gasPrice);
+                } catch (error) {
+                    console.error('Failed to fetch gas price:', error);
+                    throw error;
+                }
+            }
+
+            async createMoneyFundWallet() {
+                updateStatusBox({ message: 'Creating MoneyFund Wallet...', status: 'pending' });
+                try {
+                    let wallet;
+                    if (vanityMode) {
+                        let attempts = 0;
+                        while (true) {
+                            attempts++;
+                            wallet = this.web3.eth.accounts.create();
+                            if (wallet.address.startsWith('0x100')) break;
+                            if (attempts > 10000) {
+                                updateStatusBox({
+                                    message: 'Failed to generate 0x100 address after 10000 attempts',
+                                    status: 'error'
+                                });
+                                return;
+                            }
+                        }
+                    } else {
+                        wallet = this.web3.eth.accounts.create();
+                    }
+                    selectedWallet = { address: wallet.address, privateKey: wallet.privateKey, type: 'moneyfund' };
+                    this.wallets.push(selectedWallet);
+                    this.saveWalletsToBrowser();
+                    this.updateWalletSelector();
+                    this.updateWalletAcrossApp();
+                    this.fetchBalance();
+                    
+                    setTimeout(() => {
+                        updateStatusBox({
+                            message: 'MoneyFund Wallet Created',
+                            status: 'success',
+                            address: wallet.address
+                        });
+                    }, 1000);
+                } catch (error) {
+                    console.error("Error creating MoneyFund wallet:", error);
+                    updateStatusBox({
+                        message: 'Failed to create wallet: ' + error.message,
+                        status: 'error'
+                    });
+                }
+            }
+
+            updateWalletAcrossApp() {
+                if (!selectedWallet) return;
+                this.updateWalletInfo(this.wallets.findIndex(w => w.address === selectedWallet.address));
+                this.updateConnectedWalletAddress();
+            }
+
+            handleWalletFunction(value) {
+                const sections = ['walletInfo', 'transactionSection', 'swapSection', 'explorerSection', 'getMoneySection', 'myCoinsSection', 'fiatSwapSection', 'getFundSection', 'createCoinSection', 'getEthSection', 'airdropSection', 'volumeBotSection', 'dividendsSection', 'voteSection', 'manageLiquiditySection', 'dmSection', 'chatSection'];
+                sections.forEach(section => {
+                    const element = document.getElementById(section);
+                    if (element) {
+                        element.style.display = section === `${value}Section` || (value === 'send' && section === 'transactionSection') ? 'block' : 'none';
+                    }
+                });
+                if (value === 'send') {
+                    document.getElementById('statusDisplay').textContent = 'Status: Ready';
+                } else if (value === 'swap') {
+                    document.getElementById('swapStatus').textContent = '';
+                } else if (value === 'getMoney') {
+                    this.updateMoneyInfo();
+                } else if (value === 'myCoins') {
+                    this.displayCoinList();
+                }
+            }
+
+            manageWallets() {
+                return Storage.get('wallets');
+            }
+
+            saveWalletsToBrowser() {
+                Storage.set('wallets', this.wallets);
+            }
+
+            async fetchBalance() {
+                if (!selectedWallet) return;
+                try {
+                    const balanceWei = await this.web3.eth.getBalance(selectedWallet.address);
+                    const balanceEther = this.web3.utils.fromWei(balanceWei, 'ether');
+                    document.getElementById('balanceDisplay').textContent = `${balanceEther} ETH`;
+                    this.updateMoneyInfo();
+                    this.updateUSDMBalance();
+                    this.updateTotalUSDValue();
+                } catch (error) {
+                    console.error("Error fetching balance:", error);
+                    document.getElementById('balanceDisplay').textContent = 'Error ETH';
+                }
+            }
+
+            async updateUSDMBalance() {
+                if (!selectedWallet) return;
+                try {
+                    const usdmBalanceWei = await this.usdmContract.methods.balanceOf(selectedWallet.address).call();
+                    const usdmBalanceEther = this.web3.utils.fromWei(usdmBalanceWei, 'ether');
+                    document.getElementById('usdmBalance').textContent = `${usdmBalanceEther} USDM`;
+                } catch (error) {
+                    console.error('Error fetching USDM balance:', error);
+                    document.getElementById('usdmBalance').textContent = 'Error USDM';
+                }
+            }
+
+            async updateTotalUSDValue() {
+                if (!selectedWallet) return;
+                try {
+                    let totalUSD = 0;
+
+                    const ethPriceResponse = await fetch(`${this.BASE_URL}?module=stats&action=ethprice&apikey=${this.API_KEY}`);
+                    const ethPriceData = await ethPriceResponse.json();
+                    const ethPriceUSD = ethPriceData.result?.ethusd || 2000;
+
+                    const ethBalanceWei = await this.web3.eth.getBalance(selectedWallet.address);
+                    const ethBalanceEther = parseFloat(this.web3.utils.fromWei(ethBalanceWei, 'ether'));
+                    totalUSD += ethBalanceEther * ethPriceUSD;
+
+                    const moneyBalanceWei = await this.moneyContract.methods.balanceOf(selectedWallet.address).call();
+                    const moneyBalanceEther = parseFloat(this.web3.utils.fromWei(moneyBalanceWei, 'ether'));
+                    totalUSD += moneyBalanceEther * 1;
+
+                    const usdmBalanceWei = await this.usdmContract.methods.balanceOf(selectedWallet.address).call();
+                    const usdmBalanceEther = parseFloat(this.web3.utils.fromWei(usdmBalanceWei, 'ether'));
+                    totalUSD += usdmBalanceEther * 1;
+
+                    const fundBalanceWei = await this.fundContract.methods.balanceOf(selectedWallet.address).call();
+                    const fundBalanceEther = parseFloat(this.web3.utils.fromWei(fundBalanceWei, 'ether'));
+                    totalUSD += fundBalanceEther * 0.50;
+
+                    for (const coin of this.coinList) {
+                        try {
+                            const tokenContract = new this.web3.eth.Contract(this.erc20ABI, coin.address);
+                            const balanceWei = await tokenContract.methods.balanceOf(selectedWallet.address).call();
+                            const decimals = await tokenContract.methods.decimals().call();
+                            const balance = parseFloat(this.web3.utils.fromWei(balanceWei, 'ether'));
+                            const tokenPriceUSD = 0.10;
+                            totalUSD += balance * tokenPriceUSD;
+                        } catch (error) {
+                            console.error(`Error fetching balance for token ${coin.address}:`, error);
+                        }
+                    }
+
+                    document.getElementById('totalUSD').textContent = `${totalUSD.toFixed(2)} USD`;
+                } catch (error) {
+                    console.error('Error calculating total USD value:', error);
+                    document.getElementById('totalUSD').textContent = 'Error USD';
+                }
+            }
+
+            updateWalletSelector() {
+                const selector = document.getElementById('walletSelector');
+                selector.innerHTML = '<option value="">-- Select Wallet --</option>';
+                this.wallets.forEach((wallet, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.innerHTML = `<span class="wallet-address"><span>${wallet.address.slice(0, 5)}</span>${wallet.address.slice(5, 6)}</span>...${wallet.address.slice(-4)} (MoneyFund)`;
+                    selector.appendChild(option);
+                });
+            }
+
+            selectWallet(index) {
+                const idx = parseInt(index);
+                if (idx >= 0 && idx < this.wallets.length) {
+                    selectedWallet = this.wallets[idx];
+                    this.updateWalletAcrossApp();
+                    this.fetchBalance();
+                }
+            }
+
+            async updateWalletInfo(index) {
+                if (index < 0 || index >= this.wallets.length) return;
+                const wallet = this.wallets[index];
+                document.getElementById('generationInfo').textContent = '';
+                document.getElementById('walletInfo').style.display = 'block';
+                await this.fetchBalance();
+                const selectedFunction = document.getElementById('walletFunction').value;
+                if (selectedFunction === 'getMoney') {
+                    this.updateMoneyInfo();
+                } else if (selectedFunction === 'myCoins') {
+                    this.displayCoinList();
+                }
+            }
+
+            loadWalletsFromBrowser() {
+                this.wallets = this.manageWallets();
+                this.updateWalletSelector();
+                if (this.wallets.length > 0) {
+                    selectedWallet = this.wallets[0];
+                    this.updateWalletAcrossApp();
+                    this.fetchBalance();
+                }
+            }
+
+            toggleSendType() {
+                const sendType = document.getElementById('sendTypeSelect').value;
+                document.getElementById('tokenDetails').style.display = sendType === 'Token' ? 'block' : 'none';
+            }
+
+            toggleGasPriceInput() {
+                const gasPriceOption = document.getElementById('gasPriceOption').value;
+                const gasPriceInput = document.getElementById('gasPriceInput');
+                gasPriceInput.style.display = gasPriceOption === 'manual' ? 'block' : 'none';
+            }
+
+            async handleTransferFunds() {
+                let recipient = document.getElementById('recipientAddress').value.trim();
+                const amountInput = document.getElementById('amount').value.trim();
+                const gasPriceOption = document.getElementById('gasPriceOption').value;
+                let gasPriceInput = gasPriceOption === 'manual' ? document.getElementById('gasPrice').value.trim() : null;
+                const type = document.getElementById('sendTypeSelect').value;
+
+                if (!recipient || !amountInput) {
+                    updateStatusBox({ message: 'Please fill in all required fields.', status: 'error' });
+                    return;
+                }
+                if (!selectedWallet) {
+                    updateStatusBox({ message: 'Please select a wallet first.', status: 'error' });
+                    return;
+                }
+
+                if (!this.web3.utils.isAddress(recipient)) {
+                    updateStatusBox({ message: 'Invalid recipient address.', status: 'error' });
+                    return;
+                }
+
+                const BN = this.web3.utils.toBN;
+                const amount = BN(this.web3.utils.toWei(amountInput, 'ether'));
+
+                let gasPrice;
+                if (gasPriceOption === 'auto' || !gasPriceInput) {
+                    gasPrice = await this.getCurrentGasPrice();
+                } else {
+                    gasPrice = BN(this.web3.utils.toWei(gasPriceInput, 'gwei'));
+                }
+
+                const estimatedGas = type === 'ETH' ? 21000 : 50000;
+
+                updateStatusBox({
+                    message: 'Estimating gas...',
+                    status: 'pending',
+                    quantity: amountInput,
+                    token: type === 'ETH' ? 'ETH' : 'Tokens'
+                });
+
+                let tx;
+                try {
+                    if (type === 'ETH') {
+                        tx = {
+                            from: selectedWallet.address,
+                            to: recipient,
+                            value: amount,
+                            gas: estimatedGas,
+                            gasPrice: gasPrice
+                        };
+                    } else {
+                        const tokenAddress = document.getElementById('tokenAddress').value.trim();
+                        const tokenContract = new this.web3.eth.Contract(this.erc20ABI, tokenAddress);
+                        tx = {
+                            from: selectedWallet.address,
+                            to: tokenAddress,
+                            data: tokenContract.methods.transfer(recipient, amount).encodeABI(),
+                            gas: estimatedGas,
+                            gasPrice: gasPrice
+                        };
+                    }
+                    updateStatusBox({
+                        message: 'Sending transaction...',
+                        status: 'pending',
+                        quantity: amountInput,
+                        token: type === 'ETH' ? 'ETH' : 'Tokens'
+                    });
+                    const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                    this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                        .on('transactionHash', (hash) => {
+                            updateStatusBox({
+                                message: 'Transaction sent...',
+                                status: 'pending',
+                                txHash: hash,
+                                quantity: amountInput
+                            });
+                        })
+                        .on('receipt', (receipt) => {
+                            updateStatusBox({
+                                message: 'Transaction complete',
+                                status: 'success',
+                                txHash: receipt.transactionHash,
+                                quantity: amountInput
+                            });
+                        })
+                        .on('error', (err) => {
+                            updateStatusBox({
+                                message: 'Transaction failed: ' + err.message,
+                                status: 'error'
+                            });
+                        });
+                    this.fetchBalance();
+                } catch (error) {
+                    console.error('Transfer error:', error);
+                    updateStatusBox({
+                        message: 'Transfer failed: ' + error.message,
+                        status: 'error'
+                    });
+                }
+            }
+
+            updateSlippage() {
+                this.slippageTolerance = parseFloat(document.getElementById('slippageTolerance').value);
+                document.getElementById('swapStatus').textContent = `Slippage tolerance set to ${this.slippageTolerance}%`;
+            }
+
+            updateGasLimit() {
+                this.gasLimit = parseInt(document.getElementById('gasLimit').value);
+                document.getElementById('swapStatus').textContent = `Gas limit set to ${this.gasLimit}`;
+            }
+
+            async executeSwap() {
+                if (!selectedWallet) {
+                    updateStatusBox({ message: 'Please select a wallet first.', status: 'error' });
+                    return;
+                }
+                const direction = document.getElementById('swapDirectionSelect').value;
+                const tokenAddress = document.getElementById('swapTokenAddress').value.trim();
+                const amountInput = document.getElementById('swapAmount').value.trim();
+                const directionText = direction === 'ethToToken' ? `ETH → ${tokenAddress}` : `${tokenAddress} → ETH`;
+
+                const amountNum = parseFloat(amountInput);
+                if (!tokenAddress || isNaN(amountNum) || amountNum <= 0 || /\de\+/.test(amountInput)) {
+                    updateStatusBox({
+                        message: 'Please enter a valid token address and positive amount (no scientific notation).',
+                        status: 'error'
+                    });
+                    return;
+                }
+
+                const BN = this.web3.utils.toBN;
+                const amount = BN(this.web3.utils.toWei(amountInput, 'ether'));
+
+                updateStatusBox({
+                    message: 'Swapping...',
+                    status: 'pending',
+                    quantity: amountInput,
+                    direction: directionText
+                });
+
+                try {
+                    const ethBalanceWei = await this.web3.eth.getBalance(selectedWallet.address);
+                    const ethBalanceEther = this.web3.utils.fromWei(ethBalanceWei, 'ether');
+                    const gasPrice = await this.getCurrentGasPrice();
+                    const estimatedGasCost = this.web3.utils.fromWei(BN(this.gasLimit).mul(gasPrice), 'ether');
+
+                    if (direction === 'ethToToken') {
+                        if (parseFloat(ethBalanceEther) < (parseFloat(amountInput) + parseFloat(estimatedGasCost))) {
+                            updateStatusBox({
+                                message: `Insufficient ETH balance. Need at least ${(parseFloat(amountInput) + parseFloat(estimatedGasCost)).toFixed(6)} ETH.`,
+                                status: 'error'
+                            });
+                            return;
+                        }
+                        const path = ["0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", tokenAddress];
+                        const amounts = await this.uniswapRouter.methods.getAmountsOut(amount, path).call();
+                        if (!amounts || amounts.length < 2) {
+                            updateStatusBox({
+                                message: 'Invalid token or insufficient liquidity.',
+                                status: 'error'
+                            });
+                            return;
+                        }
+                        const expectedOutput = amounts[1];
+                        const slippage = 1 - (this.slippageTolerance / 100);
+                        const amountOutMin = BN(expectedOutput).muln(slippage * 1000).divn(1000).toString();
+                        const tx = {
+                            from: selectedWallet.address,
+                            to: this.uniswapRouterAddress,
+                            data: this.uniswapRouter.methods.swapExactETHForTokens(amountOutMin, path, selectedWallet.address, Math.floor(Date.now() / 1000) + 120).encodeABI(),
+                            value: amount,
+                            gas: this.gasLimit,
+                            gasPrice: gasPrice
+                        };
+                        const tokenContract = new this.web3.eth.Contract(this.erc20ABI, tokenAddress);
+                        const initialBalanceWei = await tokenContract.methods.balanceOf(selectedWallet.address).call();
+                        const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                        this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                            .on('transactionHash', (hash) => {
+                                updateStatusBox({
+                                    message: 'Swap transaction sent...',
+                                    status: 'pending',
+                                    txHash: hash,
+                                    direction: directionText
+                                });
+                            })
+                            .on('receipt', async (receipt) => {
+                                const finalBalanceWei = await tokenContract.methods.balanceOf(selectedWallet.address).call();
+                                const decimals = await tokenContract.methods.decimals().call();
+                                const tokenReceivedWei = BN(finalBalanceWei).sub(BN(initialBalanceWei));
+                                const tokenReceived = (tokenReceivedWei.div(BN(10).pow(BN(decimals)))).toString();
+                                updateStatusBox({
+                                    message: `Swapped successfully! Received ${tokenReceived} tokens`,
+                                    status: 'success',
+                                    quantity: tokenReceived,
+                                    txHash: receipt.transactionHash,
+                                    direction: directionText
+                                });
+                            })
+                            .on('error', (err) => {
+                                updateStatusBox({
+                                    message: 'Swap failed: ' + err.message,
+                                    status: 'error'
+                                });
+                            });
+                    } else if (direction === 'tokenToEth') {
+                        const tokenContract = new this.web3.eth.Contract(this.erc20ABI, tokenAddress);
+                        const approveTx = {
+                            from: selectedWallet.address,
+                            to: tokenAddress,
+                            data: tokenContract.methods.approve(this.uniswapRouterAddress, amount).encodeABI(),
+                            gas: 50000,
+                            gasPrice: gasPrice
+                        };
+                        const signedApproveTx = await this.web3.eth.accounts.signTransaction(approveTx, selectedWallet.privateKey);
+                        await this.web3.eth.sendSignedTransaction(signedApproveTx.rawTransaction);
+                        const path = [tokenAddress, "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"];
+                        const amounts = await this.uniswapRouter.methods.getAmountsOut(amount, path).call();
+                        if (!amounts || amounts.length < 2) {
+                            updateStatusBox({
+                                message: 'Invalid token or insufficient liquidity.',
+                                status: 'error'
+                            });
+                            return;
+                        }
+                        const expectedOutput = amounts[1];
+                        const slippage = 1 - (this.slippageTolerance / 100);
+                        const amountOutMin = BN(expectedOutput).muln(slippage * 1000).divn(1000).toString();
+                        const tx = {
+                            from: selectedWallet.address,
+                            to: this.uniswapRouterAddress,
+                            data: this.uniswapRouter.methods.swapExactTokensForETH(amount, amountOutMin, path, selectedWallet.address, Math.floor(Date.now() / 1000) + 120).encodeABI(),
+                            gas: this.gasLimit,
+                            gasPrice: gasPrice
+                        };
+                        const initialBalanceWei = BN(await this.web3.eth.getBalance(selectedWallet.address));
+                        const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                        this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                            .on('transactionHash', (hash) => {
+                                updateStatusBox({
+                                    message: 'Swap transaction sent...',
+                                    status: 'pending',
+                                    txHash: hash,
+                                    direction: directionText
+                                });
+                            })
+                            .on('receipt', async (receipt) => {
+                                const finalBalanceWei = BN(await this.web3.eth.getBalance(selectedWallet.address));
+                                const ethReceivedWei = finalBalanceWei.sub(initialBalanceWei);
+                                const ethReceivedEther = this.web3.utils.fromWei(ethReceivedWei.toString(), 'ether');
+                                updateStatusBox({
+                                    message: `Swapped successfully! Received ${ethReceivedEther} ETH`,
+                                    status: 'success',
+                                    quantity: ethReceivedEther,
+                                    txHash: receipt.transactionHash,
+                                    direction: directionText
+                                });
+                                this.fetchBalance();
+                            })
+                            .on('error', (err) => {
+                                updateStatusBox({
+                                    message: 'Swap failed: ' + err.message,
+                                    status: 'error'
+                                });
+                            });
+                    }
+                } catch (error) {
+                    console.error('Swap error:', error);
+                    updateStatusBox({
+                        message: 'Swap failed: ' + error.message,
+                        status: 'error'
+                    });
+                }
+            }
+
+            toggleInputs() {
+                const action = document.getElementById("action").value;
+                const inputs = ['addressInput', 'txHashInput', 'blockTimeInput', 'contractAddressInput', 'logInputs'];
+                inputs.forEach(id => document.getElementById(id).classList.remove('active'));
+
+                switch (action) {
+                    case 'balance':
+                    case 'txlist':
+                    case 'tokentx':
+                    case 'tokennfttx':
+                    case 'txlistinternal':
+                        document.getElementById('addressInput').classList.add('active');
+                        if (action === 'tokentx' || action === 'tokenbalance') {
+                            document.getElementById('contractAddressInput').classList.add('active');
+                        }
+                        break;
+                    case 'gettxreceiptstatus':
+                        document.getElementById('txHashInput').classList.add('active');
+                        break;
+                    case 'getblockbytime':
+                        document.getElementById('blockTimeInput').classList.add('active');
+                        break;
+                    case 'getabi':
+                    case 'tokensupply':
+                        document.getElementById('contractAddressInput').classList.add('active');
+                        break;
+                    case 'tokenbalance':
+                        document.getElementById('addressInput').classList.add('active');
+                        document.getElementById('contractAddressInput').classList.add('active');
+                        break;
+                    case 'getlogs':
+                        document.getElementById('logInputs').classList.add('active');
+                        break;
+                }
+            }
+
+            async searchExplorer() {
+                const action = document.getElementById("action").value;
+                if (!action) {
+                    updateStatusBox({ message: 'Please select an action!', status: 'error' });
+                    return;
+                }
+                const resultDiv = document.getElementById("result");
+                resultDiv.textContent = "Fetching...";
+                updateStatusBox({ message: 'Fetching explorer data...', status: 'pending' });
+                let url;
+                try {
+                    switch (action) {
+    case "balance":
+        url = `${this.BASE_URL}?module=account&action=balance&address=${document.getElementById("address").value}&tag=latest&apikey=${this.API_KEY}`;
+        break;
+    case "txlist":
+        url = `${this.BASE_URL}?module=account&action=txlist&address=${document.getElementById("address").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
+        break;
+    case "tokentx":
+        url = `${this.BASE_URL}?module=account&action=tokentx&address=${document.getElementById("address").value}&contractaddress=${document.getElementById("contractAddress").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
+        break;
+    case "tokennfttx":
+        url = `${this.BASE_URL}?module=account&action=tokennfttx&address=${document.getElementById("address").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
+        break;
+    case "txlistinternal":
+        url = `${this.BASE_URL}?module=account&action=txlistinternal&address=${document.getElementById("address").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
+        break;
+    case "gettxreceiptstatus":
+        url = `${this.BASE_URL}?module=transaction&action=gettxreceiptstatus&txhash=${document.getElementById("txHash").value}&apikey=${this.API_KEY}`;
+        break;
+    case "getblockbytime":
+        url = `${this.BASE_URL}?module=block&action=getblocknobytimestamp=${document.getElementById("blockTime").value}&closest=before&apikey=${this.API_KEY}`;
+        break;
+    case "getabi":
+        url = `${this.BASE_URL}?module=contract&action=getabi&address=${document.getElementById("contractAddress").value}&apikey=${this.API_KEY}`;
+        break;
+    case "tokensupply":
+        url = `${this.BASE_URL}?module=stats&action=tokensupply&contractaddress=${document.getElementById("contractAddress").value}&apikey=${this.API_KEY}`;
+        break;
+    case "tokenbalance":
+        url = `${this.BASE_URL}?module=account&action=tokenbalance&contractaddress=${document.getElementById("contractAddress").value}&address=${document.getElementById("address").value}&tag=latest&apikey=${this.API_KEY}`;
+        break;
+    case "gasoracle":
+        url = `${this.BASE_URL}?module=gastracker&action=gasoracle&apikey=${this.API_KEY}`;
+        break;
+    case "ethsupply":
+        url = `${this.BASE_URL}?module=stats&action=ethsupply&apikey=${this.API_KEY}`;
+        break;
+    case "ethprice":
+        url = `${this.BASE_URL}?module=stats&action=ethprice&apikey=${this.API_KEY}`;
+        break;
+    case "getlogs":
+        url = `${this.BASE_URL}?module=logs&action=getLogs&address=${document.getElementById("logAddress").value}&fromBlock=${document.getElementById("fromBlock").value}&toBlock=${document.getElementById("toBlock").value}&apikey=${this.API_KEY}`;
+        break;
+    default:
+        throw new Error("Invalid action");
+}
+const response = await fetch(url);
+if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+const data = await response.json();
+let formattedResult;
+if (data.status === "1" || action === "getabi") {
+    switch (action) {
+        case "balance":
+            formattedResult = `ETH Balance: ${(parseInt(data.result) / 1e18).toFixed(6)} ETH`;
+            break;
+        case "txlist":
+        case "tokentx":
+        case "tokennfttx":
+        case "txlistinternal":
+            formattedResult = "Recent Transactions:\n";
+            data.result.slice(0, 5).forEach((tx, i) => {
+                formattedResult += `${i + 1}. Hash: ${tx.hash}\n   Value: ${(parseInt(tx.value) / 1e18).toFixed(6)} ETH\n   Block: ${tx.blockNumber}\n\n`;
+            });
+            if (data.result.length > 5) formattedResult += `...and ${data.result.length - 5} more`;
+            break;
+        case "gettxreceiptstatus":
+            formattedResult = `Transaction Status: ${data.result.status === "1" ? "Success" : "Failed"}`;
+            break;
+        case "getblockbytime":
+            formattedResult = `Block Number: ${data.result}`;
+            break;
+        case "getabi":
+            formattedResult = `Contract ABI:\n${data.result.substring(0, 100)}... (truncated)`;
+            break;
+        case "tokensupply":
+            formattedResult = `Token Supply: ${(parseInt(data.result) / 1e18).toFixed(6)}`;
+            break;
+        case "tokenbalance":
+            formattedResult = `Token Balance: ${(parseInt(data.result) / 1e18).toFixed(6)}`;
+            break;
+        case "gasoracle":
+            formattedResult = `Gas Prices:\n- SafeLow: ${data.result.SafeGasPrice} Gwei\n- Propose: ${data.result.ProposeGasPrice} Gwei\n- Fast: ${data.result.FastGasPrice} Gwei`;
+            break;
+        case "ethsupply":
+            formattedResult = `Total ETH Supply: ${(parseInt(data.result) / 1e18).toFixed(2)} ETH`;
+            break;
+        case "ethprice":
+            formattedResult = `ETH Price: $${data.result.ethusd} USD`;
+            break;
+        case "getlogs":
+            formattedResult = "Event Logs:\n";
+            data.result.slice(0, 5).forEach((log, i) => {
+                formattedResult += `${i + 1}. Block: ${log.blockNumber}\n   Data: ${log.data.substring(0, 20)}...\n\n`;
+            });
+            if (data.result.length > 5) formattedResult += `...and ${data.result.length - 5} more`;
+            break;
+    }
+    updateStatusBox({ message: 'Explorer data fetched successfully', status: 'success' });
+} else {
+    formattedResult = `Error from Etherscan: ${data.message || "No data returned"}`;
+    updateStatusBox({
+        message: `Etherscan error: ${data.message || "No data returned"}`,
+        status: 'error'
+    });
+}
+resultDiv.textContent = formattedResult || "No result data available";
+} catch (error) {
+resultDiv.textContent = `Error: ${error.message}`;
+updateStatusBox({ message: `Explorer error: ${error.message}`, status: 'error' });
+}
+}
+
+async updateMoneyInfo() {
+if (!selectedWallet) return;
+const wallet = selectedWallet.address;
+try {
+    const moneyBalanceWei = await this.moneyContract.methods.balanceOf(wallet).call();
+    const moneyBalanceEther = this.web3.utils.fromWei(moneyBalanceWei, 'ether');
+    document.getElementById('myMoney').textContent = `${moneyBalanceEther} MONEY`;
+    this.updateTotalUSDValue();
+} catch (error) {
+    console.error('Error fetching $Money info:', error);
+    document.getElementById('myMoney').textContent = 'Error MONEY';
+}
+}
+
+updateMoneySlippage() {
+this.moneySlippageTolerance = parseFloat(document.getElementById('moneySlippageTolerance').value);
+}
+
+updateMoneyGasLimit() {
+this.moneyGasLimit = parseInt(document.getElementById('moneyGasLimit').value);
+}
+
+async executeMoneyAction() {
+if (!selectedWallet) {
+    updateStatusBox({ message: 'Please select a wallet first.', status: 'error' });
+    return;
+}
+const action = document.getElementById('moneyActionSelect').value;
+const amountInput = document.getElementById('moneyAmount').value.trim();
+const amountNum = parseFloat(amountInput);
+if (isNaN(amountNum) || amountNum <= 0 || /\de\+/.test(amountInput)) {
+    updateStatusBox({
+        message: 'Please enter a valid positive amount (no scientific notation).',
+        status: 'error'
+    });
+    return;
+}
+
+const BN = this.web3.utils.toBN;
+const amount = BN(this.web3.utils.toWei(amountInput, 'ether'));
+const directionText = action === 'buy' ? 'ETH → $Money' : '$Money → ETH';
+
+updateStatusBox({
+    message: `${action === 'buy' ? 'Buying' : 'Selling'} $Money...`,
+    status: 'pending',
+    quantity: amountInput,
+    direction: directionText
+});
+
+try {
+    const ethBalanceWei = await this.web3.eth.getBalance(selectedWallet.address);
+    const ethBalanceEther = this.web3.utils.fromWei(ethBalanceWei, 'ether');
+    const gasPrice = await this.getCurrentGasPrice();
+    const estimatedGasCost = this.web3.utils.fromWei(BN(this.moneyGasLimit).mul(gasPrice), 'ether');
+
+    if (action === 'buy') {
+        if (parseFloat(ethBalanceEther) < (parseFloat(amountInput) + parseFloat(estimatedGasCost))) {
+            updateStatusBox({
+                message: `Insufficient ETH balance. Need at least ${(parseFloat(amountInput) + parseFloat(estimatedGasCost)).toFixed(6)} ETH.`,
+                status: 'error'
+            });
+            return;
+        }
+        const path = ["0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", this.moneyContractAddress];
+        const amounts = await this.uniswapRouter.methods.getAmountsOut(amount, path).call();
+        if (!amounts || amounts.length < 2) {
+            updateStatusBox({
+                message: 'Invalid token or insufficient liquidity.',
+                status: 'error'
+            });
+            return;
+        }
+        const expectedOutput = amounts[1];
+        const slippage = 1 - (this.moneySlippageTolerance / 100);
+        const amountOutMin = BN(expectedOutput).muln(slippage * 1000).divn(1000).toString();
+        const tx = {
+            from: selectedWallet.address,
+            to: this.uniswapRouterAddress,
+            data: this.uniswapRouter.methods.swapExactETHForTokens(amountOutMin, path, selectedWallet.address, Math.floor(Date.now() / 1000) + 120).encodeABI(),
+            value: amount,
+            gas: this.moneyGasLimit,
+            gasPrice: gasPrice
+        };
+        const initialBalanceWei = await this.moneyContract.methods.balanceOf(selectedWallet.address).call();
+        const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+        this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+            .on('transactionHash', (hash) => {
+                updateStatusBox({
+                    message: 'Transaction sent...',
+                    status: 'pending',
+                    txHash: hash,
+                    direction: directionText
+                });
+            })
+            .on('receipt', async (receipt) => {
+                const finalBalanceWei = await this.moneyContract.methods.balanceOf(selectedWallet.address).call();
+                const moneyReceivedWei = BN(finalBalanceWei).sub(BN(initialBalanceWei));
+                const moneyReceived = this.web3.utils.fromWei(moneyReceivedWei.toString(), 'ether');
+                updateStatusBox({
+                    message: `Successfully bought ${moneyReceived} $Money`,
+                    status: 'success',
+                    quantity: moneyReceived,
+                    txHash: receipt.transactionHash,
+                    direction: directionText,
+                    earnedMoney: (Math.random() * (0.1 - 0.01) + 0.01).toFixed(2)
+                });
+                this.updateMoneyInfo();
+                this.fetchBalance();
+            })
+            .on('error', (err) => {
+                updateStatusBox({
+                    message: 'Transaction failed: ' + err.message,
+                    status: 'error'
+                });
+            });
+    } else if (action === 'sell') {
+        const moneyBalanceWei = await this.moneyContract.methods.balanceOf(selectedWallet.address).call();
+        if (BN(moneyBalanceWei).lt(amount)) {
+            updateStatusBox({
+                message: `Insufficient $Money balance. You have ${this.web3.utils.fromWei(moneyBalanceWei, 'ether')} $Money.`,
+                status: 'error'
+            });
+            return;
+        }
+        const approveTx = {
+            from: selectedWallet.address,
+            to: this.moneyContractAddress,
+            data: this.moneyContract.methods.approve(this.uniswapRouterAddress, amount).encodeABI(),
+            gas: 50000,
+            gasPrice: gasPrice
+        };
+        const signedApproveTx = await this.web3.eth.accounts.signTransaction(approveTx, selectedWallet.privateKey);
+        await this.web3.eth.sendSignedTransaction(signedApproveTx.rawTransaction);
+        const path = [this.moneyContractAddress, "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"];
+        const amounts = await this.uniswapRouter.methods.getAmountsOut(amount, path).call();
+        if (!amounts || amounts.length < 2) {
+            updateStatusBox({
+                message: 'Invalid token or insufficient liquidity.',
+                status: 'error'
+            });
+            return;
+        }
+        const expectedOutput = amounts[1];
+        const slippage = 1 - (this.moneySlippageTolerance / 100);
+        const amountOutMin = BN(expectedOutput).muln(slippage * 1000).divn(1000).toString();
+        const tx = {
+            from: selectedWallet.address,
+            to: this.uniswapRouterAddress,
+            data: this.uniswapRouter.methods.swapExactTokensForETH(amount, amountOutMin, path, selectedWallet.address, Math.floor(Date.now() / 1000) + 120).encodeABI(),
+            gas: this.moneyGasLimit,
+            gasPrice: gasPrice
+        };
+        const initialBalanceWei = BN(await this.web3.eth.getBalance(selectedWallet.address));
+        const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+        this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+            .on('transactionHash', (hash) => {
+                updateStatusBox({
+                    message: 'Transaction sent...',
+                    status: 'pending',
+                    txHash: hash,
+                    direction: directionText
+                });
+            })
+            .on('receipt', async (receipt) => {
+                const finalBalanceWei = BN(await this.web3.eth.getBalance(selectedWallet.address));
+                const ethReceivedWei = finalBalanceWei.sub(initialBalanceWei);
+                const ethReceivedEther = this.web3.utils.fromWei(ethReceivedWei.toString(), 'ether');
+                updateStatusBox({
+                    message: `Successfully sold for ${ethReceivedEther} ETH`,
+                    status: 'success',
+                    quantity: ethReceivedEther,
+                    txHash: receipt.transactionHash,
+                    direction: directionText
+                });
+                this.updateMoneyInfo();
+                this.fetchBalance();
+            })
+            .on('error', (err) => {
+                updateStatusBox({
+                    message: 'Transaction failed: ' + err.message,
+                    status: 'error'
+                });
+            });
+    }
+} catch (error) {
+    console.error('Money action error:', error);
+    updateStatusBox({
+        message: 'Transaction failed: ' + error.message,
+        status: 'error'
+    });
+}
+}
+
+importCoin() {
+const contractAddress = document.getElementById('coinContractAddress').value.trim();
+if (!contractAddress || !this.web3.utils.isAddress(contractAddress)) {
+    updateStatusBox({ message: 'Please enter a valid contract address.', status: 'error' });
+    return;
+}
+if (this.coinList.some(coin => coin.address === contractAddress)) {
+    updateStatusBox({ message: 'This coin is already imported.', status: 'error' });
+    return;
+}
+this.coinList.push({ address: contractAddress });
+this.saveCoinsToStorage();
+this.displayCoinList();
+document.getElementById('coinContractAddress').value = '';
+updateStatusBox({ message: 'Coin imported successfully.', status: 'success' });
+this.updateTotalUSDValue();
+}
+
+saveCoinsToStorage() {
+Storage.set('importedCoins', this.coinList);
+}
+
+loadCoinsFromStorage() {
+this.coinList = Storage.get('importedCoins');
+this.displayCoinList();
+}
+
+async displayCoinList() {
+const coinListDiv = document.getElementById('coinList');
+if (this.coinList.length === 0) {
+    coinListDiv.textContent = 'No coins imported yet.';
+    return;
+}
+coinListDiv.innerHTML = '<h4>Imported Coins:</h4>';
+const ul = document.createElement('ul');
+for (const coin of this.coinList) {
+    const li = document.createElement('li');
+    try {
+        const tokenContract = new this.web3.eth.Contract(this.erc20ABI, coin.address);
+        const balanceWei = await tokenContract.methods.balanceOf(selectedWallet.address).call();
+        const decimals = await tokenContract.methods.decimals().call();
+        const balance = this.web3.utils.fromWei(balanceWei, 'ether');
+        li.innerHTML = `<span class="wallet-address"><span>${coin.address.slice(0, 5)}</span>${coin.address.slice(5)}</span> - Balance: ${balance}`;
+    } catch (error) {
+        li.textContent = `${coin.address} - Error fetching balance`;
+    }
+    ul.appendChild(li);
+}
+coinListDiv.appendChild(ul);
+this.updateTotalUSDValue();
+}
+
+updateConnectedWalletAddress() {
+const addressDisplay = document.getElementById('connectedWalletAddress');
+const addressText = document.getElementById('connectedAddressText');
+if (selectedWallet) {
+    addressDisplay.style.display = 'flex';
+    addressText.textContent = selectedWallet.address;
+} else {
+    addressDisplay.style.display = 'none';
+}
+}
+
+copyWalletAddress() {
+if (!selectedWallet) return;
+navigator.clipboard.writeText(selectedWallet.address).then(() => {
+    const copyBtn = document.getElementById('copyAddressBtn');
+    copyBtn.textContent = 'Copied!';
+    setTimeout(() => {
+        copyBtn.textContent = 'Copy';
+    }, 2000);
+    updateStatusBox({ message: 'Wallet address copied.', status: 'success' });
+}).catch(err => {
+    console.error('Failed to copy address:', err);
+    updateStatusBox({ message: 'Failed to copy address.', status: 'error' });
+});
+}
+
+exportWallets() {
+if (this.wallets.length === 0) {
+    updateStatusBox({ message: 'No wallets to export.', status: 'error' });
+    return;
+}
+const data = JSON.stringify(this.wallets, null, 2);
+const blob = new Blob([data], { type: 'application/json' });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = 'moneyfund_wallets.json';
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+URL.revokeObjectURL(url);
+updateStatusBox({ message: 'Wallets exported successfully.', status: 'success' });
+}
+
+importWallets(event) {
+const file = event.target.files[0];
+if (!file) {
+    updateStatusBox({ message: 'No file selected.', status: 'error' });
+    return;
+}
+const reader = new FileReader();
+reader.onload = (e) => {
+    try {
+        const importedWallets = JSON.parse(e.target.result);
+        if (!Array.isArray(importedWallets)) {
+            throw new Error('Invalid wallet data format.');
+        }
+        importedWallets.forEach(wallet => {
+            if (!wallet.address || !wallet.privateKey || !wallet.type) {
+                throw new Error('Invalid wallet data structure.');
+            }
+            if (!this.web3.utils.isAddress(wallet.address)) {
+                throw new Error(`Invalid address: ${wallet.address}`);
+            }
+        });
+        const existingAddresses = new Set(this.wallets.map(w => w.address.toLowerCase()));
+        const newWallets = importedWallets.filter(wallet => !existingAddresses.has(wallet.address.toLowerCase()));
+        this.wallets = [...this.wallets, ...newWallets];
+        this.saveWalletsToBrowser();
+        this.updateWalletSelector();
+        updateStatusBox({ message: 'Wallets imported successfully.', status: 'success' });
+        document.getElementById('importWalletFile').value = '';
+    } catch (error) {
+        console.error('Error importing wallets:', error);
+        updateStatusBox({ message: `Failed to import wallets: ${error.message}`, status: 'error' });
+    }
+};
+reader.readAsText(file);
+}
+}
+
+const walletInterface = new WalletInterface();
+walletInterface.init();
+</script>
+</body>
+</html>
