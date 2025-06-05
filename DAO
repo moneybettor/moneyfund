@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoneyFund DAO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.7.4/dist/web3.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #121C2D 0%, #1A2639 100%);
+      color: #E2E8F0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #FFFFFF;
+      margin-bottom: 24px;
+      font-size: 2.8em;
+      font-weight: 600;
+    }
+
+    .section {
+      margin: 20px 0;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .section h2 {
+      color: #FFFFFF;
+      margin-bottom: 18px;
+      font-size: 1.4em;
+    }
+
+    select, input, button {
+      padding: 12px;
+      margin: 6px;
+      font-size: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #F1F5F9;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    select:hover, input:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    input::placeholder {
+      color: #A0AEC0;
+      opacity: 0.8;
+    }
+
+    button {
+      background: #10B981;
+      cursor: pointer;
+      border: none;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    button:hover {
+      background: #059669;
+    }
+
+    button:disabled {
+      background: rgba(255, 255, 255, 0.1);
+      cursor: not-allowed;
+    }
+
+    #log {
+      margin-top: 20px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 14px;
+      text-align: left;
+    }
+
+    .log-entry {
+      margin-bottom: 10px;
+    }
+
+    .log-entry p {
+      margin: 2px 0;
+      color: #E2E8F0;
+    }
+
+    .spinner {
+      display: none;
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(255, 255, 255, 0.12);
+      border-top: 4px solid #10B981;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 12px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .table-container {
+      max-width: 100%;
+      max-height: 300px; /* Added for scrollable proposals */
+      overflow-y: auto; /* Vertical scrolling */
+      overflow-x: auto; /* Keep horizontal scrolling */
+    }
+
+    #proposalsTable {
+      width: 100%;
+      min-width: 800px;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+      table-layout: fixed;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+    }
+
+    #proposalsTable th,
+    #proposalsTable td {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 6px 8px;
+      text-align: center;
+      word-break: break-word;
+      color: #F1F5F9;
+    }
+
+    #proposalsTable th {
+      background: rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    #proposalsTable td.address {
+      max-width: 90px;
+    }
+
+    #proposalsTable .vote-buttons button {
+      margin: 2px;
+      padding: 4px 6px;
+      font-size: 11px;
+      background: #3B82F6;
+      border-radius: 6px;
+    }
+
+    #proposalsTable .vote-buttons button:hover {
+      background: #2563EB;
+    }
+
+    #proposalsTable th:nth-child(1), #proposalsTable td:nth-child(1) { width: 5%; }
+    #proposalsTable th:nth-child(2), #proposalsTable td:nth-child(2) { width: 15%; }
+    #proposalsTable th:nth-child(3), #proposalsTable td:nth-child(3) { width: 15%; }
+    #proposalsTable th:nth-child(4), #proposalsTable td:nth-child(4) { width: 10%; }
+    #proposalsTable th:nth-child(5), #proposalsTable td:nth-child(5) { width: 10%; }
+    #proposalsTable th:nth-child(6), #proposalsTable td:nth-child(6) { width: 10%; }
+    #proposalsTable th:nth-child(7), #proposalsTable td:nth-child(7) { width: 10%; }
+    #proposalsTable th:nth-child(8), #proposalsTable td:nth-child(8) { width: 10%; }
+    #proposalsTable th:nth-child(9), #proposalsTable td:nth-child(9) { width: 7%; }
+    #proposalsTable th:nth-child(10), #proposalsTable td:nth-child(10) { width: 8%; }
+
+    #membersList {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    #membersList p {
+      color: #F1F5F9;
+    }
+  </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>MoneyFund DAO</h1>
+        <select id="walletSelector" onchange="daoInterface.selectWallet(this.value)">
+            <option value="">-- Select Wallet --</option>
+        </select>
+        <p id="walletAddress"></p>
+        <p id="memberStatus">Member Status: Loading...</p>
+        <button id="joinDaoBtn" onclick="daoInterface.joinDAO()">Join DAO</button>
+        <p id="tokenBalance">Token Balance: Loading...</p>
+
+        <div class="section">
+            <h2>Contract Balances</h2>
+            <p>ETH Balance: <span id="ethBalance">0</span> ETH</p>
+            <p>MONEY Balance: <span id="tokenBalanceDisplay">0</span> MONEY</p>
+            
+            <input type="number" id="depositEthAmount" placeholder="ETH Amount" min="0" step="0.01">
+            <button id="depositEthBtn" onclick="daoInterface.depositETH()">Deposit ETH</button>
+            <br>
+            <input type="number" id="depositTokenAmount" placeholder="Token Amount" min="0" step="1">
+            <button id="depositTokenBtn" onclick="daoInterface.depositToken()">Deposit MONEY</button>
+        </div>
+
+        <div class="section">
+            <h2>Proposals</h2>
+            <select id="proposalType" onchange="daoInterface.updateProposalInputs()">
+                <option value="0">Withdraw ETH</option>
+                <option value="1">Withdraw Token</option>
+                <option value="2">Add Member</option>
+                <option value="3">Remove Member</option>
+                <option value="4">Swap ETH for Tokens</option>
+                <option value="5">Swap Tokens for ETH</option>
+            </select>
+            <input type="text" id="proposalTarget" placeholder="Target Address">
+            <input type="number" id="proposalAmount" placeholder="Amount" min="0" step="0.01">
+            <input type="number" id="proposalAmountOutMin" placeholder="Min Output (Swaps Only)" min="0" step="0.01" style="display: none;">
+            <button id="createProposalBtn" onclick="daoInterface.createProposal()">Create Proposal</button>
+            <div class="table-container">
+                <table id="proposalsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Type</th>
+                            <th>Target</th>
+                            <th>Amount</th>
+                            <th>Min Out</th>
+                            <th>Yes Weight</th>
+                            <th>No Weight</th>
+                            <th>End Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proposalsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Members</h2>
+            <div id="membersList"></div>
+        </div>
+
+        <div id="spinner" class="spinner"></div>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        let selectedWallet = null;
+
+        function logMessage(message) {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const time = new Date().toLocaleTimeString();
+            const p = document.createElement('p');
+            p.textContent = `[${time}] ${message}`;
+            entry.appendChild(p);
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function showSpinner() {
+            document.getElementById('spinner').style.display = 'block';
+        }
+
+        function hideSpinner() {
+            document.getElementById('spinner').style.display = 'none';
+        }
+
+        class DAOInterface {
+            constructor() {
+                this.web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                this.contractAddress = "0x8cf5e3797aabb62698f9c4a3f0234667fd981754";
+                this.abi = [
+    {
+        "inputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "proposalIds",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "bool[]",
+                "name": "voteChoices",
+                "type": "bool[]"
+            }
+        ],
+        "name": "batchVote",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "enum DAOMultisig.ProposalType",
+                "name": "proposalType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "address",
+                "name": "target",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amountOutMin",
+                "type": "uint256"
+            }
+        ],
+        "name": "createProposal",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnableInvalidOwner",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "OwnableUnauthorizedAccount",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "DepositedETH",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "DepositedToken",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "depositETH",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "tokenAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "depositToken",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "stopped",
+                "type": "bool"
+            }
+        ],
+        "name": "EmergencyStopTriggered",
+        "type": "event"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            }
+        ],
+        "name": "executeProposal",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "joinDAO",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "member",
+                "type": "address"
+            }
+        ],
+        "name": "MemberAdded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "member",
+                "type": "address"
+            }
+        ],
+        "name": "MemberRemoved",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "proposer",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DAOMultisig.ProposalType",
+                "name": "proposalType",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "target",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amountOutMin",
+                "type": "uint256"
+            }
+        ],
+        "name": "ProposalCreated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "enum DAOMultisig.ProposalType",
+                "name": "proposalType",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "target",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "passed",
+                "type": "bool"
+            }
+        ],
+        "name": "ProposalExecuted",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bool",
+                "name": "stop",
+                "type": "bool"
+            }
+        ],
+        "name": "triggerEmergencyStop",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "support",
+                "type": "bool"
+            }
+        ],
+        "name": "vote",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "proposalId",
+                "type": "uint256"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "voter",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "vote",
+                "type": "bool"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "weight",
+                "type": "uint256"
+            }
+        ],
+        "name": "Voted",
+        "type": "event"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "receive"
+    },
+    {
+        "inputs": [],
+        "name": "emergencyStop",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getETHBalance",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getMembers",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "amountIn",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address[]",
+                "name": "path",
+                "type": "address[]"
+            }
+        ],
+        "name": "getSwapAmountOutMin",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "tokenAddress",
+                "type": "address"
+            }
+        ],
+        "name": "getTokenBalance",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "MAX_PROPOSALS_PER_DAY",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "memberCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "memberList",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "name": "members",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "MINIMUM_TOKEN_BALANCE",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "ONE_DAY",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "proposalCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "proposals",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "proposer",
+                "type": "address"
+            },
+            {
+                "internalType": "enum DAOMultisig.ProposalType",
+                "name": "proposalType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "address",
+                "name": "target",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "yesWeight",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "noWeight",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "endTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "amountOutMin",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "executed",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "proposalsPerDay",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "token",
+        "outputs": [
+            {
+                "internalType": "contract IERC20",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "TOKEN_ADDRESS",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "TOTAL_TOKEN_SUPPLY",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "UNISWAP_ROUTER_ADDRESS",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "uniswapRouter",
+        "outputs": [
+            {
+                "internalType": "contract IUniswapV2Router",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "VOTING_PERIOD",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+];
+                this.contract = new this.web3.eth.Contract(this.abi, this.contractAddress);
+                this.tokenAddress = "0x100DB67F41A2dF3c32cC7c0955694b98339B7311";
+                this.tokenAbi = [
+                    {"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+                    {"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+                    {"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"}
+                ];
+                this.tokenContract = new this.web3.eth.Contract(this.tokenAbi, this.tokenAddress);
+                this.wallets = [];
+                this.gasLimit = 500000;
+                this.proposalTypes = ["Withdraw ETH", "Withdraw Token", "Add Member", "Remove Member", "Swap ETH for ERC20", "Swap ERC20 for ETH"];
+            }
+
+            async init() {
+                this.loadWalletsFromStorage();
+                const networkId = await this.web3.eth.net.getId();
+                logMessage(`Connected to network ID: ${networkId} (1 = Mainnet)`);
+                await this.checkTokenDecimals();
+                await this.refreshBalances();
+                await this.refreshMembers();
+                await this.refreshProposals();
+                this.updateProposalInputs();
+                if (selectedWallet) {
+                    await this.checkMemberStatus();
+                    await this.checkTokenBalance();
+                }
+            }
+
+            async checkTokenDecimals() {
+                try {
+                    const decimals = await this.tokenContract.methods.decimals().call();
+                    logMessage(`Token at ${this.tokenAddress} has ${decimals} decimals`);
+                } catch (error) {
+                    logMessage(`Error fetching token decimals: ${error.message}`);
+                }
+            }
+
+            loadWalletsFromStorage() {
+                this.wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+                const selector = document.getElementById('walletSelector');
+                selector.innerHTML = '<option value="">-- Select Wallet --</option>';
+                this.wallets.forEach((wallet, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)} (${wallet.type})`;
+                    selector.appendChild(option);
+                });
+                if (this.wallets.length > 0) {
+                    selectedWallet = this.wallets[0];
+                    selector.value = 0;
+                    this.updateWalletDisplay();
+                }
+            }
+
+            async selectWallet(index) {
+                const idx = parseInt(index);
+                if (idx >= 0 && idx < this.wallets.length) {
+                    selectedWallet = this.wallets[idx];
+                    this.updateWalletDisplay();
+                    await this.checkMemberStatus();
+                    await this.checkTokenBalance();
+                    await this.refreshMembers();
+                    await this.refreshProposals();
+                } else {
+                    selectedWallet = null;
+                    document.getElementById('walletAddress').textContent = 'Not Connected';
+                    document.getElementById('memberStatus').textContent = 'Member Status: Not Connected';
+                    document.getElementById('tokenBalance').textContent = 'Token Balance: Not Connected';
+                }
+            }
+
+            updateWalletDisplay() {
+                if (selectedWallet) {
+                    document.getElementById('walletAddress').textContent
+                }
+            }
+
+            async checkMemberStatus() {
+                if (!selectedWallet) {
+                    document.getElementById('memberStatus').textContent = 'Member Status: Not Connected';
+                    return;
+                }
+                try {
+                    const isMember = await this.contract.methods.members(selectedWallet.address).call({ from: selectedWallet.address });
+                    document.getElementById('memberStatus').textContent = `Member Status: ${isMember ? 'Yes' : 'No'}`;
+                    document.getElementById('joinDaoBtn').style.display = isMember ? 'none' : 'inline-block';
+                } catch (error) {
+                    logMessage(`Error checking member status: ${error.message}`);
+                    document.getElementById('memberStatus').textContent = 'Member Status: Error';
+                }
+            }
+
+            async checkTokenBalance() {
+                if (!selectedWallet) {
+                    document.getElementById('tokenBalance').textContent = 'Token Balance: Not Connected';
+                    return;
+                }
+                try {
+                    const balance = await this.tokenContract.methods.balanceOf(selectedWallet.address).call();
+                    const balanceEth = this.web3.utils.fromWei(balance, "ether");
+                    document.getElementById('tokenBalance').textContent = `Token Balance: ${balanceEth} $Money`;
+                } catch (error) {
+                    logMessage(`Error checking token balance: ${error.message}`);
+                    document.getElementById('tokenBalance').textContent = 'Token Balance: Error';
+                }
+            }
+
+            async refreshBalances() {
+                if (!selectedWallet) {
+                    logMessage("Please select a wallet to refresh balances");
+                    return;
+                }
+                try {
+                    const ethBalance = await this.contract.methods.getETHBalance().call({ from: selectedWallet.address });
+                    const tokenBalance = await this.contract.methods.getTokenBalance(this.tokenAddress).call({ from: selectedWallet.address });
+                    document.getElementById('ethBalance').textContent = this.web3.utils.fromWei(ethBalance, "ether");
+                    document.getElementById('tokenBalanceDisplay').textContent = this.web3.utils.fromWei(tokenBalance, "ether");
+                } catch (error) {
+                    logMessage(`Error refreshing balances: ${error.message}`);
+                }
+            }
+
+            async refreshMembers() {
+                if (!selectedWallet) {
+                    logMessage("Please select a wallet to refresh members");
+                    return;
+                }
+                try {
+                    const members = await this.contract.methods.getMembers().call({ from: selectedWallet.address });
+                    const membersList = document.getElementById('membersList');
+                    membersList.innerHTML = members.map(member => `<p>${member}</p>`).join('');
+                } catch (error) {
+                    logMessage(`Error refreshing members: ${error.message}`);
+                }
+            }
+
+            async refreshProposals() {
+                const proposalsBody = document.getElementById('proposalsBody');
+                proposalsBody.innerHTML = `<tr><td colspan="10">Loading...</td></tr>`;
+
+                if (!selectedWallet) {
+                    proposalsBody.innerHTML = `<tr><td colspan="10">Select wallet to view proposals</td></tr>`;
+                    return;
+                }
+
+                try {
+                    const fromAddr = selectedWallet.address;
+                    const proposalCount = await this.contract.methods.proposalCount().call({ from: fromAddr });
+                    const proposalCountNum = Number(proposalCount);
+
+                    if (proposalCountNum === 0) {
+                        proposalsBody.innerHTML = `<tr><td colspan="10">No proposals found.</td></tr>`;
+                        return;
+                    }
+
+                    const now = Math.floor(Date.now() / 1000);
+                    const proposalPromises = [];
+                    for (let i = 1; i <= proposalCountNum; i++) {
+                        proposalPromises.push(
+                            this.contract.methods.proposals(i).call({ from: fromAddr })
+                                .catch(err => {
+                                    logMessage(`Failed to fetch proposal ${i}: ${err.message}`);
+                                    return null;
+                                })
+                        );
+                    }
+
+                    const proposals = await Promise.all(proposalPromises);
+                    proposalsBody.innerHTML = '';
+
+                    const validProposals = proposals.filter(p => p && p.id && Number(p.id) > 0);
+
+                    if (validProposals.length === 0) {
+                        proposalsBody.innerHTML = `<tr><td colspan="10">No valid proposals loaded.</td></tr>`;
+                        return;
+                    }
+
+                    validProposals.forEach((proposal) => {
+                        const proposalId = Number(proposal.id);
+                        const row = document.createElement('tr');
+                        const endTime = parseInt(proposal.endTime);
+                        const canVote = !proposal.executed && now <= endTime;
+                        const canExecute = !proposal.executed && now > endTime;
+                        const decimals = this.tokenDecimals || 18;
+
+                        const yesWeightFormatted = parseFloat(this.web3.utils.fromWei(proposal.yesWeight || '0', decimals === 18 ? 'ether' : 'mwei')).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+                        const noWeightFormatted = parseFloat(this.web3.utils.fromWei(proposal.noWeight || '0', decimals === 18 ? 'ether' : 'mwei')).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+
+                        const amountFormatted = parseFloat(this.web3.utils.fromWei(proposal.amount || '0', "ether")).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+                        const amountOutMinFormatted = parseFloat(this.web3.utils.fromWei(proposal.amountOutMin || '0', "ether")).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+
+                        const typeText = this.proposalTypes[Number(proposal.proposalType)] || `Unknown (${proposal.proposalType})`;
+                        let statusText = proposal.executed ? 'Executed' : (now > endTime ? 'Ended' : 'Active');
+
+                        const endDate = new Date(endTime * 1000);
+                        const displayEndDate = endDate.toLocaleDateString() + ' ' + endDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                        row.innerHTML = `
+                            <td>${proposalId}</td>
+                            <td title="${typeText}">${typeText}</td>
+                            <td class="address" title="${proposal.target}">${proposal.target.slice(0,6)}...${proposal.target.slice(-4)}</td>
+                            <td>${amountFormatted}</td>
+                            <td>${amountOutMinFormatted}</td>
+                            <td>${yesWeightFormatted}</td>
+                            <td>${noWeightFormatted}</td>
+                            <td title="${endDate.toLocaleString()}">${displayEndDate}</td>
+                            <td>${statusText}</td>
+                            <td>
+                                <div class="vote-buttons">
+                                    ${canVote ? `<button onclick="daoInterface.vote(${proposalId}, true)" title="Vote Yes">Yes</button>` : ''}
+                                    ${canVote ? `<button onclick="daoInterface.vote(${proposalId}, false)" title="Vote No">No</button>` : ''}
+                                    ${canExecute ? `<button onclick="daoInterface.executeProposal(${proposalId})" title="Execute Proposal">Execute</button>` : ''}
+                                    ${!canVote && !canExecute && !proposal.executed ? 'Ended' : ''}
+                                    ${proposal.executed ? '-' : ''}
+                                </div>
+                            </td>`;
+                        proposalsBody.appendChild(row);
+                    });
+
+                } catch (error) {
+                    logMessage(`Error refreshing proposals: ${error.message}`);
+                    console.error("Proposal Refresh Error:", error);
+                    proposalsBody.innerHTML = `<tr><td colspan="10">Error loading proposals</td></tr>`;
+                }
+            }
+
+            updateProposalInputs() {
+                const proposalType = document.getElementById('proposalType').value;
+                const targetInput = document.getElementById('proposalTarget');
+                const amountInput = document.getElementById('proposalAmount');
+                const amountOutMinInput = document.getElementById('proposalAmountOutMin');
+
+                if (proposalType == "0") { // Withdraw ETH
+                    targetInput.placeholder = "Recipient Address";
+                    amountInput.placeholder = "Amount (ETH)";
+                    amountInput.style.display = 'inline-block';
+                    amountOutMinInput銈广偪銈ゃ儷.display = 'none';
+                } else if (proposalType == "1") { // Withdraw Token
+                    targetInput.placeholder = "Token Address";
+                    amountInput.placeholder = "Amount (Tokens)";
+                    amountInput.style.display = 'inline-block';
+                    amountOutMinInput.style.display = 'none';
+                } else if (proposalType == "2") { // Add Member
+                    targetInput.placeholder = "Member Address to Add";
+                    amountInput.style.display = 'none';
+                    amountOutMinInput.style.display = 'none';
+                } else if (proposalType == "3") { // Remove Member
+                    targetInput.placeholder = "Member Address to Remove";
+                    amountInput.style.display = 'none';
+                    amountOutMinInput.style.display = 'none';
+                } else if (proposalType == "4") { // Swap ETH for ERC20
+                    targetInput.placeholder = "ERC20 Token Address to Receive";
+                    amountInput.placeholder = "ETH Amount to Swap";
+                    amountInput.style.display = 'inline-block';
+                    amountOutMinInput.placeholder = "Min Tokens Out";
+                    amountOutMinInput.style.display = 'inline-block';
+                } else if (proposalType == "5") { // Swap ERC20 for ETH
+                    targetInput.placeholder = "ERC20 Token Address to Swap";
+                    amountInput.placeholder = "Token Amount to Swap";
+                    amountInput.style.display = 'inline-block';
+                    amountOutMinInput.placeholder = "Min ETH Out";
+                    amountOutMinInput.style.display = 'inline-block';
+                }
+            }
+
+            async joinDAO() {
+                if (!selectedWallet || selectedWallet.isMetaMask) {
+                    logMessage("DAO Multisig requires a wallet with a private key.");
+                    return;
+                }
+                showSpinner();
+                document.getElementById("joinDaoBtn").disabled = true;
+                try {
+                    const tx = {
+                        from: selectedWallet.address,
+                        to: this.contractAddress,
+                        data: this.contract.methods.joinDAO().encodeABI(),
+                        gas: this.gasLimit,
+                        gasPrice: await this.web3.eth.getGasPrice()
+                    };
+                    const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                    const txHash = await this.sendTransaction(signedTx);
+                    logMessage(`Join DAO transaction sent: ${txHash}`);
+                    await this.checkMemberStatus();
+                    await this.refreshMembers();
+                } catch (error) {
+                    logMessage(`Error joining DAO: ${error.message}`);
+                } finally {
+                    hideSpinner();
+                    document.getElementById("joinDaoBtn").disabled = false;
+                }
+            }
+
+            async depositETH() {
+                if (!selectedWallet || selectedWallet.isMetaMask) {
+                    logMessage("DAO Multisig requires a wallet with a private key.");
+                    return;
+                }
+                const amount = document.getElementById("depositEthAmount").value;
+                if (!amount || amount <= 0) {
+                    logMessage("Enter a valid ETH amount!");
+                    return;
+                }
+                showSpinner();
+                document.getElementById("depositEthBtn").disabled = true;
+                try {
+                    const amountWei = this.web3.utils.toWei(amount, "ether");
+                    const tx = {
+                        from: selectedWallet.address,
+                        to: this.contractAddress,
+                        value: amountWei,
+                        data: this.contract.methods.depositETH().encodeABI(),
+                        gas: this.gasLimit,
+                        gasPrice: await this.web3.eth.getGasPrice()
+                    };
+                    const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                    const txHash = await this.sendTransaction(signedTx);
+                    logMessage(`Deposit ETH transaction sent: ${txHash}`);
+                    await this.refreshBalances();
+                } catch (error) {
+                    logMessage(`Error depositing ETH: ${error.message}`);
+                } finally {
+                    hideSpinner();
+                    document.getElementById("depositEthBtn").disabled = false;
+                }
+            }
+
+            async depositToken() {
+                if (!selectedWallet || selectedWallet.isMetaMask) {
+                    logMessage("DAO Multisig requires a wallet with a private key.");
+                    return;
+                }
+                const amount = document.getElementById("depositTokenAmount").value;
+                if (!amount || amount <= 0) {
+                    logMessage("Enter a valid token amount!");
+                    return;
+                }
+                showSpinner();
+                document.getElementById("depositTokenBtn").disabled = true;
+                try {
+                    const amountWei = this.web3.utils.toWei(amount, "ether");
+                    const approveTx = {
+                        from: selectedWallet.address,
+                        to: this.tokenAddress,
+                        data: this.tokenContract.methods.approve(this.contractAddress, amountWei).encodeABI(),
+                        gas: this.gasLimit,
+                        gasPrice: await this.web3.eth.getGasPrice()
+                    };
+                    const signedApproveTx = await this.web3.eth.accounts.signTransaction(approveTx, selectedWallet.privateKey);
+                    const approveTxHash = await this.sendTransaction(signedApproveTx);
+                    logMessage(`Approval transaction sent: ${approveTxHash}`);
+
+                    const depositTx = {
+                        from: selectedWallet.address,
+                        to: this.contractAddress,
+                        data: this.contract.methods.depositToken(this.tokenAddress, amountWei).encodeABI(),
+                        gas: this.gasLimit,
+                        gasPrice: await this.web3.eth.getGasPrice()
+                    };
+                    const signedDepositTx = await this.web3.eth.accounts.signTransaction(depositTx, selectedWallet.privateKey);
+                    const depositTxHash = await this.sendTransaction(signedDepositTx);
+                    logMessage(`Deposit token transaction sent: ${depositTxHash}`);
+                    await this.refreshBalances();
+                } catch (error) {
+                    logMessage(`Error depositing tokens: ${error.message}`);
+                } finally {
+                    hideSpinner();
+                    document.getElementById("depositTokenBtn").disabled = false;
+                }
+            }
+
+            async createProposal() {
+                if (!selectedWallet || selectedWallet.isMetaMask) {
+                    logMessage("DAO Multisig requires a wallet with a private key.");
+                    return;
+                }
+                const proposalType = document.getElementById("proposalType").value;
+                const target = document.getElementById("proposalTarget").value;
+                const amount = document.getElementById("proposalAmount").value;
+                const amountOutMin = document.getElementById("proposalAmountOutMin").value || "0";
+
+                if (!this.web3.utils.isAddress(target)) {
+                    logMessage("Enter a valid target address!");
+                    return;
+                }
+
+                let amountWei = "0";
+                let amountOutMinWei = this.web3.utils.toWei(amountOutMin, "ether");
+                if (proposalType == "0" || proposalType == "1" || proposalType == "4" || proposalType == "5") {
+                    if (!amount || amount <= 0) {
+                        logMessage("Enter a valid amount!");
+                        return;
+                    }
+                    amountWei = this.web3.utils.toWei(amount, "ether");
+                }
+                if (proposalType == "4" || proposalType == "5") {
+                    if (!amountOutMin || amountOutMin <= 0) {
+                        logMessage("Enter a valid minimum output for swaps!");
+                        return;
+                    }
+                }
+
+                showSpinner();
+                document.getElementById("createProposalBtn").disabled = true;
+                try {
+                    const tx = {
+                        from: selectedWallet.address,
+                        to: this.contractAddress,
+                        data: this.contract.methods.createProposal(proposalType, target, amountWei, amountOutMinWei).encodeABI(),
+                        gas: this.gasLimit,
+                        gasPrice: await this.web3.eth.getGasPrice()
+                    };
+                    const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                    const txHash = await this.sendTransaction(signedTx);
+                    logMessage(`Create proposal transaction sent: ${txHash}`);
+                    await this.refreshProposals();
+                } catch (error) {
+                    logMessage(`Error creating proposal: ${error.message}`);
+                } finally {
+                    hideSpinner();
+                    document.getElementById("createProposalBtn").disabled = false;
+                }
+            }
+
+            async vote(proposalId, support) {
+                if (!selectedWallet || selectedWallet.isMetaMask) {
+                    logMessage("DAO Multisig requires a wallet with a private key.");
+                    return;
+                }
+                showSpinner();
+                try {
+                    const tx = {
+                        from: selectedWallet.address,
+                        to: this.contractAddress,
+                        data: this.contract.methods.vote(proposalId, support).encodeABI(),
+                        gas: this.gasLimit,
+                        gasPrice: await this.web3.eth.getGasPrice()
+                    };
+                    const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                    const txHash = await this.sendTransaction(signedTx);
+                    logMessage(`Vote transaction sent: ${txHash}`);
+                    await this.refreshProposals();
+                } catch (error) {
+                    logMessage(`Error voting: ${error.message}`);
+                } finally {
+                    hideSpinner();
+                }
+            }
+
+            async executeProposal(proposalId) {
+                if (!selectedWallet || selectedWallet.isMetaMask) {
+                    logMessage("DAO Multisig requires a wallet with a private key.");
+                    return;
+                }
+                showSpinner();
+                try {
+                    const tx = {
+                        from: selectedWallet.address,
+                        to: this.contractAddress,
+                        data: this.contract.methods.executeProposal(proposalId).encodeABI(),
+                        gas: this.gasLimit,
+                        gasPrice: await this.web3.eth.getGasPrice()
+                    };
+                    const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                    const txHash = await this.sendTransaction(signedTx);
+                    logMessage(`Execute proposal transaction sent: ${txHash}`);
+                    await this.refreshProposals();
+                    await this.refreshBalances();
+                    await this.refreshMembers();
+                } catch (error) {
+                    logMessage(`Error executing proposal: ${error.message}`);
+                } finally {
+                    hideSpinner();
+                }
+            }
+
+            async sendTransaction(signedTx) {
+                return new Promise((resolve, reject) => {
+                    this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                        .on('transactionHash', resolve)
+                        .on('error', reject);
+                });
+            }
+        }
+
+        // Simplified Chat JavaScript
+        let chatCooldown = false;
+        let apiUrl = "https://moneyfund.com/shane/ledger_chat.php";
+        const fallbackApiUrl = "https://box4177.bluehost.com/shane/ledger_chat.php";
+
+        async function fetchChatData() {
+            let data = { chatMessages: [] };
+            try {
+                const urlWithCacheBust = `${apiUrl}?_t=${Date.now()}`;
+                const response = await fetch(urlWithCacheBust, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                data = await response.json();
+                if (!data.chatMessages || !Array.isArray(data.chatMessages)) throw new Error("Invalid data format");
+                return data;
+            } catch (error) {
+                try {
+                    const fallbackResponse = await fetch(`${fallbackApiUrl}?_t=${Date.now()}`, { cache: 'no-store' });
+                    if (!fallbackResponse.ok) throw new Error(`HTTP ${fallbackResponse.status}`);
+                    data = await fallbackResponse.json();
+                    if (!data.chatMessages || !Array.isArray(data.chatMessages)) throw new Error("Invalid fallback data format");
+                    apiUrl = fallbackApiUrl;
+                    return data;
+                } catch (fallbackError) {
+                    logMessage("Unable to fetch chat data: " + fallbackError.message);
+                    return { chatMessages: [] };
+                }
+            }
+        }
+
+        async function saveChatData(dataToSave) {
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToSave)
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return true;
+            } catch (error) {
+                try {
+                    const fallbackResponse = await fetch(fallbackApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(dataToSave)
+                    });
+                    if (!fallbackResponse.ok) throw new Error(`HTTP ${fallbackResponse.status}`);
+                    apiUrl = fallbackApiUrl;
+                    return true;
+                } catch (fallbackError) {
+                    logMessage("Unable to save chat data: " + fallbackError.message);
+                    return false;
+                }
+            }
+        }
+
+        class Chat {
+            constructor() {
+                this.allMessages = [];
+                this.displayedMessageCount = 100;
+            }
+
+            async init() {
+                this.attachEventListeners();
+                await this.fetchAndRenderMessages();
+                this.startChatRefresh();
+            }
+
+            attachEventListeners() {
+                document.getElementById('send-button').addEventListener('click', () => this.sendChatMessage());
+                document.getElementById('upload-image-button').addEventListener('click', () => this.uploadImage());
+                document.getElementById('image-upload').addEventListener('change', () => this.handleImageUpload());
+            }
+
+            startChatRefresh() {
+                setInterval(async () => {
+                    await this.fetchAndRenderMessages();
+                }, 500); // Refresh every 0.5 seconds
+            }
+
+            async fetchAndRenderMessages() {
+                try {
+                    const data = await fetchChatData();
+                    this.allMessages = data.chatMessages;
+                    this.renderMessages();
+                } catch (error) {
+                    logMessage("Failed to fetch chat messages: " + error.message);
+                    this.allMessages = [];
+                    this.renderMessages();
+                }
+            }
+
+            async sendChatMessage() {
+                if (chatCooldown) {
+                    alert('Please wait 5 seconds between messages!');
+                    return;
+                }
+
+                const messageInput = document.getElementById('message-input');
+                const chatArea = document.getElementById('chat-area');
+
+                if (!selectedWallet) {
+                    alert('Please connect a wallet in the DAO section first!');
+                    return;
+                }
+
+                if (messageInput.value.trim()) {
+                    const message = document.createElement('div');
+                    message.className = 'message';
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'message-content';
+                    const username = document.createElement('span');
+                    username.className = 'username';
+                    username.textContent = `${selectedWallet.address.substring(selectedWallet.address.length - 6)} (${selectedWallet.type})`;
+                    const timestamp = document.createElement('span');
+                    timestamp.className = 'timestamp';
+                    timestamp.textContent = new Date().toLocaleString();
+                    const text = document.createElement('p');
+                    text.textContent = messageInput.value;
+
+                    contentDiv.appendChild(username);
+                    contentDiv.appendChild(document.createElement('br'));
+                    contentDiv.appendChild(text);
+                    message.appendChild(contentDiv);
+                    message.appendChild(timestamp);
+                    chatArea.insertBefore(message, chatArea.firstChild);
+
+                    const newMessage = {
+                        id: this.allMessages.length,
+                        text: messageInput.value,
+                        username: username.textContent,
+                        timestamp: timestamp.textContent,
+                        image: null
+                    };
+                    this.allMessages.push(newMessage);
+
+                    try {
+                        const data = await fetchChatData();
+                        data.chatMessages.push(newMessage);
+                        await saveChatData(data);
+                        this.renderMessages(); // Re-render to ensure consistency
+                    } catch (error) {
+                        logMessage("Failed to save chat message: " + error.message);
+                    }
+
+                    messageInput.value = '';
+                    this.startCooldown();
+                }
+            }
+
+            uploadImage() {
+                if (chatCooldown) {
+                    alert('Please wait 5 seconds between messages!');
+                    return;
+                }
+                document.getElementById('image-upload').click();
+            }
+
+            async handleImageUpload() {
+                if (!selectedWallet) {
+                    alert('Please connect a wallet in the DAO section first!');
+                    return;
+                }
+
+                const fileInput = document.getElementById('image-upload');
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const imageData = e.target.result;
+                    const message = document.createElement('div');
+                    message.className = 'message';
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'message-content';
+                    const username = document.createElement('span');
+                    username.className = 'username';
+                    username.textContent = `${selectedWallet.address.substring(selectedWallet.address.length - 6)} (${selectedWallet.type})`;
+                    const timestamp = document.createElement('span');
+                    timestamp.className = 'timestamp';
+                    timestamp.textContent = new Date().toLocaleString();
+                    const img = document.createElement('img');
+                    img.src = imageData;
+                    img.style.maxWidth = '200px';
+                    img.style.maxHeight = '200px';
+
+                    contentDiv.appendChild(username);
+                    contentDiv.appendChild(document.createElement('br'));
+                    contentDiv.appendChild(img);
+                    message.appendChild(contentDiv);
+                    message.appendChild(timestamp);
+                    document.getElementById('chat-area').insertBefore(message, document.getElementById('chat-area').firstChild);
+
+                    const newMessage = {
+                        id: this.allMessages.length,
+                        text: '',
+                        username: username.textContent,
+                        timestamp: timestamp.textContent,
+                        image: imageData
+                    };
+                    this.allMessages.push(newMessage);
+
+                    try {
+                        const data = await fetchChatData();
+                        data.chatMessages.push(newMessage);
+                        await saveChatData(data);
+                        this.renderMessages();
+                    } catch (error) {
+                        logMessage("Failed to save image message: " + error.message);
+                    }
+
+                    fileInput.value = '';
+                    this.startCooldown();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            startCooldown() {
+                chatCooldown = true;
+                const sendButton = document.getElementById('send-button');
+                const messageInput = document.getElementById('message-input');
+                const uploadButton = document.getElementById('upload-image-button');
+                sendButton.disabled = true;
+                messageInput.disabled = true;
+                uploadButton.disabled = true;
+                let countdown = 5;
+
+                const interval = setInterval(() => {
+                    countdown--;
+                    if (countdown < 0) {
+                        clearInterval(interval);
+                        chatCooldown = false;
+                        sendButton.disabled = false;
+                        messageInput.disabled = false;
+                        uploadButton.disabled = false;
+                    }
+                }, 1000);
+            }
+
+            renderMessages() {
+                const chatArea = document.getElementById('chat-area');
+                chatArea.innerHTML = '';
+                const displayedMessages = this.allMessages.slice(-this.displayedMessageCount).reverse();
+                displayedMessages.forEach(msg => {
+                    const message = document.createElement('div');
+                    message.className = 'message';
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'message-content';
+                    const username = document.createElement('span');
+                    username.className = 'username';
+                    username.textContent = msg.username;
+                    const timestamp = document.createElement('span');
+                    timestamp.className = 'timestamp';
+                    timestamp.textContent = msg.timestamp;
+
+                    contentDiv.appendChild(username);
+                    contentDiv.appendChild(document.createElement('br'));
+                    if (msg.image) {
+                        const img = document.createElement('img');
+                        img.src = msg.image;
+                        img.style.maxWidth = '200px';
+                        img.style.maxHeight = '200px';
+                        contentDiv.appendChild(img);
+                    } else {
+                        const text = document.createElement('p');
+                        text.textContent = msg.text;
+                        contentDiv.appendChild(text);
+                    }
+
+                    message.appendChild(contentDiv);
+                    message.appendChild(timestamp);
+                    chatArea.appendChild(message);
+                });
+            }
+        }
+
+        const daoInterface = new DAOInterface();
+        const chat = new Chat();
+
+        daoInterface.init();
+        chat.init();
+    </script>
+</body>
+</html>
