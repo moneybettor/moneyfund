@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+    <title>Register Tokens to List</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <style>
+        body {
+            font-family: 'Montserrat', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1E3A5F 0%, #436C94 50%, #6B9AC4 100%);
+            color: #E8ECEF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 20px;
+            text-align: center; /* Center all content within the container */
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px 15px 0 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative; /* For positioning the Connect MetaMask button */
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+            color: #87CEEB;
+            padding-top: 10px; /* Add padding to avoid overlap with button */
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            margin: 0 auto;
+            color: #87CEEB;
+            font-size: 1.5em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        button {
+            background: rgba(135, 206, 235, 0.8);
+            color: #E8ECEF;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background: rgba(135, 206, 235, 1);
+            transform: scale(1.02);
+        }
+
+        button:disabled {
+            background: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+        }
+
+        input, select {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #E8ECEF;
+            font-size: 1em;
+            width: calc(100% - 22px);
+            max-width: 300px;
+            transition: background 0.3s ease;
+            text-align: center; /* Center input/select text */
+        }
+
+        input:hover, select:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        input::placeholder {
+            color: rgba(232, 236, 239, 0.7);
+            text-align: center; /* Center placeholder text */
+        }
+
+        .wallet-info {
+            text-align: center;
+        }
+
+        .wallet-info p {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .action-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center; /* Center buttons and inputs */
+            align-items: center;
+        }
+
+        #connectMetaMaskBtn {
+            position: absolute;
+            top: 10px;
+            left: 10px; /* Positioned in top-left corner */
+            width: 60px;
+            padding: 6px;
+            font-size: 0.6em;
+        }
+
+        @media (max-width: 600px) {
+            .app-container {
+                margin: 10px;
+            }
+            .section {
+                padding: 15px;
+            }
+            button, input, select {
+                width: 100%;
+                max-width: none;
+            }
+            #connectMetaMaskBtn {
+                position: static; /* Prevent overlap on small screens */
+                margin: 0 auto;
+                display: block;
+            }
+            header h1 {
+                padding-top: 0; /* Reset padding on small screens */
+            }
+        }
+
+        #connectionPopup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1001;
+            color: #E8ECEF;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        #connectionPopup h3 {
+            margin: 10px 0;
+            font-size: 20px;
+            color: #87CEEB;
+        }
+
+        #connectionPopup p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        #connectionPopup .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.15);
+            border-top: 5px solid #87CEEB;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        #connectionPopup .checkmark {
+            display: none;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(135, 206, 235, 0.8);
+            border-radius: 50%;
+            color: #E8ECEF;
+            font-size: 30px;
+            line-height: 50px;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #connectionPopup .close-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(135, 206, 235, 0.8);
+            border-radius: 8px;
+            color: #E8ECEF;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background 0.3s ease;
+        }
+
+        #connectionPopup .close-btn:hover {
+            background: rgba(135, 206, 235, 1);
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Register Tokens to List</h1>
+            <button id="connectMetaMaskBtn">Connect MetaMask</button>
+        </header>
+
+        <div class="section wallet-info">
+            <h2>Wallet</h2>
+            <div class="action-group">
+                <select id="walletSelector" onchange="selectWallet(this.value)">
+                    <option value="">-- Select Wallet --</option>
+                </select>
+            </div>
+            <p>Connected Account: <span id="account">Not connected</span></p>
+        </div>
+
+        <div class="section">
+            <h2>Register Tokens to List</h2>
+            <div class="action-group">
+                <input type="text" id="singleTokenAddress" placeholder="Single Token Address">
+                <button id="receiveTokenButton">Receive Single Token</button>
+                <button id="addTokenButton">Add Single Token</button>
+            </div>
+            <div class="action-group">
+                <input type="text" id="multipleTokenAddresses" placeholder="Multiple Token Addresses (comma-separated)">
+                <button id="receiveMultipleTokensButton">Receive Multiple Tokens</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="connectionPopup">
+        <div class="spinner" id="connectionSpinner"></div>
+        <div class="checkmark" id="connectionCheckmark">✓</div>
+        <h3 id="connectionStatusMessage">Processing...</h3>
+        <p id="connectionAddress" style="display: none;"></p>
+        <button class="close-btn" id="closeConnectionPopupBtn">Close</button>
+    </div>
+    <div id="overlay"></div>
+
+    <script>
+        function loadEthers() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js";
+                script.onload = () => resolve(window.ethers);
+                script.onerror = () => {
+                    const fallback = document.createElement("script");
+                    fallback.src = "https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js";
+                    fallback.onload = () => resolve(window.ethers);
+                    fallback.onerror = () => reject(new Error("Both CDNs failed to load ethers.js"));
+                    document.head.appendChild(fallback);
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        (async () => {
+            const ethers = await loadEthers();
+            if (!ethers) throw new Error("ethers.js not loaded");
+
+            const CONTRACT_ADDRESS = "0x9759883ea07e2ca1e2d32e97f42d254841616ab5";
+            const MONEY_ADDRESS = "0x100DB67F41A2dF3c32cC7c0955694b98339B7311";
+            const ABI = [
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "token",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "addTokenToList",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address[]",
+                            "name": "tokens",
+                            "type": "address[]"
+                        }
+                    ],
+                    "name": "receiveMultipleTokens",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "token",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "receiveTokens",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }
+            ];
+
+            const ERC20_ABI = [
+                {"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
+            ];
+
+            let provider, signer, contract, web3, userAccount;
+            let wallets = [];
+            let selectedWallet = null;
+
+            function showConnectionPopup(message) {
+                const popup = document.getElementById("connectionPopup");
+                const spinner = document.getElementById("connectionSpinner");
+                const checkmark = document.getElementById("connectionCheckmark");
+                const statusMessage = document.getElementById("connectionStatusMessage");
+                const addressDisplay = document.getElementById("connectionAddress");
+                const closeBtn = document.getElementById("closeConnectionPopupBtn");
+
+                spinner.style.display = "block";
+                checkmark.style.display = "none";
+                closeBtn.style.display = "none";
+                addressDisplay.style.display = "none";
+                statusMessage.textContent = message;
+
+                popup.style.display = "block";
+                document.getElementById("overlay").style.display = "block";
+            }
+
+            function updateConnectionPopup({ message, address, success = false }) {
+                const spinner = document.getElementById("connectionSpinner");
+                const checkmark = document.getElementById("connectionCheckmark");
+                const statusMessage = document.getElementById("connectionStatusMessage");
+                const addressDisplay = document.getElementById("connectionAddress");
+                const closeBtn = document.getElementById("closeConnectionPopupBtn");
+
+                statusMessage.textContent = message;
+                if (address) {
+                    addressDisplay.textContent = `Address: ${address.slice(0, 6)}...${address.slice(-4)}`;
+                    addressDisplay.style.display = "block";
+                }
+                if (success) {
+                    spinner.style.display = "none";
+                    checkmark.style.display = "block";
+                    closeBtn.style.display = "block";
+                }
+            }
+
+            function hideConnectionPopup() {
+                document.getElementById("connectionPopup").style.display = "none";
+                document.getElementById("overlay").style.display = "none";
+            }
+
+            async function initializeWallets() {
+                web3 = new Web3(web3 ? web3.currentProvider : "https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+
+                if (window.ethereum && userAccount) {
+                    const metamaskWallet = { address: userAccount, type: 'MetaMask', isMetaMask: true };
+                    if (!wallets.some(w => w.address === metamaskWallet.address)) {
+                        wallets.push(metamaskWallet);
+                    }
+                }
+
+                wallets = wallets.map(wallet => {
+                    if (wallet.type === 'moneyfund' && wallet.privateKey) {
+                        return { ...wallet, isMetaMask: false };
+                    }
+                    return wallet;
+                });
+
+                localStorage.setItem('wallets', JSON.stringify(wallets));
+
+                const walletSelector = document.getElementById('walletSelector');
+                walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+                wallets.forEach((wallet, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${wallet.type}: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+                    walletSelector.appendChild(option);
+                });
+
+                const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex')) || 0;
+                if (wallets.length > 0 && selectedIndex >= 0 && selectedIndex < wallets.length) {
+                    selectedWallet = wallets[selectedIndex];
+                    walletSelector.value = selectedIndex;
+                    userAccount = selectedWallet.address;
+                    await selectWallet(selectedIndex);
+                    updateAccountDisplay();
+                } else if (wallets.length > 0) {
+                    selectedWallet = wallets[0];
+                    localStorage.setItem('selectedWalletIndex', 0);
+                    walletSelector.value = 0;
+                    userAccount = selectedWallet.address;
+                    await selectWallet(0);
+                    updateAccountDisplay();
+                }
+            }
+
+            async function selectWallet(index) {
+                const idx = parseInt(index);
+                if (idx >= 0 && idx < wallets.length) {
+                    selectedWallet = wallets[idx];
+                    localStorage.setItem('selectedWalletIndex', idx);
+                    userAccount = selectedWallet.address;
+                    updateAccountDisplay();
+
+                    if (selectedWallet.isMetaMask && window.ethereum) {
+                        provider = new ethers.providers.Web3Provider(window.ethereum);
+                        signer = provider.getSigner();
+                        contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+                    } else {
+                        provider = new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                        const wallet = new ethers.Wallet(selectedWallet.privateKey, provider);
+                        contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, wallet);
+                    }
+                } else {
+                    selectedWallet = null;
+                    userAccount = null;
+                    contract = null;
+                    updateAccountDisplay();
+                }
+            }
+
+            async function connectMetaMask() {
+                if (!window.ethereum) {
+                    alert("Please install MetaMask!");
+                    return;
+                }
+                showConnectionPopup("Connecting MetaMask...");
+                try {
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await window.ethereum.request({ method: "eth_requestAccounts" });
+                    const chainId = await provider.getNetwork().then(net => net.chainId);
+                    if (chainId !== 1) throw new Error("Please switch to Ethereum Mainnet (Chain ID: 1)");
+                    signer = provider.getSigner();
+                    userAccount = await signer.getAddress();
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+                    await initializeWallets();
+                    updateConnectionPopup({ message: "MetaMask connected successfully", address: userAccount, success: true });
+                } catch (error) {
+                    updateConnectionPopup({ message: `Failed to connect: ${error.message}`, success: false });
+                }
+            }
+
+            async function createMoneyFundWallet() {
+                showConnectionPopup("Creating MoneyFund Wallet...");
+                try {
+                    web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                    let wallet;
+                    let attempts = 0;
+                    while (true) {
+                        attempts++;
+                        wallet = web3.eth.accounts.create();
+                        if (wallet.address.startsWith('0x100')) break;
+                        if (attempts > 10000) throw new Error("Failed to generate vanity address after 10000 attempts");
+                    }
+                    const newWallet = { address: wallet.address, privateKey: wallet.privateKey, type: 'moneyfund', isMetaMask: false };
+                    wallets.push(newWallet);
+                    localStorage.setItem('wallets', JSON.stringify(wallets));
+                    selectedWallet = newWallet;
+                    userAccount = selectedWallet.address;
+                    await initializeWallets();
+                    updateConnectionPopup({ message: "MoneyFund Wallet created successfully", address: userAccount, success: true });
+                } catch (error) {
+                    updateConnectionPopup({ message: `Failed to create wallet: ${error.message}`, success: false });
+                }
+            }
+
+            function updateAccountDisplay() {
+                const accountSpan = document.getElementById("account");
+                if (userAccount) {
+                    accountSpan.textContent = `${userAccount.slice(0, 6)}...${userAccount.slice(-4)} (${selectedWallet.type})`;
+                } else {
+                    accountSpan.textContent = "Not connected";
+                }
+            }
+
+            async function executeTransaction(method, args = [], value = "0") {
+                if (!contract || !userAccount) return alert("Connect wallet first!");
+                try {
+                    const gasLimit = await contract.estimateGas[method](...args, { value });
+                    const gasPrice = await provider.getGasPrice();
+                    const txOptions = { gasLimit: gasLimit.mul(115).div(100), gasPrice, value };
+
+                    if (selectedWallet.isMetaMask) {
+                        const tx = await contract[method](...args, txOptions);
+                        await tx.wait();
+                        return tx.hash;
+                    } else {
+                        const web3Contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+                        const ethBalance = await web3.eth.getBalance(userAccount);
+                        if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
+                            throw new Error("Insufficient ETH for gas (need at least 0.0001 ETH)");
+                        }
+                        const txData = web3Contract.methods[method](...args).encodeABI();
+                        const tx = {
+                            from: userAccount,
+                            to: CONTRACT_ADDRESS,
+                            data: txData,
+                            gas: txOptions.gasLimit.toString(),
+                            gasPrice: txOptions.gasPrice.toString(),
+                            value: ethers.utils.hexlify(ethers.BigNumber.from(value))
+                        };
+                        const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+                        return receipt.transactionHash;
+                    }
+                } catch (error) {
+                    throw error;
+                }
+            }
+
+            // Receive Single Token
+            document.getElementById("receiveTokenButton").addEventListener("click", async () => {
+                const tokenAddress = document.getElementById("singleTokenAddress").value.trim();
+                if (!tokenAddress || !ethers.utils.isAddress(tokenAddress)) return alert("Enter a valid token address!");
+                if (tokenAddress.toLowerCase() === MONEY_ADDRESS.toLowerCase()) return alert("MONEY cannot be added to token list!");
+                try {
+                    const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
+                    const balance = await tokenContract.balanceOf(CONTRACT_ADDRESS);
+                    if (balance.eq(0)) return alert("Contract has no balance of this token!");
+                    const txHash = await executeTransaction("receiveTokens", [tokenAddress]);
+                    alert(`Token received successfully! Tx: ${txHash}`);
+                } catch (error) {
+                    console.error(error);
+                    alert("Receive token failed: " + error.message);
+                }
+            });
+
+            // Add Single Token to List
+            document.getElementById("addTokenButton").addEventListener("click", async () => {
+                const tokenAddress = document.getElementById("singleTokenAddress").value;
+                if (!tokenAddress) return alert("Enter a valid token address!");
+                try {
+                    const txHash = await executeTransaction("addTokenToList", [tokenAddress]);
+                    alert(`Token added to list successfully! Tx: ${txHash}`);
+                } catch (error) {
+                    console.error(error);
+                    alert("Add token failed: " + error.message);
+                }
+            });
+
+            // Receive Multiple Tokens
+            document.getElementById("receiveMultipleTokensButton").addEventListener("click", async () => {
+                const tokenAddressesInput = document.getElementById("multipleTokenAddresses").value;
+                if (!tokenAddressesInput) return alert("Enter valid token addresses!");
+                const tokenAddresses = tokenAddressesInput.split(",").map(addr => addr.trim()).filter(addr => addr);
+                if (tokenAddresses.length === 0) return alert("Enter at least one valid token address!");
+                try {
+                    const txHash = await executeTransaction("receiveMultipleTokens", [tokenAddresses]);
+                    alert(`Multiple tokens received successfully! Tx: ${txHash}`);
+                } catch (error) {
+                    console.error(error);
+                    alert("Receive multiple tokens failed: " + error.message);
+                }
+            });
+
+            // Initialization
+            async function init() {
+                await initializeWallets();
+                document.getElementById("connectMetaMaskBtn").onclick = connectMetaMask;
+                document.getElementById("closeConnectionPopupBtn").onclick = hideConnectionPopup;
+
+                if (window.ethereum) {
+                    window.ethereum.on("accountsChanged", () => window.location.reload());
+                    window.ethereum.on("chainChanged", () => window.location.reload());
+                }
+            }
+
+            window.onload = init;
+        })();
+    </script>
+</body>
+</html>
