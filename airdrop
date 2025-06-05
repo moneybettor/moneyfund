@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.9">
+  <title>MoneyFund Airdrop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%);
+      color: #E8ECEF;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      color: #FFFFFF;
+      margin-bottom: 20px;
+      font-size: 2.2em;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 8px;
+      font-weight: 600;
+      color: #E8ECEF;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      max-width: 600px;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #E8ECEF;
+      font-size: 1em;
+      text-align: center;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    #amountMode {
+      width: 150px;
+      padding: 8px;
+      font-size: 0.9em;
+      margin: 0 auto 15px;
+    }
+
+    select:hover, input:hover, textarea:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #A3BFFA;
+      opacity: 0.7;
+    }
+
+    textarea {
+      resize: vertical;
+      height: 80px;
+    }
+
+    button {
+      width: 100%;
+      max-width: 600px;
+      padding: 14px;
+      margin: 12px 0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: 600;
+      background: #3B82F6;
+      color: #FFFFFF;
+      transition: background 0.3s ease, transform 0.2s;
+    }
+
+    button:hover {
+      background: #2563EB;
+      transform: scale(1.02);
+    }
+
+    button:disabled {
+      background: rgba(255, 255, 255, 0.2);
+      cursor: not-allowed;
+    }
+
+    #connectMetaMaskBtn {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      width: 60px;
+      padding: 6px;
+      font-size: 0.6em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: #4B5EAA;
+    }
+
+    #connectMetaMaskBtn:hover {
+      background: #334C8C;
+    }
+
+    #airdropButton {
+      background: #3B82F6;
+      color: #FFFFFF;
+    }
+
+    #airdropButton:hover {
+      background: #2563EB;
+    }
+
+    .gas-settings {
+      margin: 10px 0;
+      font-size: 0.95em;
+      text-align: center;
+      color: #E8ECEF;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 0.95em;
+      word-wrap: break-word;
+      color: #E8ECEF;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 15px;
+      z-index: 1;
+    }
+
+    #airdropLog {
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-size: 0.9em;
+      text-align: left;
+      max-width: 600px;
+      width: 100%;
+      z-index: 1;
+    }
+
+    .airdrop-entry {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      color: #E8ECEF;
+    }
+
+    #connectionPopup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: none;
+      z-index: 1001;
+      font-size: 16px;
+      color: #E8ECEF;
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    #connectionPopup h3 {
+      margin: 10px 0;
+      font-size: 20px;
+      color: #FFFFFF;
+    }
+
+    #connectionPopup p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #E8ECEF;
+    }
+
+    #connectionPopup .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.15);
+      border-top: 5px solid #3B82F6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    #connectionPopup .checkmark {
+      display: none;
+      width: 50px;
+      height: 50px;
+      background-color: #3B82F6;
+      border-radius: 50%;
+      color: #FFFFFF;
+      font-size: 30px;
+      line-height: 50px;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #connectionPopup .close-btn {
+      display: none;
+      margin-top: 20px;
+      padding: 10px;
+      background: #3B82F6;
+      border: none;
+      border-radius: 8px;
+      color: #FFFFFF;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      transition: background 0.3s ease;
+    }
+
+    #connectionPopup .close-btn:hover {
+      background: #2563EB;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+    <h1>MoneyFund Airdrop</h1>
+    <button id="connectMetaMaskBtn">Connect MetaMask</button>
+    <select id="walletSelector" onchange="selectWallet(this.value)">
+        <option value="">-- Select Wallet --</option>
+    </select>
+    <label for="tokenAddress">Token Address:</label>
+    <input type="text" id="tokenAddress" placeholder="e.g., 0x..." value="0x100DB67F41A2dF3c32cC7c0955694b98339B7311">
+    <label for="recipients">Recipients (one per line):</label>
+    <textarea id="recipients" placeholder="0x100DB67F41A2dF3c32cC7c0955694b98339B7311"></textarea>
+    <label for="amountMode">Amount Mode:</label>
+    <select id="amountMode" onchange="toggleAmountField()">
+        <option value="uniform">Uniform</option>
+        <option value="individual">Individual</option>
+    </select>
+    <label id="amountLabel" for="amountField">Set Uniform Amount for All:</label>
+    <input type="number" id="amountField" placeholder="e.g., 10" min="0" step="any" style="display: block;">
+    <textarea id="amountFieldIndividual" placeholder="10" style="display: none;"></textarea>
+    <div class="gas-settings"></div>
+    <button id="airdropButton" disabled>Send Airdrop</button>
+    <div id="status"></div>
+    <div id="airdropLog"></div>
+
+    <div id="connectionPopup">
+        <div class="spinner" id="connectionSpinner"></div>
+        <div class="checkmark" id="connectionCheckmark">✓</div>
+        <h3 id="connectionStatusMessage">Processing...</h3>
+        <p id="connectionAddress" style="display: none;"></p>
+        <button class="close-btn" id="closeConnectionPopupBtn">Close</button>
+    </div>
+    <div id="overlay"></div>
+
+    <script>
+        function loadEthers() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js";
+                script.onload = () => resolve(window.ethers);
+                script.onerror = () => {
+                    console.warn("Primary CDN failed, trying fallback...");
+                    const fallback = document.createElement("script");
+                    fallback.src = "https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js";
+                    fallback.onload = () => resolve(window.ethers);
+                    fallback.onerror = () => reject(new Error("Both CDNs failed to load ethers.js"));
+                    document.head.appendChild(fallback);
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        function toggleAmountField() {
+            const mode = document.getElementById("amountMode").value;
+            const uniformField = document.getElementById("amountField");
+            const individualField = document.getElementById("amountFieldIndividual");
+            const amountLabel = document.getElementById("amountLabel");
+
+            if (mode === "uniform") {
+                uniformField.style.display = "block";
+                individualField.style.display = "none";
+                amountLabel.textContent = "Set Uniform Amount for All:";
+            } else {
+                uniformField.style.display = "none";
+                individualField.style.display = "block";
+                amountLabel.textContent = "Amounts (one per line):";
+            }
+        }
+
+        (async () => {
+            try {
+                const ethers = await loadEthers();
+                if (!ethers) throw new Error("ethers.js not loaded");
+
+                const contractAddress = "0x6785cd86a65f3d8336fdc3b0e54c78215501dca2";
+                const airdropAbi = [
+                    {
+                        "inputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "constructor"
+                    },
+                    {
+                        "inputs": [
+                            {
+                                "internalType": "address",
+                                "name": "owner",
+                                "type": "address"
+                            }
+                        ],
+                        "name": "OwnableInvalidOwner",
+                        "type": "error"
+                    },
+                    {
+                        "inputs": [
+                            {
+                                "internalType": "address",
+                                "name": "account",
+                                "type": "address"
+                            }
+                        ],
+                        "name": "OwnableUnauthorizedAccount",
+                        "type": "error"
+                    },
+                    {
+                        "anonymous": false,
+                        "inputs": [
+                            {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "previousOwner",
+                                "type": "address"
+                            },
+                            {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "newOwner",
+                                "type": "address"
+                            }
+                        ],
+                        "name": "OwnershipTransferred",
+                        "type": "event"
+                    },
+                    {
+                        "anonymous": false,
+                        "inputs": [
+                            {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "sender",
+                                "type": "address"
+                            },
+                            {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "recipient",
+                                "type": "address"
+                            },
+                            {
+                                "indexed": false,
+                                "internalType": "uint256",
+                                "name": "amount",
+                                "type": "uint256"
+                            }
+                        ],
+                        "name": "TokensAirdropped",
+                        "type": "event"
+                    },
+                    {
+                        "anonymous": false,
+                        "inputs": [
+                            {
+                                "indexed": true,
+                                "internalType": "address",
+                                "name": "token",
+                                "type": "address"
+                            },
+                            {
+                                "indexed": false,
+                                "internalType": "uint256",
+                                "name": "amount",
+                                "type": "uint256"
+                            }
+                        ],
+                        "name": "TokensRecovered",
+                        "type": "event"
+                    },
+                    {
+                        "inputs": [
+                            {
+                                "internalType": "contract IERC20",
+                                "name": "token",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address[]",
+                                "name": "recipients",
+                                "type": "address[]"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "amounts",
+                                "type": "uint256[]"
+                            }
+                        ],
+                        "name": "airdropTokens",
+                        "outputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [
+                            {
+                                "internalType": "contract IERC20",
+                                "name": "token",
+                                "type": "address"
+                            }
+                        ],
+                        "name": "getContractBalance",
+                        "outputs": [
+                            {
+                                "internalType": "uint256",
+                                "name": "",
+                                "type": "uint256"
+                            }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [],
+                        "name": "owner",
+                        "outputs": [
+                            {
+                                "internalType": "address",
+                                "name": "",
+                                "type": "address"
+                            }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [
+                            {
+                                "internalType": "contract IERC20",
+                                "name": "token",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "amount",
+                                "type": "uint256"
+                            }
+                        ],
+                        "name": "recoverTokens",
+                        "outputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [],
+                        "name": "renounceOwnership",
+                        "outputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [
+                            {
+                                "internalType": "address",
+                                name: "newOwner",
+                                type: "address"
+                            }
+                        ],
+                        "name": "transferOwnership",
+                        "outputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    }
+                ];
+
+                const erc20Abi = [
+                    {
+                        "constant": false,
+                        "inputs": [
+                            { name: "spender", type: "address" },
+                            { name: "amount", type: "uint256" }
+                        ],
+                        "name": "approve",
+                        "outputs": [{ type: "boolean" }],
+                        "payable": false,
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    },
+                    {
+                        "constant": true,
+                        "inputs": [
+                            { name: "owner", type: "address" },
+                            { name: "spender", type: "address" }
+                        ],
+                        "name": "allowance",
+                        "outputs": [{ type: "uint256" }],
+                        "payable": false,
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "constant": true,
+                        "inputs": [{ name: "owner", type: "address" }],
+                        "name": "balanceOf",
+                        "outputs": [{ type: "uint256" }],
+                        "payable": false,
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "constant": true,
+                        "inputs": [],
+                        "name": "decimals",
+                        "outputs": [{ type: "uint8" }],
+                        "payable": false,
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                    {
+                        "constant": true,
+                        "inputs": [],
+                        "name": "paused",
+                        "outputs": [{ type: "boolean" }],
+                        "payable": false,
+                        "stateMutability": "view",
+                        "type": "function"
+                    }
+                ];
+
+                let provider, signer, contract, tokenContract, web3, userAccount;
+                let wallets = [];
+                let selectedWallet = null;
+                const status = document.getElementById("status");
+
+                function showConnectionPopup(message) {
+                    const popup = document.getElementById("connectionPopup");
+                    const spinner = document.getElementById("connectionSpinner");
+                    const checkmark = document.getElementById("connectionCheckmark");
+                    const statusMessage = document.getElementById("connectionStatusMessage");
+                    const addressDisplay = document.getElementById("connectionAddress");
+                    const closeBtn = document.getElementById("closeConnectionPopupBtn");
+
+                    spinner.style.display = "block";
+                    checkmark.style.display = "none";
+                    closeBtn.style.display = "none";
+                    addressDisplay.style.display = "none";
+                    statusMessage.textContent = message;
+
+                    popup.style.display = "block";
+                    document.getElementById("overlay").style.display = "block";
+                }
+
+                function updateConnectionPopup({ message, address, success = false }) {
+                    const spinner = document.getElementById("connectionSpinner");
+                    const checkmark = document.getElementById("connectionCheckmark");
+                    const statusMessage = document.getElementById("connectionStatusMessage");
+                    const addressDisplay = document.getElementById("connectionAddress");
+                    const closeBtn = document.getElementById("closeConnectionPopupBtn");
+
+                    statusMessage.textContent = message;
+                    if (address) {
+                        addressDisplay.textContent = `Address: ${address.slice(0, 6)}...${address.slice(-4)}`;
+                        addressDisplay.style.display = "block";
+                    }
+                    if (success) {
+                        spinner.style.display = "none";
+                        checkmark.style.display = "block";
+                        closeBtn.style.display = "block";
+                    }
+                }
+
+                function hideConnectionPopup() {
+                    document.getElementById("connectionPopup").style.display = "none";
+                    document.getElementById("overlay").style.display = "none";
+                }
+
+                function updateSuggestedGas(recipientCount) {
+                    const baseGas = 60000;
+                    const perRecipientGas = 45000;
+                    const suggested = baseGas + (recipientCount * perRecipientGas);
+                    document.getElementById("suggestedGas") ? document.getElementById("suggestedGas").textContent = suggested : null;
+                    document.getElementById("gasLimit") ? document.getElementById("gasLimit").placeholder = suggested : null;
+                }
+
+                async function initializeWallets() {
+                    web3 = new Web3(web3 ? web3.currentProvider : "https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                    wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+
+                    if (window.ethereum && userAccount) {
+                        const metamaskWallet = { address: userAccount, type: 'MetaMask', isMetaMask: true };
+                        if (!wallets.some(w => w.address === metamaskWallet.address)) {
+                            wallets.push(metamaskWallet);
+                        }
+                    }
+
+                    wallets = wallets.map(wallet => {
+                        if (wallet.type === 'moneyfund' && wallet.privateKey) {
+                            return { ...wallet, isMetaMask: false };
+                        }
+                        return wallet;
+                    });
+
+                    localStorage.setItem('wallets', JSON.stringify(wallets));
+
+                    const walletSelector = document.getElementById('walletSelector');
+                    walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+                    wallets.forEach((wallet, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = `${wallet.type}: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+                        walletSelector.appendChild(option);
+                    });
+
+                    const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex')) || 0;
+                    if (wallets.length > 0 && selectedIndex >= 0 && selectedIndex < wallets.length) {
+                        selectedWallet = wallets[selectedIndex];
+                        walletSelector.value = selectedIndex;
+                        userAccount = selectedWallet.address;
+                        await selectWallet(selectedIndex);
+                        updateStatus();
+                    } else if (wallets.length > 0) {
+                        selectedWallet = wallets[0];
+                        localStorage.setItem('selectedWalletIndex', 0);
+                        walletSelector.value = 0;
+                        userAccount = selectedWallet.address;
+                        await selectWallet(0);
+                        updateStatus();
+                    }
+                }
+
+                async function selectWallet(index) {
+                    const idx = parseInt(index);
+                    if (idx >= 0 && idx < wallets.length) {
+                        selectedWallet = wallets[idx];
+                        localStorage.setItem('selectedWalletIndex', idx);
+                        userAccount = selectedWallet.address;
+                        updateStatus();
+                        const tokenAddress = document.getElementById("tokenAddress").value.trim();
+                        if (selectedWallet.isMetaMask && window.ethereum) {
+                            provider = new ethers.providers.Web3Provider(window.ethereum);
+                            signer = provider.getSigner();
+                            contract = new ethers.Contract(contractAddress, airdropAbi, signer);
+                            tokenContract = tokenAddress ? new ethers.Contract(tokenAddress, erc20Abi, signer) : null;
+                        } else {
+                            provider = new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                            contract = new ethers.Contract(contractAddress, airdropAbi, provider);
+                            tokenContract = tokenAddress ? new ethers.Contract(tokenAddress, erc20Abi, provider) : null;
+                        }
+                    } else {
+                        selectedWallet = null;
+                        userAccount = null;
+                        tokenContract = null;
+                        updateStatus();
+                    }
+                }
+
+                async function connectMetaMask() {
+                    if (!window.ethereum) {
+                        status.innerHTML = "Please install MetaMask!";
+                        status.className = "error";
+                        return;
+                    }
+                    showConnectionPopup("Connecting MetaMask...");
+                    try {
+                        provider = new ethers.providers.Web3Provider(window.ethereum);
+                        await window.ethereum.request({ method: "eth_requestAccounts" });
+                        const chainId = await provider.getNetwork().then(net => net.chainId);
+                        if (chainId !== 1) throw new Error("Please switch to Ethereum Mainnet (Chain ID: 1)");
+                        signer = provider.getSigner();
+                        userAccount = await signer.getAddress();
+                        contract = new ethers.Contract(contractAddress, airdropAbi, signer);
+                        await initializeWallets();
+                        updateConnectionPopup({ message: "MetaMask connected successfully", address: userAccount, success: true });
+                        document.getElementById("airdropButton").disabled = false;
+                    } catch (error) {
+                        updateConnectionPopup({ message: `Failed to connect: ${error.message}`, success: false });
+                        status.innerHTML = `Error: ${error.message}`;
+                        status.className = "error";
+                    }
+                }
+
+                async function createMoneyFundWallet() {
+                    showConnectionPopup("Creating MoneyFund Wallet...");
+                    try {
+                        web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                        let wallet;
+                        let attempts = 0;
+                        while (true) {
+                            attempts++;
+                            wallet = web3.eth.accounts.create();
+                            if (wallet.address.startsWith('0x100')) break;
+                            if (attempts > 10000) throw new Error("Failed to generate vanity address after 10000 attempts");
+                        }
+                        const newWallet = { address: wallet.address, privateKey: wallet.privateKey, type: 'moneyfund', isMetaMask: false };
+                        wallets.push(newWallet);
+                        localStorage.setItem('wallets', JSON.stringify(wallets));
+                        selectedWallet = newWallet;
+                        userAccount = selectedWallet.address;
+                        await initializeWallets();
+                        updateConnectionPopup({ message: "MoneyFund Wallet created successfully", address: userAccount, success: true });
+                        document.getElementById("airdropButton").disabled = false;
+                    } catch (error) {
+                        updateConnectionPopup({ message: `Failed to create wallet: ${error.message}`, success: false });
+                        status.innerHTML = `Error: ${error.message}`;
+                        status.className = "error";
+                    }
+                }
+
+                function updateStatus() {
+                    if (userAccount) {
+                        status.innerHTML = `Connected: ${userAccount.slice(0, 6)}...${userAccount.slice(-4)} (${selectedWallet.type})`;
+                        status.className = "connected";
+                        document.getElementById("connectMetaMaskBtn").innerHTML = "MetaMask Connected";
+                        document.getElementById("airdropButton").disabled = false;
+                    } else {
+                        status.innerHTML = "Not connected";
+                        status.className = "";
+                        document.getElementById("connectMetaMaskBtn").innerHTML = "Connect MetaMask";
+                        document.getElementById("airdropButton").disabled = true;
+                    }
+                }
+
+                async function init() {
+                    await initializeWallets();
+                    await loadAirdropLog();
+
+                    document.getElementById("connectMetaMaskBtn").onclick = connectMetaMask;
+                    document.getElementById("airdropButton").onclick = executeAirdrop;
+                    document.getElementById("closeConnectionPopupBtn").onclick = hideConnectionPopup;
+
+                    document.getElementById("recipients").addEventListener("input", (e) => {
+                        const recipientCount = e.target.value.split("\n").filter(r => r.trim()).length;
+                        updateSuggestedGas(recipientCount);
+                    });
+                    updateSuggestedGas(1);
+
+                    toggleAmountField();
+
+                    if (window.ethereum) {
+                        window.ethereum.on("accountsChanged", () => window.location.reload());
+                        window.ethereum.on("chainChanged", () => window.location.reload());
+                    }
+                }
+
+                function getAmounts() {
+                    const mode = document.getElementById("amountMode").value;
+                    const uniformField = document.getElementById("amountField").value.trim();
+                    const individualField = document.getElementById("amountFieldIndividual").value;
+                    const recipients = document.getElementById("recipients").value.split("\n").map(r => r.trim()).filter(r => r);
+                    if (mode === "uniform" && uniformField) {
+                        return recipients.map(() => uniformField);
+                    }
+                    return individualField.split("\n").map(a => a.trim()).filter(a => a);
+                }
+
+                async function executeAirdrop() {
+                    if (!selectedWallet || !userAccount || !tokenContract) {
+                        status.innerHTML = "Please connect and select a wallet, and ensure token address is valid!";
+                        status.className = "error";
+                        return;
+                    }
+
+                    const tokenAddress = document.getElementById("tokenAddress").value.trim();
+                    const recipients = document.getElementById("recipients").value.split("\n").map(r => r.trim()).filter(r => r);
+                    const amounts = getAmounts();
+
+                    if (!ethers.utils.isAddress(tokenAddress)) {
+                        status.innerHTML = "Invalid token address!";
+                        status.className = "error";
+                        return;
+                    }
+                    if (recipients.length !== amounts.length || recipients.length === 0) {
+                        status.innerHTML = "Mismatch or empty recipients/amounts!";
+                        status.className = "error";
+                        return;
+                    }
+                    if (!recipients.every(r => ethers.utils.isAddress(r))) {
+                        status.innerHTML = "Invalid recipient address!";
+                        status.className = "error";
+                        return;
+                    }
+                    if (!amounts.every(a => parseFloat(a) > 0)) {
+                        status.innerHTML = "Invalid amount (must be > 0)!";
+                        status.className = "error";
+                        return;
+                    }
+
+                    try {
+                        const decimals = selectedWallet.isMetaMask ? await tokenContract.decimals() : await new web3.eth.Contract(erc20Abi, tokenAddress).methods.decimals().call();
+                        const amountsWei = amounts.map(a => ethers.utils.parseUnits(a.toString(), decimals));
+                        const totalAmountWei = amountsWei.reduce((sum, a) => sum.add(a), ethers.BigNumber.from(0));
+                        const feeAmountWei = totalAmountWei.mul(2).div(1000);
+                        const totalWithFeesWei = totalAmountWei.add(feeAmountWei);
+                        const totalWithBuffer = totalWithFeesWei.mul(110).div(100);
+                        const balance = selectedWallet.isMetaMask ? await tokenContract.balanceOf(userAccount) : await new web3.eth.Contract(erc20Abi, tokenAddress).methods.balanceOf(userAccount).call();
+
+                        status.innerHTML = `Checking preconditions...<br>Balance: ${ethers.utils.formatUnits(balance, decimals)}<br>Required (incl. 0.2% fee): ${ethers.utils.formatUnits(totalWithFeesWei, decimals)}`;
+                        if (BigInt(balance) < BigInt(totalWithFeesWei.toString())) {
+                            status.innerHTML += "<br>Insufficient token balance (including fees)!";
+                            status.className = "error";
+                            return;
+                        }
+
+                        const allowance = selectedWallet.isMetaMask ? await tokenContract.allowance(userAccount, contractAddress) : await new web3.eth.Contract(erc20Abi, tokenAddress).methods.allowance(userAccount, contractAddress).call();
+
+                        if (!selectedWallet.isMetaMask && BigInt(allowance) < BigInt(totalWithFeesWei.toString())) {
+                            status.innerHTML += "<br>Approving tokens (including fees) in the background...";
+                            const web3TokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
+                            const ethBalance = await web3.eth.getBalance(userAccount);
+                            if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
+                                status.innerHTML += "<br>Insufficient ETH for gas (need at least 0.0001 ETH)!";
+                                status.className = "error";
+                                return;
+                            }
+
+                            let isPaused = false;
+                            try {
+                                isPaused = await web3TokenContract.methods.paused().call();
+                                if (isPaused) {
+                                    status.innerHTML += "<br>Token is paused! Transfers are disabled.";
+                                    status.className = "error";
+                                    return;
+                                }
+                            } catch (e) {
+                                status.innerHTML += "<br>Could not check if token is paused.";
+                            }
+
+                            let gasLimit;
+                            try {
+                                const gasEstimate = await web3TokenContract.methods.approve(contractAddress, totalWithBuffer.toString()).estimateGas({ from: userAccount });
+                                gasLimit = Math.ceil(gasEstimate * 1.15);
+                            } catch (e) {
+                                console.warn("Gas estimation failed, using fallback:", e);
+                                gasLimit = 100000;
+                            }
+                            const txData = web3TokenContract.methods.approve(contractAddress, totalWithBuffer.toString()).encodeABI();
+                            const tx = {
+                                from: userAccount,
+                                to: tokenAddress,
+                                data: txData,
+                                gas: gasLimit,
+                                gasPrice: await web3.eth.getGasPrice()
+                            };
+                            const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                            const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+                            status.innerHTML += "<br>Approval successful!";
+                        } else if (selectedWallet.isMetaMask && BigInt(allowance) < BigInt(totalWithFeesWei.toString())) {
+                            status.innerHTML += "<br>Insufficient allowance! Please approve tokens (including 0.2% fee) manually in MetaMask.";
+                            status.className = "error";
+                            return;
+                        }
+
+                        const baseGas = 60000;
+                        const perRecipientGas = 45000;
+                        const defaultGas = baseGas + (recipients.length * perRecipientGas) + 20000;
+                        const gasLimit = ethers.BigNumber.from(defaultGas);
+                        if (gasLimit.lt(100000)) {
+                            status.innerHTML += "<br>Gas limit too low (min 100,000)!";
+                            status.className = "error";
+                            return;
+                        }
+
+                        let txOptions = { gasLimit };
+                        status.innerHTML += `<br>Gas limit: ${gasLimit} (default fees)`;
+
+                        status.innerHTML += "<br>Sending airdrop...";
+                        let txHash;
+                        if (selectedWallet.isMetaMask) {
+                            const tx = await contract.connect(signer).airdropTokens(tokenAddress, recipients, amountsWei, txOptions);
+                            const receipt = await tx.wait();
+                            txHash = receipt.transactionHash;
+                            status.innerHTML = `Airdrop successful! Tx: ${txHash}<br>Gas used: ${receipt.gasUsed.toString()}`;
+                        } else {
+                            const web3Contract = new web3.eth.Contract(airdropAbi, contractAddress);
+                            const ethBalance = await web3.eth.getBalance(userAccount);
+                            if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
+                                status.innerHTML += "<br>Insufficient ETH for gas (need at least 0.0001 ETH)!";
+                                status.className = "error";
+                                return;
+                            }
+                            const txData = web3Contract.methods.airdropTokens(tokenAddress, recipients, amountsWei.map(a => a.toString())).encodeABI();
+                            const tx = {
+                                from: userAccount,
+                                to: contractAddress,
+                                data: txData,
+                                gas: gasLimit.toString(),
+                                gasPrice: await web3.eth.getGasPrice()
+                            };
+                            const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                            const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+                            txHash = receipt.transactionHash;
+                            status.innerHTML = `Airdrop successful! Tx: ${txHash}<br>Gas used: ${receipt.gasUsed.toString()}`;
+                        }
+                        status.className = "connected";
+                        await logAirdrop(userAccount, tokenAddress, recipients, amounts, txHash);
+                    } catch (error) {
+                        let errorMsg = error.message;
+                        if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
+                        else if (error.code === -32603) errorMsg = "Gas or network issue.";
+                        else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
+                        else if (error.code === "ACTION_REJECTED") errorMsg = "Rejected by MetaMask (check fees).";
+                        status.innerHTML += `<br>Error: ${errorMsg}`;
+                        status.className = "error";
+                        console.error("Airdrop error:", error);
+                    }
+                }
+
+                async function logAirdrop(sender, tokenAddress, recipients, amounts, txHash) {
+                    const timestamp = new Date().toISOString();
+                    const airdropData = recipients.map((recipient, index) => ({
+                        sender,
+                        token: tokenAddress,
+                        amount: amounts[index],
+                        recipient,
+                        timestamp,
+                        txHash
+                    }));
+
+                    try {
+                        const response = await fetch("save_airdrop.php", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(airdropData)
+                        });
+                        if (response.ok) {
+                            await loadAirdropLog();
+                        } else {
+                            console.error("Failed to save airdrop log:", await response.text());
+                        }
+                    } catch (error) {
+                        console.error("Error logging airdrop:", error);
+                    }
+                }
+
+                async function loadAirdropLog() {
+                    try {
+                        const response = await fetch("airdrop_log.json");
+                        if (response.ok) {
+                            const logs = await response.json();
+                            const logDiv = document.getElementById("airdropLog");
+                            logDiv.innerHTML = logs.map((log, index) => `
+                                <div class="airdrop-entry">
+                                    <strong>Airdrop #${index + 1}</strong><br>
+                                    Sender: ${log.sender}<br>
+                                    Token: ${log.token}<br>
+                                    Amount: ${log.amount}<br>
+                                    Recipient: ${log.recipient}<br>
+                                    Timestamp: ${log.timestamp}<br>
+                                    Tx: ${log.txHash}
+                                </div>
+                            `).join("");
+                        }
+                    } catch (error) {
+                        console.error("Error loading airdrop log:", error);
+                    }
+                }
+
+                window.onload = init;
+            } catch (error) {
+                document.body.innerHTML = `<h1 style='color: #ff4444; text-align: center;'>Error: ${error.message}. Please check your network and try again.</h1>`;
+                console.error(error);
+            }
+        })();
+    </script>
+</body>
+</html>
