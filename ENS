@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.9">
+  <title>ENS Domain Registration</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1E2A44 0%, #2C3E50 100%);
+      color: #E8ECEF;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 30px 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      color: #FFFFFF;
+      margin-bottom: 20px;
+      font-size: 2.2em;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 8px;
+      font-weight: 600;
+      color: #E8ECEF;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #E8ECEF;
+      font-size: 1em;
+      text-align: center;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    select:hover, input:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    input::placeholder {
+      color: #A3BFFA;
+      opacity: 0.7;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin: 12px 0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: 600;
+      background: #3B82F6;
+      color: #FFFFFF;
+      transition: background 0.3s ease, transform 0.2s;
+    }
+
+    button:hover {
+      background: #2563EB;
+      transform: scale(1.02);
+    }
+
+    button:disabled {
+      background: rgba(255, 255, 255, 0.2);
+      cursor: not-allowed;
+    }
+
+    #connectMetaMaskBtn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 60px;
+      padding: 6px;
+      font-size: 0.6em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: #4B5EAA;
+    }
+
+    #connectMetaMaskBtn:hover {
+      background: #334C8C;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 0.95em;
+      word-wrap: break-word;
+      color: #E8ECEF;
+    }
+
+    #ensLog {
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.9em;
+      text-align: left;
+    }
+
+    .ens-entry {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      color: #E8ECEF;
+    }
+
+    #connectionPopup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: none;
+      z-index: 1001;
+      font-size: 16px;
+      color: #E8ECEF;
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    #connectionPopup h3 {
+      margin: 10px 0;
+      font-size: 20px;
+      color: #FFFFFF;
+    }
+
+    #connectionPopup p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #E8ECEF;
+    }
+
+    #connectionPopup .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.15);
+      border-top: 5px solid #3B82F6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    #connectionPopup .checkmark {
+      display: none;
+      width: 50px;
+      height: 50px;
+      background-color: #3B82F6;
+      border-radius: 50%;
+      color: #FFFFFF;
+      font-size: 30px;
+      line-height: 50px;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #connectionPopup .close-btn {
+      display: none;
+      margin-top: 20px;
+      padding: 10px;
+      background: #3B82F6;
+      border: none;
+      border-radius: 8px;
+      color: #FFFFFF;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+      transition: background 0.3s ease;
+    }
+
+    #connectionPopup .close-btn:hover {
+      background: #2563EB;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ENS Domain Registration</h1>
+    <button id="connectMetaMaskBtn">Connect MetaMask</button>
+    <select id="walletSelector" disabled>
+      <option value="">-- Select Wallet --</option>
+    </select>
+    <label for="ensName">ENS Name (without .eth):</label>
+    <input type="text" id="ensName" placeholder="e.g., example">
+    <button id="checkButton" disabled>Check Availability</button>
+    <button id="commitButton" disabled>Commit Name</button>
+    <button id="registerButton" disabled>Register Name</button>
+    <div id="status"></div>
+    <div id="ensLog"></div>
+  </div>
+
+  <div id="connectionPopup">
+    <div class="spinner" id="connectionSpinner"></div>
+    <div class="checkmark" id="connectionCheckmark">✓</div>
+    <h3 id="connectionStatusMessage">Processing...</h3>
+    <p id="connectionAddress" style="display: none;"></p>
+    <button class="close-btn" id="closeConnectionPopupBtn">Close</button>
+  </div>
+  <div id="overlay"></div>
+
+  <script>
+    (async () => {
+      try {
+        // Load ethers.js dynamically
+        function loadEthers() {
+          console.log("Loading ethers.js...");
+          return new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js?t=" + Date.now();
+            script.onload = () => {
+              console.log("ethers.js loaded successfully");
+              resolve(window.ethers);
+            };
+            script.onerror = () => {
+              console.warn("Primary CDN failed, trying fallback...");
+              const fallback = document.createElement("script");
+              fallback.src = "https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js?t=" + Date.now();
+              fallback.onload = () => resolve(window.ethers);
+              fallback.onerror = () => reject(new Error("Both CDNs failed to load ethers.js"));
+              document.head.appendChild(fallback);
+            };
+            document.head.appendChild(script);
+          });
+        }
+
+        const ethers = await loadEthers();
+        if (!ethers) throw new Error("ethers.js not loaded");
+
+        // ENS Registrar Controller (Mainnet)
+        const registrarAddress = "0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5";
+        const registrarABI = [
+          "function available(string) view returns (bool)",
+          "function makeCommitment(string, address, bytes32) pure returns (bytes32)",
+          "function commit(bytes32)",
+          "function register(string, address, uint256, bytes32) payable",
+          "function rentPrice(string, uint256) view returns (uint256)"
+        ];
+        console.log("Registrar ABI loaded:", registrarABI);
+
+        let provider, signer, registrarContract, userAccount;
+        let wallets = [];
+        let selectedWallet = null;
+        let commitmentTimestamp = null;
+        let commitmentSecret = null;
+        const status = document.getElementById("status");
+        const ensNameInput = document.getElementById("ensName");
+        const checkButton = document.getElementById("checkButton");
+        const commitButton = document.getElementById("commitButton");
+        const registerButton = document.getElementById("registerButton");
+        const walletSelector = document.getElementById("walletSelector");
+
+        // Popup functions
+        function showConnectionPopup(message) {
+          console.log("Showing popup:", message);
+          const popup = document.getElementById("connectionPopup");
+          const spinner = document.getElementById("connectionSpinner");
+          const checkmark = document.getElementById("connectionCheckmark");
+          const statusMessage = document.getElementById("connectionStatusMessage");
+          const addressDisplay = document.getElementById("connectionAddress");
+          const closeBtn = document.getElementById("closeConnectionPopupBtn");
+
+          spinner.style.display = "block";
+          checkmark.style.display = "none";
+          closeBtn.style.display = "none";
+          addressDisplay.style.display = "none";
+          statusMessage.textContent = message;
+
+          popup.style.display = "block";
+          document.getElementById("overlay").style.display = "block";
+        }
+
+        function updateConnectionPopup({ message, address, success = false }) {
+          console.log("Updating popup:", message, address, success);
+          const spinner = document.getElementById("connectionSpinner");
+          const checkmark = document.getElementById("connectionCheckmark");
+          const statusMessage = document.getElementById("connectionStatusMessage");
+          const addressDisplay = document.getElementById("connectionAddress");
+          const closeBtn = document.getElementById("closeConnectionPopupBtn");
+
+          statusMessage.textContent = message;
+          if (address) {
+            addressDisplay.textContent = `Address: ${address.slice(0, 6)}...${address.slice(-4)}`;
+            addressDisplay.style.display = "block";
+          }
+          if (success) {
+            spinner.style.display = "none";
+            checkmark.style.display = "block";
+            closeBtn.style.display = "block";
+          }
+        }
+
+        function hideConnectionPopup() {
+          console.log("Hiding popup");
+          document.getElementById("connectionPopup").style.display = "none";
+          document.getElementById("overlay").style.display = "none";
+        }
+
+        // Wallet initialization
+        async function initializeWallets() {
+          console.log("Fetching wallets from local storage...");
+          try {
+            const storedWallets = localStorage.getItem('wallets');
+            if (storedWallets) {
+              wallets = JSON.parse(storedWallets);
+              if (!Array.isArray(wallets)) {
+                console.warn("Invalid wallet data in local storage, resetting to empty array");
+                wallets = [];
+              }
+            } else {
+              console.log("No wallets found in local storage");
+              wallets = [];
+            }
+            console.log("Wallets loaded:", wallets);
+
+            walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+            wallets.forEach((wallet, index) => {
+              if (wallet.address && wallet.type) {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${wallet.type}: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+                walletSelector.appendChild(option);
+              } else {
+                console.warn("Skipping invalid wallet entry:", wallet);
+              }
+            });
+
+            if (wallets.length > 0) {
+              console.log("Selecting first valid wallet");
+              walletSelector.value = 0;
+              walletSelector.disabled = false;
+              await selectWallet(0);
+            } else {
+              console.log("No valid wallets available");
+              status.innerHTML = "Please connect MetaMask or create a wallet.";
+              status.className = "";
+              walletSelector.disabled = true;
+            }
+          } catch (error) {
+            console.error("Error fetching wallets from local storage:", error);
+            status.innerHTML = `Error loading wallets: ${error.message}`;
+            status.className = "error";
+            wallets = [];
+            walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+            walletSelector.disabled = true;
+          }
+        }
+
+        async function selectWallet(index) {
+          console.log("Selecting wallet index:", index);
+          try {
+            const idx = parseInt(index);
+            if (idx >= 0 && idx < wallets.length) {
+              selectedWallet = wallets[idx];
+              localStorage.setItem('selectedWalletIndex', idx);
+              userAccount = selectedWallet.address;
+              console.log("Selected wallet:", selectedWallet);
+
+              provider = new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+              if (selectedWallet.isMetaMask && window.ethereum) {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+              } else if (selectedWallet.privateKey) {
+                signer = new ethers.Wallet(selectedWallet.privateKey, provider);
+              } else {
+                throw new Error("No valid signer available for wallet");
+              }
+
+              registrarContract = new ethers.Contract(registrarAddress, registrarABI, signer);
+              console.log("Contract initialized, address:", registrarContract.address);
+
+              checkButton.disabled = false;
+              commitButton.disabled = false;
+              registerButton.disabled = true;
+              updateStatus();
+            } else {
+              console.log("No valid wallet selected");
+              selectedWallet = null;
+              userAccount = null;
+              registrarContract = null;
+              checkButton.disabled = true;
+              commitButton.disabled = true;
+              registerButton.disabled = true;
+              updateStatus();
+            }
+          } catch (error) {
+            console.error("Error selecting wallet:", error);
+            status.innerHTML = `Error selecting wallet: ${error.message}`;
+            status.className = "error";
+          }
+        }
+
+        async function connectMetaMask() {
+          console.log("Connect MetaMask clicked");
+          try {
+            if (!window.ethereum) {
+              console.error("MetaMask not detected");
+              status.innerHTML = "Please install MetaMask!";
+              status.className = "error";
+              return;
+            }
+            showConnectionPopup("Connecting MetaMask...");
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            await window.ethereum.request({ method: "eth_requestAccounts" });
+            const chainId = await provider.getNetwork().then(net => net.chainId);
+            if (chainId !== 1) {
+              throw new Error("Please switch to Ethereum Mainnet (Chain ID: 1)");
+            }
+            signer = provider.getSigner();
+            userAccount = await signer.getAddress();
+            registrarContract = new ethers.Contract(registrarAddress, registrarABI, signer);
+            console.log("MetaMask connected, address:", userAccount);
+
+            const metamaskWallet = { address: userAccount, type: 'MetaMask', isMetaMask: true };
+            if (!wallets.some(w => w.address.toLowerCase() === metamaskWallet.address.toLowerCase())) {
+              wallets.push(metamaskWallet);
+              localStorage.setItem('wallets', JSON.stringify(wallets));
+              console.log("Saved MetaMask wallet to local storage:", metamaskWallet);
+            }
+
+            await initializeWallets();
+            walletSelector.disabled = false;
+            updateConnectionPopup({ message: "MetaMask connected successfully", address: userAccount, success: true });
+          } catch (error) {
+            console.error("MetaMask connection error:", error);
+            updateConnectionPopup({ message: `Failed to connect: ${error.message}`, success: false });
+            status.innerHTML = `Error: ${error.message}`;
+            status.className = "error";
+          }
+        }
+
+        async function createMoneyFundWallet() {
+          console.log("Create MoneyFund Wallet clicked");
+          try {
+            showConnectionPopup("Creating MoneyFund Wallet...");
+            const wallet = ethers.Wallet.createRandom();
+            const newWallet = {
+              address: wallet.address,
+              privateKey: wallet.privateKey,
+              type: 'moneyfund',
+              isMetaMask: false
+            };
+            wallets.push(newWallet);
+            localStorage.setItem('wallets', JSON.stringify(wallets));
+            console.log("Created and saved MoneyFund wallet to local storage:", newWallet);
+
+            await initializeWallets();
+            walletSelector.disabled = false;
+            updateConnectionPopup({ message: "MoneyFund Wallet created successfully", address: newWallet.address, success: true });
+          } catch (error) {
+            console.error("Error creating MoneyFund wallet:", error);
+            updateConnectionPopup({ message: `Failed to create wallet: ${error.message}`, success: false });
+            status.innerHTML = `Error: ${error.message}`;
+            status.className = "error";
+          }
+        }
+
+        function updateStatus() {
+          console.log("Updating status, userAccount:", userAccount);
+          if (userAccount && selectedWallet) {
+            status.innerHTML = `Connected: ${userAccount.slice(0, 6)}...${userAccount.slice(-4)} (${selectedWallet.type})`;
+            status.className = "connected";
+            document.getElementById("connectMetaMaskBtn").innerHTML = selectedWallet.isMetaMask ? "MetaMask Connected" : "Connect MetaMask";
+          } else {
+            status.innerHTML = "Not connected";
+            status.className = "";
+            document.getElementById("connectMetaMaskBtn").innerHTML = "Connect MetaMask";
+          }
+        }
+
+        // ENS Functions
+        async function checkAvailability() {
+          console.log("Check Availability clicked");
+          try {
+            status.innerHTML = "Checking availability...";
+            status.className = "connected";
+
+            if (!selectedWallet || !userAccount || !registrarContract) {
+              console.error("Check failed: No wallet or contract");
+              status.innerHTML = "Please connect and select a wallet!";
+              status.className = "error";
+              return;
+            }
+
+            const name = ensNameInput.value.trim();
+            if (!name) {
+              console.error("Check failed: No name entered");
+              status.innerHTML = "Enter a name!";
+              status.className = "error";
+              return;
+            }
+
+            console.log("Checking name:", name);
+            const isAvailable = await registrarContract.available(name);
+            console.log("Availability:", isAvailable);
+
+            const duration = 31536000; // 1 year
+            const price = await registrarContract.rentPrice(name, duration);
+            console.log("Price:", ethers.utils.formatEther(price), "ETH");
+
+            status.innerHTML = isAvailable
+              ? `Available! Price: ${ethers.utils.formatEther(price)} ETH for 1 year`
+              : "Name is taken!";
+            status.className = isAvailable ? "connected" : "error";
+            commitButton.disabled = !isAvailable;
+            registerButton.disabled = true;
+          } catch (error) {
+            console.error("Error checking availability:", error);
+            status.innerHTML = `Error checking availability: ${error.message}`;
+            status.className = "error";
+          }
+        }
+
+        async function commitName() {
+          console.log("Commit Name clicked");
+          try {
+            status.innerHTML = "Preparing commitment...";
+            status.className = "connected";
+
+            if (!selectedWallet || !userAccount || !registrarContract) {
+              console.error("Commit failed: No wallet or contract");
+              status.innerHTML = "Please connect and select a wallet!";
+              status.className = "error";
+              return;
+            }
+
+            const name = ensNameInput.value.trim();
+            if (!name) {
+              console.error("Commit failed: No name entered");
+              status.innerHTML = "Enter a name!";
+              status.className = "error";
+              return;
+            }
+
+            // Verify contract methods
+            if (!registrarContract.makeCommitment || !registrarContract.commit) {
+              console.error("Commit failed: Contract methods missing");
+              status.innerHTML = "Error: Contract not properly initialized";
+              status.className = "error";
+              return;
+            }
+
+            console.log("Contract methods verified, proceeding...");
+            commitmentSecret = ethers.utils.hexlify(ethers.utils.randomBytes(32));
+            console.log("Commitment secret:", commitmentSecret);
+            const commitment = await registrarContract.makeCommitment(name, userAccount, commitmentSecret);
+            console.log("Commitment:", commitment);
+
+            status.innerHTML = "Sending commitment...";
+            const tx = await registrarContract.commit(commitment);
+            const receipt = await tx.wait();
+            const txHash = receipt.transactionHash;
+            console.log("Commitment sent, txHash:", txHash);
+
+            commitmentTimestamp = Date.now();
+            status.innerHTML = `Commitment sent! Tx: ${txHash}<br>Wait 60 seconds before registering.`;
+            status.className = "connected";
+            commitButton.disabled = true;
+            setTimeout(() => {
+              registerButton.disabled = false;
+              status.innerHTML += "<br>Ready to register!";
+              console.log("Register button enabled");
+            }, 60000);
+            await logEnsAction(userAccount, name, "Committed", txHash);
+          } catch (error) {
+            console.error("Error committing name:", error);
+            status.innerHTML = `Error committing name: ${error.message}`;
+            status.className = "error";
+          }
+        }
+
+        async function registerName() {
+          console.log("Register Name clicked");
+          try {
+            if (!selectedWallet || !userAccount || !registrarContract) {
+              console.error("Register failed: No wallet or contract");
+              status.innerHTML = "Please connect and select a wallet!";
+              status.className = "error";
+              return;
+            }
+            const name = ensNameInput.value.trim();
+            if (!name) {
+              console.error("Register failed: No name entered");
+              status.innerHTML = "Enter a name!";
+              status.className = "error";
+              return;
+            }
+            if (!commitmentTimestamp || Date.now() - commitmentTimestamp < 60000) {
+              console.error("Register failed: Commit delay not met");
+              status.innerHTML = "Please wait 60 seconds after committing!";
+              status.className = "error";
+              return;
+            }
+            if (!commitmentSecret) {
+              console.error("Register failed: No commitment secret");
+              status.innerHTML = "No commitment found. Please commit again.";
+              status.className = "error";
+              return;
+            }
+
+            const duration = 31536000; // 1 year
+            const price = await registrarContract.rentPrice(name, duration);
+            console.log("Registering:", name, "Price:", ethers.utils.formatEther(price));
+
+            const tx = await registrarContract.register(name, userAccount, duration, commitmentSecret, { value: price });
+            const receipt = await tx.wait();
+            const txHash = receipt.transactionHash;
+
+            status.innerHTML = `${name}.eth registered successfully! Tx: ${txHash}`;
+            status.className = "connected";
+            commitButton.disabled = false;
+            registerButton.disabled = true;
+            commitmentTimestamp = null;
+            commitmentSecret = null;
+            await logEnsAction(userAccount, name, "Registered", txHash);
+          } catch (error) {
+            console.error("Error registering name:", error);
+            status.innerHTML = `Error: ${error.message}`;
+            status.className = "error";
+          }
+        }
+
+        async function logEnsAction(sender, name, action, txHash) {
+          console.log("Logging ENS action:", { sender, name, action, txHash });
+          try {
+            const timestamp = new Date().toISOString();
+            const ensData = { sender, name: `${name}.eth`, action, txHash, timestamp };
+            const logs = JSON.parse(localStorage.getItem('ensLog') || '[]');
+            logs.push(ensData);
+            localStorage.setItem('ensLog', JSON.stringify(logs));
+            await loadEnsLog();
+          } catch (error) {
+            console.error("Error logging ENS action:", error);
+            status.innerHTML = `Error logging action: ${error.message}`;
+            status.className = "error";
+          }
+        }
+
+        async function loadEnsLog() {
+          console.log("Loading ENS log...");
+          try {
+            const logs = JSON.parse(localStorage.getItem('ensLog') || '[]');
+            const logDiv = document.getElementById("ensLog");
+            logDiv.innerHTML = logs.map((log, index) => `
+              <div class="ens-entry">
+                <strong>Action #${index + 1}</strong><br>
+                Sender: ${log.sender}<br>
+                Name: ${log.name}<br>
+                Action: ${log.action}<br>
+                Timestamp: ${log.timestamp}<br>
+                Tx: ${log.txHash}
+              </div>
+            `).join("");
+          } catch (error) {
+            console.error("Error loading ENS log:", error);
+            status.innerHTML = `Error loading log: ${error.message}`;
+            status.className = "error";
+          }
+        }
+
+        // Initialize
+        async function init() {
+          console.log("Starting initialization...");
+          try {
+            // Add button to create MoneyFund wallet
+            const createWalletBtn = document.createElement("button");
+            createWalletBtn.textContent = "Create MoneyFund Wallet";
+            createWalletBtn.addEventListener("click", createMoneyFundWallet);
+            document.querySelector(".container").insertBefore(createWalletBtn, walletSelector);
+
+            await initializeWallets();
+            await loadEnsLog();
+
+            if (window.ethereum) {
+              window.ethereum.on("accountsChanged", () => {
+                console.log("Accounts changed, reloading...");
+                window.location.reload();
+              });
+              window.ethereum.on("chainChanged", () => {
+                console.log("Chain changed, reloading...");
+                window.location.reload();
+              });
+            }
+            console.log("Initialization complete");
+          } catch (error) {
+            console.error("Initialization error:", error);
+            status.innerHTML = `Initialization error: ${error.message}`;
+            status.className = "error";
+          }
+        }
+
+        // Set up event listeners immediately
+        document.getElementById("connectMetaMaskBtn").addEventListener("click", connectMetaMask);
+        document.getElementById("checkButton").addEventListener("click", checkAvailability);
+        document.getElementById("commitButton").addEventListener("click", commitName);
+        document.getElementById("registerButton").addEventListener("click", registerName);
+        document.getElementById("closeConnectionPopupBtn").addEventListener("click", hideConnectionPopup);
+        walletSelector.addEventListener("change", (e) => selectWallet(e.target.value));
+
+        // Start initialization
+        window.onload = init;
+      } catch (error) {
+        console.error("Global error:", error);
+        document.body.innerHTML = `<h1 style='color: #ff4444; text-align: center;'>Error: ${error.message}. Please check your network and try again.</h1>`;
+      }
+    })();
+  </script>
+</body>
+</html>
