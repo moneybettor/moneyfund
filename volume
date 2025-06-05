@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyFund Volume Bot</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #E8ECEF;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            background: transparent;
+        }
+        #backgroundCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .interface-wrapper {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 auto;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 600px;
+            z-index: 1;
+        }
+        h1 {
+            text-align: center;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: 500;
+            color: #E8ECEF;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            font-size: 16px;
+            color: #E8ECEF;
+            background: rgba(255, 255, 255, 0.1);
+            transition: border-color 0.3s ease, background 0.3s ease;
+        }
+        select:hover, input:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        input::placeholder {
+            color: #A3BFFA;
+            opacity: 0.7;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        #startAutoBuyBtn, #stopAutoBuyBtn {
+            background: #3B82F6;
+            color: #FFFFFF;
+        }
+        #startAutoBuyBtn:hover, #stopAutoBuyBtn:hover {
+            background: #2563EB;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        button:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        #walletAddress {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #E8ECEF;
+            text-align: center;
+        }
+        #status {
+            margin-top: 20px;
+            font-weight: 500;
+            text-align: center;
+            color: #E8ECEF;
+        }
+        #log {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #E8ECEF;
+            border-radius: 6px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="backgroundCanvas"></canvas>
+    <div class="interface-wrapper">
+        <div class="container">
+            <h1>MoneyFund Volume Bot</h1>
+            <label for="walletSelector">Select Wallet:</label>
+            <select id="walletSelector" onchange="autoBuyInterface.selectWallet(this.value)">
+                <option value="">-- Select Wallet --</option>
+            </select>
+            <p id="walletAddress">Not Connected</p>
+            <label for="tokenAddress">Contract Address to Pump:</label>
+            <input type="text" id="tokenAddress" value="0x100DB67F41A2dF3c32cC7c0955694b98339B7311">
+            <label for="totalEth">ETH Spending Limit:</label>
+            <input type="number" id="totalEth" placeholder="e.g., 1" step="0.001" min="0">
+            <label for="ethPerTx">ETH per Transaction:</label>
+            <input type="number" id="ethPerTx" placeholder="e.g., 0.1" step="0.001" min="0">
+            <button id="startAutoBuyBtn">Start Volume</button>
+            <button id="stopAutoBuyBtn" disabled>Stop Volume</button>
+            <div id="status">Status: Not started</div>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // Background 3D Space with Green Particles and Random Behaviors
+        const canvas = document.getElementById('backgroundCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const particles = [];
+        const numParticles = 300;
+        const maxZ = 1000;
+        const focalLength = 500;
+
+        const greenShades = [
+            '#006400', '#228B22', '#32CD32', '#3CB371', '#2E8B57',
+            '#9ACD32', '#66CDAA', '#00FF7F', '#7CFC00', '#ADFF2F',
+            '#00FA9A', '#90EE90', '#98FB98', '#8FBC8F'
+        ];
+
+        class Particle {
+            constructor(isExplosionParticle = false, lifespan = Infinity) {
+                this.x = (Math.random() - 0.5) * canvas.width * 2;
+                this.y = (Math.random() - 0.5) * canvas.height * 2;
+                this.z = Math.random() * maxZ;
+                this.vx = isExplosionParticle ? (Math.random() - 0.5) * 5 : (Math.random() - 0.5) * 2;
+                this.vy = isExplosionParticle ? (Math.random() - 0.5) * 5 : (Math.random() - 0.5) * 2;
+                this.vz = isExplosionParticle ? (Math.random() - 0.5) * 2 : (Math.random() - 0.5) * 1;
+                this.size = isExplosionParticle ? 1 : 2;
+                this.color = greenShades[Math.floor(Math.random() * greenShades.length)];
+                this.isShooting = false;
+                this.isExploding = false;
+                this.lifespan = lifespan;
+                this.age = 0;
+                this.behaviorEndTime = 0;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.z += this.vz;
+
+                if (this.x < -canvas.width) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = -canvas.width;
+                if (this.y < -canvas.height) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = -canvas.height;
+
+                if (this.z < 1) this.z = maxZ;
+                if (this.z > maxZ) this.z = 1;
+
+                if (this.lifespan !== Infinity) {
+                    this.age++;
+                }
+            }
+
+            draw() {
+                const scale = focalLength / (focalLength + this.z);
+                const x2d = (this.x * scale) + canvas.width / 2;
+                const y2d = (this.y * scale) + canvas.height / 2;
+                const scaledSize = this.size * scale;
+
+                const container = document.querySelector('.container');
+                const rect = container ? container.getBoundingClientRect() : { left: 0, right: 0, top: 0, bottom: 0 };
+
+                const isInsideBox = x2d >= rect.left && x2d <= rect.right && y2d >= rect.top && y2d <= rect.bottom;
+
+                if (!isInsideBox && this.age < this.lifespan) {
+                    const opacity = this.lifespan === Infinity ? (1 - this.z / maxZ) : (1 - this.age / this.lifespan);
+                    ctx.save();
+                    ctx.fillStyle = this.color;
+                    ctx.globalAlpha = opacity;
+                    ctx.beginPath();
+                    ctx.arc(x2d, y2d, scaledSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+        }
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push(new Particle());
+        }
+
+        function createBackgroundGradient() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#1C2526');
+            gradient.addColorStop(1, '#2E1A47');
+            return gradient;
+        }
+
+        const activeBehaviorParticles = new Set();
+        const maxBehaviors = 2;
+
+        function applyRandomBehavior() {
+            const now = Date.now();
+
+            for (let particle of activeBehaviorParticles) {
+                if (now >= particle.behaviorEndTime) {
+                    particle.isShooting = false;
+                    particle.isExploding = false;
+                    particle.vx = (Math.random() - 0.5) * 2;
+                    particle.vy = (Math.random() - 0.5) * 2;
+                    activeBehaviorParticles.delete(particle);
+                }
+            }
+
+            while (activeBehaviorParticles.size < maxBehaviors) {
+                const availableParticles = particles.filter(p => !activeBehaviorParticles.has(p) && p.lifespan === Infinity);
+                if (availableParticles.length === 0) break;
+
+                const particle = availableParticles[Math.floor(Math.random() * availableParticles.length)];
+                const behavior = Math.random() < 0.5 ? 'shoot' : 'explode';
+
+                if (behavior === 'shoot') {
+                    particle.isShooting = true;
+                    particle.vx = (Math.random() - 0.5) * 20;
+                    particle.vy = (Math.random() - 0.5) * 20;
+                    particle.behaviorEndTime = now + 1000;
+                    activeBehaviorParticles.add(particle);
+                } else {
+                    particle.isExploding = true;
+                    const numExplosionParticles = 5;
+                    for (let i = 0; i < numExplosionParticles; i++) {
+                        const explosionParticle = new Particle(true, 60);
+                        explosionParticle.x = particle.x;
+                        explosionParticle.y = particle.y;
+                        explosionParticle.z = particle.z;
+                        particles.push(explosionParticle);
+                    }
+                    particle.lifespan = 1;
+                    particle.age = 0;
+                    particle.behaviorEndTime = now + 1000;
+                    activeBehaviorParticles.add(particle);
+                }
+            }
+        }
+
+        let lastFrameTime = Date.now();
+        const targetFrameInterval = 1000 / 60;
+
+        function animateSpace() {
+            const now = Date.now();
+            const deltaTime = now - lastFrameTime;
+
+            if (deltaTime < targetFrameInterval) {
+                requestAnimationFrame(animateSpace);
+                return;
+            }
+            lastFrameTime = now;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = createBackgroundGradient();
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle, index) => {
+                particle.update();
+                particle.draw();
+                if (particle.age >= particle.lifespan) {
+                    particles.splice(index, 1);
+                }
+            });
+
+            applyRandomBehavior();
+            requestAnimationFrame(animateSpace);
+        }
+
+        animateSpace();
+
+        let selectedWallet = null;
+
+        function logMessage(message) {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('p');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        class AutoBuyInterface {
+            constructor() {
+                this.web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                this.uniswapRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
+                this.wethAddress = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+                this.uniswapRouterABI = [
+                    {
+                        "constant": false,
+                        "inputs": [
+                            {"name": "amountOutMin", "type": "uint256"},
+                            {"name": "path", "type": "address[]"},
+                            {"name": "to", "type": "address"},
+                            {"name": "deadline", "type": "uint256"}
+                        ],
+                        "name": "swapExactETHForTokens",
+                        "outputs": [{"name": "amounts", "type": "uint256[]"}],
+                        "payable": true,
+                        "stateMutability": "payable",
+                        "type": "function"
+                    },
+                    {
+                        "constant": false,
+                        "inputs": [
+                            {"name": "amountIn", "type": "uint256"},
+                            {"name": "amountOutMin", "type": "uint256"},
+                            {"name": "path", "type": "address[]"},
+                            {"name": "to", "type": "address"},
+                            {"name": "deadline", "type": "uint256"}
+                        ],
+                        "name": "swapExactTokensForETH",
+                        "outputs": [{"name": "amounts", "type": "uint256[]"}],
+                        "payable": false,
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    },
+                    {
+                        "constant": true,
+                        "inputs": [
+                            {"name": "amountIn", "type": "uint256"},
+                            {"name": "path", "type": "address[]"}
+                        ],
+                        "name": "getAmountsOut",
+                        "outputs": [{"name": "amounts", "type": "uint256[]"}],
+                        "payable": false,
+                        "stateMutability": "view",
+                        "type": "function"
+                    }
+                ];
+                this.erc20ABI = [
+                    {"constant": true, "inputs": [{"name": "_owner", "type": "address"}], "name": "balanceOf", "outputs": [{"name": "balance", "type": "uint256"}], "type": "function"},
+                    {"constant": false, "inputs": [{"name": "_spender", "type": "address"}, {"name": "_value", "type": "uint256"}], "name": "approve", "outputs": [{"name": "success", "type": "bool"}], "type": "function"}
+                ];
+                this.uniswapRouter = new this.web3.eth.Contract(this.uniswapRouterABI, this.uniswapRouterAddress);
+                this.wallets = [];
+                this.isRunning = false;
+                this.slippageTolerance = 1; // 1% slippage
+                this.gasLimit = 500000;
+            }
+
+            init() {
+                this.loadWalletsFromStorage();
+                this.attachEventListeners();
+            }
+
+            attachEventListeners() {
+                document.getElementById('startAutoBuyBtn').addEventListener('click', () => this.startAutoBuy());
+                document.getElementById('stopAutoBuyBtn').addEventListener('click', () => this.stopAutoBuy());
+            }
+
+            loadWalletsFromStorage() {
+                this.wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+                const selector = document.getElementById('walletSelector');
+                selector.innerHTML = '<option value="">-- Select Wallet --</option>';
+                this.wallets.forEach((wallet, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)} (${wallet.type})`;
+                    selector.appendChild(option);
+                });
+                if (this.wallets.length > 0) {
+                    selectedWallet = this.wallets[0];
+                    selector.value = 0;
+                    this.updateWalletDisplay();
+                }
+            }
+
+            selectWallet(index) {
+                const idx = parseInt(index);
+                if (idx >= 0 && idx < this.wallets.length) {
+                    selectedWallet = this.wallets[idx];
+                    this.updateWalletDisplay();
+                } else {
+                    selectedWallet = null;
+                    document.getElementById('walletAddress').textContent = 'Not Connected';
+                }
+            }
+
+            updateWalletDisplay() {
+                if (selectedWallet) {
+                    document.getElementById('walletAddress').textContent = `Connected: ${selectedWallet.address}`;
+                }
+            }
+
+            async waitForReceipt(txHash) {
+                let receipt = null;
+                let attempts = 0;
+                const maxAttempts = 30; // ~5 minutes with 10s intervals
+                while (!receipt && attempts < maxAttempts) {
+                    receipt = await this.web3.eth.getTransactionReceipt(txHash);
+                    if (!receipt) {
+                        await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10s
+                        attempts++;
+                    }
+                }
+                return receipt;
+            }
+
+            async buyToken(amount, tokenAddress) {
+                const amountInWei = this.web3.utils.toWei(amount.toString(), 'ether');
+                const path = [this.wethAddress, tokenAddress];
+                const amounts = await this.uniswapRouter.methods.getAmountsOut(amountInWei, path).call();
+                const amountOutMin = Math.floor(amounts[1] * (1 - this.slippageTolerance / 100)).toString();
+
+                const baseGasPrice = await this.web3.eth.getGasPrice();
+                const gasPrice = this.web3.utils.toBN(baseGasPrice).mul(this.web3.utils.toBN(15)).div(this.web3.utils.toBN(10)).toString();
+                const tx = {
+                    from: selectedWallet.address,
+                    to: this.uniswapRouterAddress,
+                    data: this.uniswapRouter.methods.swapExactETHForTokens(
+                        amountOutMin,
+                        path,
+                        selectedWallet.address,
+                        Math.floor(Date.now() / 1000) + 120
+                    ).encodeABI(),
+                    value: amountInWei,
+                    gas: this.gasLimit,
+                    gasPrice: gasPrice
+                };
+
+                logMessage(`Initiating buy of ${amount} ETH worth of token at ${tokenAddress}...`);
+                try {
+                    const tokenContract = new this.web3.eth.Contract(this.erc20ABI, tokenAddress);
+                    const initialBalanceWei = await tokenContract.methods.balanceOf(selectedWallet.address).call();
+                    const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                    const txHash = await new Promise((resolve, reject) => {
+                        this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+                            .on('transactionHash', resolve)
+                            .on('error', (error) => reject(new Error(`Send error: ${error.message}`)));
+                    });
+                    logMessage(`Buy transaction sent: ${txHash}`);
+                    const receipt = await this.waitForReceipt(txHash);
+                    if (receipt && receipt.status) {
+                        const finalBalanceWei = await tokenContract.methods.balanceOf(selectedWallet.address).call();
+                        const tokenReceivedWei = this.web3.utils.toBN(finalBalanceWei).sub(this.web3.utils.toBN(initialBalanceWei));
+                        const tokenReceived = this.web3.utils.fromWei(tokenReceivedWei.toString(), 'ether');
+                        logMessage(`Bought ${tokenReceived} tokens: ${txHash}`);
+                        return { success: true, tokenReceivedWei };
+                    } else {
+                        logMessage(`Buy transaction reverted: ${txHash}`);
+                        return { success: false };
+                    }
+                } catch (error) {
+                    logMessage(`Buy failed: ${error.message}`);
+                    return { success: false };
+                }
+            }
+
+            async sellToken(tokenAmountWei, tokenAddress) {
+                const path = [tokenAddress, this.wethAddress];
+                const amounts = await this.uniswapRouter.methods.getAmountsOut(tokenAmountWei, path).call();
+                const amountOutMin = Math.floor(amounts[1] * (1 - this.slippageTolerance / 100)).toString();
+
+                const tokenContract = new this.web3.eth.Contract(this.erc20ABI, tokenAddress);
+                const baseGasPrice = await this.web3.eth.getGasPrice();
+                const gasPrice = this.web3.utils.toBN(baseGasPrice).mul(this.web3.utils.toBN(15)).div(this.web3.utils.toBN(10)).toString();
+
+                // Approve Uniswap Router to spend tokens
+                const approveTx = {
+                    from: selectedWallet.address,
+                    to: tokenAddress,
+                    data: tokenContract.methods.approve(this.uniswapRouterAddress, tokenAmountWei).encodeABI(),
+                    gas: 100000,
+                    gasPrice: gasPrice
+                };
+
+                try {
+                    const signedApproveTx = await this.web3.eth.accounts.signTransaction(approveTx, selectedWallet.privateKey);
+                    const approveTxHash = await new Promise((resolve, reject) => {
+                        this.web3.eth.sendSignedTransaction(signedApproveTx.rawTransaction)
+                            .on('transactionHash', resolve)
+                            .on('error', (error) => reject(new Error(`Approve error: ${error.message}`)));
+                    });
+                    await this.waitForReceipt(approveTxHash);
+                    logMessage(`Approval sent: ${approveTxHash}`);
+
+                    // Sell tokens
+                    const sellTx = {
+                        from: selectedWallet.address,
+                        to: this.uniswapRouterAddress,
+                        data: this.uniswapRouter.methods.swapExactTokensForETH(
+                            tokenAmountWei,
+                            amountOutMin,
+                            path,
+                            selectedWallet.address,
+                            Math.floor(Date.now() / 1000) + 120
+                        ).encodeABI(),
+                        gas: this.gasLimit,
+                        gasPrice: gasPrice
+                    };
+
+                    const signedSellTx = await this.web3.eth.accounts.signTransaction(sellTx, selectedWallet.privateKey);
+                    const sellTxHash = await new Promise((resolve, reject) => {
+                        this.web3.eth.sendSignedTransaction(signedSellTx.rawTransaction)
+                            .on('transactionHash', resolve)
+                            .on('error', (error) => reject(new Error(`Sell error: ${error.message}`)));
+                    });
+                    logMessage(`Sell transaction sent: ${sellTxHash}`);
+                    const receipt = await this.waitForReceipt(sellTxHash);
+                    if (receipt && receipt.status) {
+                        const ethReceived = this.web3.utils.fromWei(amounts[1], 'ether');
+                        logMessage(`Sold tokens for ${ethReceived} ETH: ${sellTxHash}`);
+                        return true;
+                    } else {
+                        logMessage(`Sell transaction reverted: ${sellTxHash}`);
+                        return false;
+                    }
+                } catch (error) {
+                    logMessage(`Sell failed: ${error.message}`);
+                    return false;
+                }
+            }
+
+            async startAutoBuy() {
+                if (!selectedWallet || selectedWallet.isMetaMask) {
+                    logMessage("Auto-buy/sell requires a MoneyFund wallet with a private key.");
+                    return;
+                }
+
+                const tokenAddress = document.getElementById('tokenAddress').value.trim();
+                const totalEth = parseFloat(document.getElementById('totalEth').value.trim());
+                const ethPerTx = parseFloat(document.getElementById('ethPerTx').value.trim());
+
+                if (!tokenAddress || !this.web3.utils.isAddress(tokenAddress)) {
+                    logMessage("Please enter a valid token contract address.");
+                    return;
+                }
+
+                if (!totalEth || !ethPerTx || totalEth <= 0 || ethPerTx <= 0 || ethPerTx > totalEth) {
+                    logMessage("Invalid inputs: Total ETH and ETH per Tx must be > 0, and ETH per Tx <= Total ETH.");
+                    return;
+                }
+
+                const ethBalanceWei = await this.web3.eth.getBalance(selectedWallet.address);
+                const ethBalance = parseFloat(this.web3.utils.fromWei(ethBalanceWei, 'ether'));
+                if (ethBalance < totalEth) {
+                    logMessage(`Insufficient ETH balance: ${ethBalance.toFixed(6)} ETH available, ${totalEth.toFixed(6)} ETH required.`);
+                    return;
+                }
+
+                document.getElementById('startAutoBuyBtn').disabled = true;
+                document.getElementById('stopAutoBuyBtn').disabled = false;
+                document.getElementById('status').textContent = 'Status: Running';
+                this.isRunning = true;
+
+                let remainingEth = totalEth;
+                const executeNextTrade = async (isBuy = true) => {
+                    if (!this.isRunning || remainingEth <= 0) {
+                        this.stopAutoBuy();
+                        return;
+                    }
+
+                    const amountToTrade = Math.min(ethPerTx, remainingEth);
+
+                    if (isBuy) {
+                        const buyResult = await this.buyToken(amountToTrade, tokenAddress);
+                        if (buyResult.success) {
+                            remainingEth -= amountToTrade;
+                            const sellAmountWei = this.web3.utils.toBN(buyResult.tokenReceivedWei).mul(this.web3.utils.toBN(90)).div(this.web3.utils.toBN(100)).toString();
+                            document.getElementById('status').textContent = `Status: Running (Remaining ETH: ${remainingEth.toFixed(6)})`;
+                            executeNextTrade(false); // Sell next
+                        } else {
+                            logMessage("Buy failed, retrying in 5 seconds...");
+                            setTimeout(() => executeNextTrade(true), 5000);
+                        }
+                    } else {
+                        const tokenContract = new this.web3.eth.Contract(this.erc20ABI, tokenAddress);
+                        const balanceWei = await tokenContract.methods.balanceOf(selectedWallet.address).call();
+                        const sellAmountWei = this.web3.utils.toBN(balanceWei).mul(this.web3.utils.toBN(90)).div(this.web3.utils.toBN(100)).toString();
+                        const success = await this.sellToken(sellAmountWei, tokenAddress);
+                        if (success) {
+                            executeNextTrade(true); // Buy next
+                        } else {
+                            logMessage("Sell failed, retrying in 5 seconds...");
+                            setTimeout(() => executeNextTrade(false), 5000);
+                        }
+                    }
+                };
+
+                executeNextTrade(true); // Start with buy
+            }
+
+            stopAutoBuy() {
+                this.isRunning = false;
+                document.getElementById('startAutoBuyBtn').disabled = false;
+                document.getElementById('stopAutoBuyBtn').disabled = true;
+                document.getElementById('status').textContent = 'Status: Stopped';
+                logMessage("Auto-buy/sell stopped.");
+            }
+        }
+
+        const autoBuyInterface = new AutoBuyInterface();
+        autoBuyInterface.init();
+    </script>
+</body>
+</html>
