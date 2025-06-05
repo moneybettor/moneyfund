@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - MoneyFund</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0d1117, #161b22);
+            color: #c9d1d9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #chat-container {
+            width: 100%;
+            max-width: 800px;
+            padding: 25px;
+            background: #21262d;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+            color: #c9d1d9;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        #stats {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #58a6ff;
+            font-weight: 500;
+        }
+        #wallet-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #wallet-selector, #connectMetaMaskBtn {
+            padding: 12px;
+            margin: 5px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            background: #30363d;
+            color: #c9d1d9;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        #wallet-selector:focus, #connectMetaMaskBtn:focus {
+            box-shadow: 0 0 6px rgba(88, 166, 255, 0.3);
+        }
+        #connectMetaMaskBtn {
+            background: linear-gradient(90deg, #2f81f7, #58a6ff);
+            color: #ffffff;
+            cursor: pointer;
+            padding: 6px 12px;
+            font-size: 7px;
+        }
+        #connectMetaMaskBtn:hover {
+            background: linear-gradient(90deg, #3b8aff, #6ab0ff);
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        h1 {
+            color: #58a6ff;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 24px;
+            text-shadow: 0 0 4px rgba(88, 166, 255, 0.2);
+        }
+        #message-area {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #161b22;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            scrollbar-width: thin;
+            scrollbar-color: #2f81f7 #161b22;
+        }
+        #message-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        #message-area::-webkit-scrollbar-track {
+            background: #161b22;
+        }
+        #message-area::-webkit-scrollbar-thumb {
+            background: #2f81f7;
+            border-radius: 4px;
+        }
+        .message {
+            background: linear-gradient(145deg, #30363d, #21262d);
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #2f81f7;
+            animation: slideIn 0.3s ease-out;
+        }
+        .message .username {
+            font-weight: 700;
+            color: #58a6ff;
+            font-size: 14px;
+        }
+        .message .timestamp {
+            font-size: 11px;
+            color: #8b949e;
+            margin-left: 10px;
+        }
+        .message .text {
+            margin: 8px 0;
+            color: #c9d1d9;
+            font-size: 14px;
+        }
+        .message .image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .emoji {
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        .emoji:hover {
+            transform: scale(1.2);
+        }
+        .emoji.like {
+            color: #2ea043; /* Muted green for likes */
+        }
+        .emoji.dislike {
+            color: #d73a4a; /* Muted red for dislikes */
+        }
+        #input-area {
+            margin: 20px 0;
+            text-align: center;
+        }
+        #message-input {
+            padding: 12px;
+            font-size: 14px;
+            margin: 0 10px 10px 10px;
+            border-radius: 8px;
+            background: #30363d;
+            color: #c9d1d9;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: calc(100% - 40px);
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+        #message-input:focus {
+            box-shadow: 0 0 6px rgba(88, 166, 255, 0.3);
+        }
+        #send-button, .photo-upload-label {
+            padding: 12px 20px;
+            margin: 0 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            background: linear-gradient(90deg, #2f81f7, #58a6ff);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #send-button:hover, .photo-upload-label:hover {
+            background: linear-gradient(90deg, #3b8aff, #6ab0ff);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+        }
+        #upload-photo {
+            display: none;
+        }
+        .photo-upload-label {
+            background: linear-gradient(90deg, #2f81f7, #58a6ff);
+        }
+        #message {
+            font-size: 20px;
+            text-align: center;
+            margin: 20px 0;
+            color: #58a6ff;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @media (max-width: 600px) {
+            #chat-container {
+                padding: 15px;
+            }
+            #stats {
+                font-size: 14px;
+            }
+            #wallet-selector, #connectMetaMaskBtn {
+                font-size: 12px;
+                padding: 10px;
+            }
+            #connectMetaMaskBtn {
+                padding: 5px 10px;
+                font-size: 6px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            #message-input {
+                font-size: 12px;
+            }
+            #send-button, .photo-upload-label {
+                font-size: 12px;
+                padding: 10px 15px;
+            }
+            #message {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="stats">Messages: <span id="totalMessages">0</span> | Users: <span id="totalUsers">0</span></div>
+        <div id="wallet-container">
+            <button id="connectMetaMaskBtn">Connect MetaMask</button>
+            <select id="wallet-selector">
+                <option value="">-- Select Wallet --</option>
+            </select>
+        </div>
+        <h1>Chat</h1>
+        <div id="message-area"></div>
+        <div id="input-area">
+            <input type="text" id="message-input" placeholder="Type your message here...">
+            <button id="send-button">Send</button>
+            <input type="file" id="upload-photo" accept="image/*">
+            <label for="upload-photo" class="photo-upload-label">Upload Image</label>
+        </div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        class Chat {
+            constructor() {
+                this.wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+                this.selectedWallet = null;
+                this.userAccount = null;
+                this.web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                this.allMessages = [];
+                this.stats = { totalMessages: 0, totalUsers: new Set() };
+                this.init();
+            }
+
+            async init() {
+                await this.initializeWallets();
+                this.attachEventListeners();
+                await this.loadMessages();
+            }
+
+            async initializeWallets() {
+                if (window.ethereum && this.userAccount) {
+                    const metamaskWallet = { address: this.userAccount, type: 'MetaMask', isMetaMask: true };
+                    if (!this.wallets.some(w => w.address === metamaskWallet.address)) {
+                        this.wallets.push(metamaskWallet);
+                    }
+                }
+                this.wallets = this.wallets.map(wallet => ({
+                    ...wallet,
+                    isMetaMask: wallet.type === 'MetaMask'
+                }));
+                localStorage.setItem('wallets', JSON.stringify(this.wallets));
+                const walletSelector = document.getElementById('wallet-selector');
+                walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+                this.wallets.forEach((wallet, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${wallet.type}: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+                    walletSelector.appendChild(option);
+                });
+                const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex')) || 0;
+                if (this.wallets.length > 0 && selectedIndex >= 0 && selectedIndex < this.wallets.length) {
+                    this.selectedWallet = this.wallets[selectedIndex];
+                    walletSelector.value = selectedIndex;
+                    this.userAccount = this.selectedWallet.address;
+                }
+            }
+
+            async connectMetaMask() {
+                if (!window.ethereum) {
+                    document.getElementById('message').textContent = 'Please install MetaMask!';
+                    return;
+                }
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    this.userAccount = accounts[0];
+                    const metamaskWallet = { address: this.userAccount, type: 'MetaMask', isMetaMask: true };
+                    if (!this.wallets.some(w => w.address === this.userAccount)) {
+                        this.wallets.push(metamaskWallet);
+                        localStorage.setItem('wallets', JSON.stringify(this.wallets));
+                    }
+                    localStorage.setItem('selectedWalletIndex', this.wallets.length - 1);
+                    await this.initializeWallets();
+                } catch (error) {
+                    document.getElementById('message').textContent = `Error: ${error.message}`;
+                }
+            }
+
+            attachEventListeners() {
+                document.getElementById('send-button').addEventListener('click', () => this.sendMessage());
+                document.getElementById('connectMetaMaskBtn').addEventListener('click', () => this.connectMetaMask());
+                document.getElementById('wallet-selector').addEventListener('change', (e) => {
+                    const index = e.target.value;
+                    if (index) {
+                        this.selectedWallet = this.wallets[index];
+                        this.userAccount = this.selectedWallet.address;
+                        localStorage.setItem('selectedWalletIndex', index);
+                    }
+                });
+                document.getElementById('upload-photo').addEventListener('change', () => this.sendMessage());
+            }
+
+            async loadMessages() {
+                try {
+                    const response = await fetch('ledger_chat.php', { cache: 'no-store' });
+                    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                    const data = await response.json();
+                    if (!Array.isArray(data.chatMessages)) throw new Error('Invalid message data');
+                    this.allMessages = data.chatMessages;
+                    this.stats.totalMessages = this.allMessages.length;
+                    this.stats.totalUsers = new Set(this.allMessages.map(msg => msg.wallet));
+                    this.renderMessages();
+                    this.updateStatsDisplay();
+                } catch (error) {
+                    console.error('Error loading messages:', error);
+                    document.getElementById('message').textContent = 'Failed to load messages. Please try again.';
+                }
+            }
+
+            updateStatsDisplay() {
+                document.getElementById('totalMessages').textContent = this.stats.totalMessages;
+                document.getElementById('totalUsers').textContent = this.stats.totalUsers.size;
+            }
+
+            async sendMessage() {
+                if (!this.userAccount) {
+                    document.getElementById('message').textContent = 'Please connect a wallet!';
+                    return;
+                }
+                const messageInput = document.getElementById('message-input');
+                const fileInput = document.getElementById('upload-photo');
+                const text = messageInput.value.trim();
+                let imageData = null;
+
+                if (!text && !fileInput.files[0]) {
+                    document.getElementById('message').textContent = 'Please enter a message or select an image!';
+                    return;
+                }
+
+                if (fileInput.files[0]) {
+                    imageData = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(fileInput.files[0]);
+                    });
+                }
+
+                const newMessage = {
+                    id: this.allMessages.length,
+                    wallet: this.userAccount,
+                    username: `${this.userAccount.slice(-6)} (${this.selectedWallet.type})`,
+                    text: text,
+                    image: imageData,
+                    timestamp: new Date().toISOString(),
+                    likes: 0,
+                    dislikes: 0,
+                    reactions: {} // { wallet: 'like' | 'dislike' }
+                };
+
+                this.allMessages.push(newMessage);
+                this.stats.totalMessages++;
+                this.stats.totalUsers.add(this.userAccount);
+                this.renderMessages();
+                this.updateStatsDisplay();
+
+                try {
+                    const response = await fetch('ledger_chat.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chatMessages: this.allMessages })
+                    });
+                    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                } catch (error) {
+                    console.error('Error saving message:', error);
+                    document.getElementById('message').textContent = 'Failed to save message. Please try again.';
+                }
+
+                messageInput.value = '';
+                fileInput.value = '';
+                setTimeout(() => document.getElementById('message').textContent = '', 2000);
+            }
+
+            async handleLikeDislike(messageIndex, action) {
+                if (!this.userAccount) {
+                    document.getElementById('message').textContent = 'Please connect a wallet to react!';
+                    return;
+                }
+                const message = this.allMessages[messageIndex];
+                if (message.reactions[this.userAccount]) {
+                    if (message.reactions[this.userAccount] === action) {
+                        // Undo reaction
+                        message[message.reactions[this.userAccount] + 's']--;
+                        delete message.reactions[this.userAccount];
+                    } else {
+                        // Switch reaction
+                        message[message.reactions[this.userAccount] + 's']--;
+                        message.reactions[this.userAccount] = action;
+                        message[action + 's']++;
+                    }
+                } else {
+                    // New reaction
+                    message.reactions[this.userAccount] = action;
+                    message[action + 's']++;
+                }
+
+                try {
+                    const response = await fetch('ledger_chat.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chatMessages: this.allMessages })
+                    });
+                    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                } catch (error) {
+                    console.error('Error saving reaction:', error);
+                    document.getElementById('message').textContent = 'Failed to save reaction. Please try again.';
+                }
+
+                this.renderMessages();
+            }
+
+            renderMessages() {
+                const messageArea = document.getElementById('message-area');
+                messageArea.innerHTML = '';
+                const displayedMessages = this.allMessages.slice().reverse(); // Newest first
+                displayedMessages.forEach((msg, index) => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message';
+                    const username = document.createElement('span');
+                    username.className = 'username';
+                    username.textContent = msg.username;
+                    const timestamp = document.createElement('span');
+                    timestamp.className = 'timestamp';
+                    timestamp.textContent = new Date(msg.timestamp).toLocaleString();
+                    const text = document.createElement('p');
+                    text.className = 'text';
+                    text.textContent = msg.text;
+
+                    messageDiv.appendChild(username);
+                    messageDiv.appendChild(document.createTextNode(' '));
+                    messageDiv.appendChild(timestamp);
+                    messageDiv.appendChild(document.createElement('br'));
+                    if (msg.text) {
+                        messageDiv.appendChild(text);
+                    }
+                    if (msg.image) {
+                        const img = document.createElement('img');
+                        img.src = msg.image;
+                        img.className = 'image';
+                        messageDiv.appendChild(img);
+                    }
+
+                    const like = document.createElement('span');
+                    like.className = 'emoji like';
+                    like.innerHTML = `🚀 ${msg.likes}`;
+                    like.onclick = () => this.handleLikeDislike(this.allMessages.length - 1 - index, 'like');
+                    const dislike = document.createElement('span');
+                    dislike.className = 'emoji dislike';
+                    dislike.innerHTML = `🌈 ${msg.dislikes}`;
+                    dislike.onclick = () => this.handleLikeDislike(this.allMessages.length - 1 - index, 'dislike');
+
+                    messageDiv.appendChild(document.createElement('br'));
+                    messageDiv.appendChild(like);
+                    messageDiv.appendChild(document.createTextNode(' '));
+                    messageDiv.appendChild(dislike);
+
+                    messageArea.appendChild(messageDiv);
+                });
+                messageArea.scrollTop = 0; // Scroll to top (newest message)
+            }
+        }
+
+        const chat = new Chat();
+    </script>
+</body>
+</html>
