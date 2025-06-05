@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+    <title>Money DEX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #121C2D 0%, #1A2639 100%);
+            color: #E2E8F0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 15px 15px 0 0;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            position: relative;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+            color: #FFFFFF;
+            padding-top: 10px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 24px;
+            margin-bottom: 24px;
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .section h2, .expandable-content h3 {
+            margin: 0 auto 16px;
+            color: #FFFFFF;
+            font-size: 1.4em;
+            border-bottom: 2px solid #10B981;
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+
+        button {
+            background: #10B981;
+            color: #F1F5F9;
+            border: none;
+            padding: 8px 12px;
+            margin: 3px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background 0.25s ease, transform 0.2s;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: #059669;
+            transform: scale(1.02);
+        }
+
+        button:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+        }
+
+        button.loading {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        button.loading::after {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #F1F5F9;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 6px;
+        }
+
+        button i {
+            margin-right: 4px;
+        }
+
+        input, select {
+            padding: 12px;
+            margin: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #F1F5F9;
+            font-size: 1em;
+            width: 100%;
+            max-width: 320px;
+            transition: background 0.25s ease, border-color 0.25s ease;
+            text-align: left;
+        }
+
+        input:hover, select:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        input:focus, select:focus, button:focus {
+            outline: 2px solid #10B981;
+            outline-offset: 2px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        input::placeholder {
+            color: #A0AEC0;
+            text-align: left;
+            opacity: 0.8;
+        }
+
+        .info-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .info-half {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            line-height: 1.5;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .info-half hr {
+            border: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 8px auto;
+            width: 80%;
+        }
+
+        .wallet-info {
+            text-align: center;
+        }
+
+        .wallet-info p {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        #connectMetaMaskBtn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 60px;
+            padding: 6px;
+            font-size: 0.6em;
+            background: #10B981;
+        }
+
+        #connectMetaMaskBtn:hover {
+            background: #059669;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+        }
+
+        .input-group label {
+            font-size: 0.9em;
+            color: #E2E8F0;
+        }
+
+        .input-group label::after {
+            content: '?';
+            display: inline-block;
+            margin-left: 5px;
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+            text-align: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: help;
+        }
+
+        .input-group label:hover::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            border-radius: 4px;
+            font-size: 0.7em;
+            white-space: nowrap;
+            z-index: 10;
+            max-width: 200px;
+            text-align: center;
+        }
+
+        .expandable-content {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: none;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .expandable-content.active {
+            display: block;
+        }
+
+        .expandable-content.pairs {
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.8em;
+        }
+
+        .pair-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+        }
+
+        .pair-item button {
+            padding: 6px 12px;
+            font-size: 0.8em;
+            background: #10B981;
+            flex-shrink: 0;
+        }
+
+        .pair-item button:hover {
+            background: #059669;
+        }
+
+        .pair-item div {
+            text-align: left;
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pair-item hr {
+            border: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 4px 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: nowrap; /* Single line on desktop */
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .status-box {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 8px 16px;
+            border-radius: 6px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            color: #E2E8F0;
+            max-width: 250px;
+            text-align: left;
+            font-size: 0.8em;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-box.success {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10B981;
+        }
+
+        .status-box.error {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #EF4444;
+        }
+
+        .status-box .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-top: 2px solid #10B981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .status-box .checkmark {
+            display: none;
+            width: 14px;
+            height: 14px;
+            background-color: #10B981;
+            border-radius: 50%;
+            color: #F1F5F9;
+            font-size: 10px;
+            line-height: 14px;
+            text-align: center;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .status-box.success .spinner {
+            display: none;
+        }
+
+        .status-box.success .checkmark {
+            display: inline-block;
+        }
+
+        .status-box .close-btn {
+            margin-left: 8px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: #F1F5F9;
+            cursor: pointer;
+            font-size: 0.7em;
+            border: none;
+            transition: background 0.25s ease;
+        }
+
+        .status-box .retry-btn {
+            margin-left: 8px;
+            padding: 4px 8px;
+            background: #EF4444;
+            border-radius: 4px;
+            color: #F1F5F9;
+            cursor: pointer;
+            font-size: 0.7em;
+            border: none;
+            transition: background 0.25s ease;
+        }
+
+        .status-box .retry-btn:hover {
+            background: #DC2626;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .app-container {
+                margin: 10px;
+            }
+            .section {
+                padding: 15px;
+            }
+            button, input, select {
+                padding: 12px;
+                font-size: 1em; /* Restore readable font size */
+            }
+            .info-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            #connectMetaMaskBtn {
+                position: static;
+                margin: 0 auto;
+                display: block;
+            }
+            header h1 {
+                padding-top: 0;
+            }
+            .status-box {
+                width: 90%;
+                font-size: 0.75em;
+                padding: 8px 12px;
+                max-width: 200px;
+                top: 50px;
+                right: 10px;
+            }
+            .input-group label:hover::before {
+                top: -25px;
+                font-size: 0.65em;
+                max-width: 150px;
+            }
+            .expandable-content {
+                max-height: 120px;
+                font-size: 0.8em;
+                padding: 10px;
+                max-width: 100%;
+            }
+            .expandable-content.pairs {
+                max-height: 120px;
+                overflow-y: auto;
+            }
+            .pair-item button, .expandable-content button {
+                padding: 8px 12px; /* Match desktop button size for consistency */
+                font-size: 0.8em;
+            }
+            .button-group {
+                flex-wrap: wrap; /* Allow buttons to wrap on mobile */
+                gap: 8px; /* Slightly larger gap for better spacing */
+                justify-content: center;
+            }
+            button {
+                padding: 8px 12px; /* Same as desktop to avoid distortion */
+                font-size: 0.8em;
+                margin: 3px;
+            }
+            button i {
+                margin-right: 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Money DEX</h1>
+            <button id="connectMetaMaskBtn" aria-label="Connect MetaMask wallet"><i class="fas fa-wallet"></i> Connect MetaMask</button>
+            <div id="statusBox" class="status-box">
+                <span class="spinner" id="statusSpinner"></span>
+                <span class="checkmark" id="statusCheckmark">✓</span>
+                <span id="statusMessage">Processing...</span>
+                <button class="close-btn" id="closeStatusBtn">Close</button>
+                <button class="retry-btn" id="retryStatusBtn" style="display: none;">Retry</button>
+            </div>
+        </header>
+
+        <!-- Wallet Connection -->
+        <div class="section wallet-info">
+            <h2>Wallet</h2>
+            <div class="action-group">
+                <select id="walletSelector" onchange="selectWallet(this.value)" aria-label="Select wallet">
+                    <option value="">-- Select Wallet --</option>
+                </select>
+            </div>
+            <p>Connected Account: <span id="account">Not connected</span></p>
+        </div>
+
+        <!-- Interact with Pair -->
+        <div class="section">
+
+            <!-- Added stats display for Total Pairs and Total Swaps -->
+            <div class="info-container">
+                <div class="info-half" id="totalPairs">Total Pairs: Loading...</div>
+                <div class="info-half" id="totalSwaps">Total Swaps: Loading...</div>
+            </div>
+            <div class="action-group">
+                <div class="input-group">
+                    <label data-tooltip="Enter the address of the liquidity pair (e.g., 0x...)">Pair Address</label>
+                    <input type="text" id="pairAddress" placeholder="Pair Address (e.g., 0x...)" aria-label="Pair contract address">
+                </div>
+                <div class="button-group">
+                    <button onclick="toggleSection('create-pair')"><i class="fas fa-plus"></i> Create New Pair</button>
+                    <button onclick="loadPair()"><i class="fas fa-search"></i> Load Pair</button>
+                    <button onclick="toggleSection('pairList')"><i class="fas fa-list"></i> See All Pairs</button>
+                    <button onclick="toggleSection('add-liquidity')"><i class="fas fa-plus-circle"></i> Add Liquidity</button>
+                    <button onclick="toggleSection('remove-liquidity')"><i class="fas fa-minus-circle"></i> Remove Liquidity</button>
+                    <button onclick="toggleSection('swap-tokens')"><i class="fas fa-exchange-alt"></i> Swap Tokens</button>
+                </div>
+                <div id="create-pair" class="expandable-content">
+                    <h3>Create New Pair</h3>
+                    <div class="action-group">
+                        <div class="input-group">
+                            <label data-tooltip="Enter the contract address of the first token (e.g., 0x...)">Token 1 Address</label>
+                            <input type="text" id="token0" placeholder="Token 1 Address (e.g., 0x...)" aria-label="Token 1 contract address">
+                        </div>
+                        <div class="input-group">
+                            <label data-tooltip="Enter the contract address of the second token (e.g., 0x...)">Token 2 Address</label>
+                            <input type="text" id="token1" placeholder="Token 2 Address (e.g., 0x...)" aria-label="Token 2 contract address">
+                        </div>
+                        <button onclick="createPair()"><i class="fas fa-plus"></i> Create Pair</button>
+                    </div>
+                </div>
+                <div id="pairList" class="expandable-content pairs">Click "See All Pairs" to load pairs.</div>
+                <div id="add-liquidity" class="expandable-content">
+                    <h3>Add Liquidity</h3>
+                    <div class="action-group">
+                        <div class="input-group">
+                            <label data-tooltip="Amount of the first token to add to the pool">Amount of Token 1</label>
+                            <input type="number" id="amount0Add" placeholder="e.g., 10" step="0.000000000000000001" aria-label="Amount of token 1">
+                        </div>
+                        <div class="input-group">
+                            <label data-tooltip="Amount of the second token to add to the pool">Amount of Token 2</label>
+                            <input type="number" id="amount1Add" placeholder="e.g., 10" step="0.000000000000000001" aria-label="Amount of token 2">
+                        </div>
+                        <button onclick="approveAndAddLiquidity()"><i class="fas fa-plus-circle"></i> Approve & Add Liquidity</button>
+                    </div>
+                </div>
+                <div id="remove-liquidity" class="expandable-content">
+                    <h3>Remove Liquidity</h3>
+                    <div class="action-group">
+                        <div class="input-group">
+                            <label data-tooltip="Amount of liquidity pool tokens to burn">Amount of LP tokens to burn</label>
+                            <input type="number" id="liquidityRemove" placeholder="e.g., 100" step="0.000000000000000001" aria-label="Amount of LP tokens">
+                        </div>
+                        <button onclick="approveAndRemoveLiquidity()"><i class="fas fa-minus-circle"></i> Remove Liquidity</button>
+                    </div>
+                </div>
+                <div id="swap-tokens" class="expandable-content">
+                    <h3>Swap Tokens</h3>
+                    <div class="action-group">
+                        <div class="input-group">
+                            <label data-tooltip="Amount of tokens to swap">Amount to Swap</label>
+                            <input type="number" id="swapAmount" placeholder="e.g., 5" step="0.000000000000000001" aria-label="Amount to swap">
+                        </div>
+                        <div class="input-group">
+                            <label data-tooltip="Maximum slippage percentage you're willing to accept (e.g., 5 for 5%)">Slippage Tolerance (%)</label>
+                            <input type="number" id="slippageTolerance" placeholder="e.g., 5" step="0.1" min="0.1" max="50" value="5" aria-label="Slippage tolerance percentage">
+                        </div>
+                        <div class="action-group">
+                            <button onclick="approveAndSwap(true)"><i class="fas fa-exchange-alt"></i> Swap Token 1 for Token 2</button>
+                            <button onclick="approveAndSwap(false)"><i class="fas fa-exchange-alt"></i> Swap Token 2 for Token 1</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-container">
+                <div class="info-half" id="pairDetails">Enter a pair address to load details.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load ethers.js
+        function loadEthers() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js";
+                script.async = true;
+                script.onload = () => resolve(window.ethers);
+                script.onerror = () => {
+                    const fallback = document.createElement("script");
+                    fallback.src = "https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js";
+                    fallback.async = true;
+                    fallback.onload = () => resolve(window.ethers);
+                    fallback.onerror = () => reject(new Error("Both CDNs failed to load ethers.js"));
+                    document.head.appendChild(fallback);
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Global variables
+        let provider, signer, moneyDEXContract, pairContract, token0Contract, token1Contract, web3, userAccount;
+        let wallets = [];
+        let selectedWallet = null;
+
+        // Hardcoded Values
+        const MONEYDEX_ADDRESS = "0x2e24553474be9136785303689c65af45c55f0f55"; // Updated contract address
+
+        // Updated MoneyDEX ABI
+        const MONEYDEX_ABI = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token0",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "token1",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount0",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount1",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "addLiquidity",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token0",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "token1",
+                        "type": "address"
+                    }
+                ],
+                "name": "createPair",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "pair",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "initialOwner",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    }
+                ],
+                "name": "OwnableInvalidOwner",
+                "type": "error"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "account",
+                        "type": "address"
+                    }
+                ],
+                "name": "OwnableUnauthorizedAccount",
+                "type": "error"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "sender",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount0",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount1",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "to",
+                        "type": "address"
+                    }
+                ],
+                "name": "Burn",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "DivFeeAdded",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "pair",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "FeeAdded",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "sender",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount0",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount1",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "Mint",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "previousOwner",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "newOwner",
+                        "type": "address"
+                    }
+                ],
+                "name": "OwnershipTransferred",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "token0",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "token1",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "address",
+                        "name": "pair",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "pairCount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "PairCreated",
+                "type": "event"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token0",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "token1",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "liquidity",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "removeLiquidity",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "renounceOwnership",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "sender",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount0In",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount1In",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount0Out",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amount1Out",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "to",
+                        "type": "address"
+                    }
+                ],
+                "name": "Swap",
+                "type": "event"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token0",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "token1",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount0In",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "minAmount1Out",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "swapToken0ForToken1",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token0",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "token1",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount1In",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "minAmount0Out",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "swapToken1ForToken0",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "newOwner",
+                        "type": "address"
+                    }
+                ],
+                "name": "transferOwnership",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "allPairs",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "DIVIDEND_FEE",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "DIVIDEND_POOL",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "FEE_DENOMINATOR",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "FEE_PERCENTAGE",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getAllPairs",
+                "outputs": [
+                    {
+                        "internalType": "address[]",
+                        "name": "",
+                        "type": "address[]"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "getPair",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token0",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "token1",
+                        "type": "address"
+                    }
+                ],
+                "name": "getReserves",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "reserve0",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "reserve1",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getTotalSwaps",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "LP_TOKEN_SCALING_FACTOR",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "MINIMUM_LIQUIDITY",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "owner",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "SPECIAL_FEE_PERCENTAGE",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "SPECIAL_FEE_RECIPIENT",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "totalPairs",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "totalSwaps",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        // MoneyDEXPair ABI (for interacting with pair contracts)
+        const PAIR_ABI = [
+            {
+                "inputs": [],
+                "name": "moneyDEX",
+                "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "token0",
+                "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "token1",
+                "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "reserve0",
+                "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "reserve1",
+                "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "totalSupply",
+                "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    { "internalType": "address", "name": "account", "type": "address" }
+                ],
+                "name": "balanceOf",
+                "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        // ERC20 ABI (for interacting with token contracts)
+        const ERC20_ABI = [
+            {
+                "inputs": [
+                    { "internalType": "address", "name": "spender", "type": "address" },
+                    { "internalType": "uint256", "name": "amount", "type": "uint256" }
+                ],
+                "name": "approve",
+                "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    { "internalType": "address", "name": "account", "type": "address" }
+                ],
+                "name": "balanceOf",
+                "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "decimals",
+                "outputs": [{ "name": "", "type": "uint8" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    { "name": "owner", "type": "address" },
+                    { "name": "spender", "type": "address" }
+                ],
+                "name": "allowance",
+                "outputs": [{ "name": "", "type": "uint256" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "symbol",
+                "outputs": [{ "name": "", "type": "string" }],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    { "internalType": "address", "name": "to", "type": "address" },
+                    { "internalType": "uint256", "name": "amount", "type": "uint256" }
+                ],
+                "name": "transfer",
+                "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
+
+        // Status Box Functions
+        window.showStatusBanner = function(message, isError = false) {
+            const box = document.getElementById("statusBox");
+            const spinner = document.getElementById("statusSpinner");
+            const checkmark = document.getElementById("statusCheckmark");
+            const statusMessage = document.getElementById("statusMessage");
+            const closeBtn = document.getElementById("closeStatusBtn");
+            const retryBtn = document.getElementById("retryStatusBtn");
+
+            box.classList.remove('success', 'error');
+            box.classList.add(isError ? 'error' : 'success');
+            spinner.style.display = "inline-block";
+            checkmark.style.display = "none";
+            closeBtn.style.display = "inline-block";
+            retryBtn.style.display = isError ? "inline-block" : "none";
+            statusMessage.textContent = message;
+
+            box.style.display = "flex";
+            setTimeout(() => box.style.opacity = "1", 10);
+        };
+
+        window.updateStatusBanner = function({ message, address, success = false, isError = false, txHash = null }) {
+            const box = document.getElementById("statusBox");
+            const spinner = document.getElementById("statusSpinner");
+            const checkmark = document.getElementById("statusCheckmark");
+            const statusMessage = document.getElementById("statusMessage");
+            const retryBtn = document.getElementById("retryStatusBtn");
+
+            box.classList.remove('success', 'error');
+            box.classList.add(isError ? 'error' : 'success');
+            statusMessage.textContent = message + (address ? ` (Address: ${address.slice(0, 6)}...${address.slice(-4)})` : '');
+            if (txHash) {
+                statusMessage.innerHTML += ` <a href="https://etherscan.io/tx/${txHash}" target="_blank" style="color: #10B981;">View on Etherscan</a>`;
+            }
+            spinner.style.display = success || isError ? "none" : "inline-block";
+            checkmark.style.display = success ? "inline-block" : "none";
+            retryBtn.style.display = isError ? "inline-block" : "none";
+
+            if (success || isError) {
+                setTimeout(() => {
+                    box.style.opacity = "0";
+                    setTimeout(() => box.style.display = "none", 300);
+                }, 5000);
+            }
+        };
+
+        window.hideStatusBanner = function() {
+            const box = document.getElementById("statusBox");
+            box.style.opacity = "0";
+            setTimeout(() => box.style.display = "none", 300);
+        };
+
+        // Input Validation
+        function validateAddress(input) {
+            const isValid = ethers.utils.isAddress(input.value);
+            input.style.borderColor = isValid ? '#10B981' : '#EF4444';
+            return isValid;
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Fetch and display Total Pairs and Total Swaps
+        window.updateStats = async function() {
+            if (!moneyDEXContract) {
+                document.getElementById("totalPairs").innerHTML = "Total Pairs: Not connected";
+                document.getElementById("totalSwaps").innerHTML = "Total Swaps: Not connected";
+                return;
+            }
+            try {
+                const totalPairs = await moneyDEXContract.totalPairs();
+                const totalSwaps = await moneyDEXContract.getTotalSwaps();
+                document.getElementById("totalPairs").innerHTML = `Total Pairs: ${totalPairs.toString()}`;
+                document.getElementById("totalSwaps").innerHTML = `Total Swaps: ${totalSwaps.toString()}`;
+            } catch (error) {
+                console.error("Error fetching stats:", error);
+                document.getElementById("totalPairs").innerHTML = "Total Pairs: Error";
+                document.getElementById("totalSwaps").innerHTML = "Total Swaps: Error";
+            }
+        };
+
+        // Toggle Expandable Section
+        window.toggleSection = function(sectionId) {
+            const section = document.getElementById(sectionId);
+            const button = document.querySelector(`button[onclick="toggleSection('${sectionId}')"]`);
+            const isActive = section.classList.contains('active');
+            section.classList.toggle('active', !isActive);
+            button.innerHTML = `<i class="fas fa-${sectionId === 'pairList' ? 'list' : sectionId === 'create-pair' ? 'plus' : sectionId === 'add-liquidity' ? 'plus-circle' : sectionId === 'remove-liquidity' ? 'minus-circle' : 'exchange-alt'}"></i> ${isActive ? sectionId === 'pairList' ? 'See All Pairs' : sectionId === 'create-pair' ? 'Create New Pair' : sectionId === 'add-liquidity' ? 'Add Liquidity' : sectionId === 'remove-liquidity' ? 'Remove Liquidity' : 'Swap Tokens' : sectionId === 'pairList' ? 'Hide Pairs' : sectionId === 'create-pair' ? 'Hide Create Pair' : sectionId === 'add-liquidity' ? 'Hide Add Liquidity' : sectionId === 'remove-liquidity' ? 'Hide Remove Liquidity' : 'Hide Swap Tokens'}`;
+            if (sectionId === 'pairList' && !isActive) {
+                window.listPairs();
+            }
+        };
+
+        // Initialize Wallets
+        window.initializeWallets = async function() {
+            console.log("Initializing wallets...");
+            web3 = new Web3(web3 ? web3.currentProvider : "https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+            wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+
+            if (window.ethereum && userAccount) {
+                const metamaskWallet = { address: userAccount, type: 'MetaMask', isMetaMask: true };
+                if (!wallets.some(w => w.address === metamaskWallet.address)) {
+                    wallets.push(metamaskWallet);
+                }
+            }
+
+            wallets = wallets.map(wallet => {
+                if (wallet.type === 'moneyfund' && wallet.privateKey) {
+                    return { ...wallet, isMetaMask: false };
+                }
+                return wallet;
+            });
+
+            localStorage.setItem('wallets', JSON.stringify(wallets));
+
+            const walletSelector = document.getElementById('walletSelector');
+            walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+            wallets.forEach((wallet, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${wallet.type}: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+                walletSelector.appendChild(option);
+            });
+
+            const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex')) || 0;
+            if (wallets.length > 0 && selectedIndex >= 0 && selectedIndex < wallets.length) {
+                selectedWallet = wallets[selectedIndex];
+                walletSelector.value = selectedIndex;
+                await window.selectWallet(selectedIndex);
+            } else if (wallets.length > 0) {
+                selectedWallet = wallets[0];
+                localStorage.setItem('selectedWalletIndex', 0);
+                walletSelector.value = 0;
+                await window.selectWallet(0);
+            }
+            updateUIVisibility();
+            await window.updateStats(); // Fetch stats after wallet initialization
+        };
+
+        // Select Wallet
+        window.selectWallet = async function(index) {
+            console.log("Selecting wallet with index:", index);
+            const idx = parseInt(index);
+            if (idx >= 0 && idx < wallets.length) {
+                selectedWallet = wallets[idx];
+                localStorage.setItem('selectedWalletIndex', idx);
+                userAccount = selectedWallet.address;
+                window.updateAccountDisplay();
+
+                if (selectedWallet.isMetaMask && window.ethereum) {
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    moneyDEXContract = new ethers.Contract(MONEYDEX_ADDRESS, MONEYDEX_ABI, signer);
+                } else {
+                    provider = new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                    const wallet = new ethers.Wallet(selectedWallet.privateKey, provider);
+                    signer = wallet;
+                    moneyDEXContract = new ethers.Contract(MONEYDEX_ADDRESS, MONEYDEX_ABI, wallet);
+                }
+                console.log("MoneyDEX contract initialized:", moneyDEXContract.address);
+                updateUIVisibility();
+                await window.updateStats(); // Fetch stats after wallet selection
+            } else {
+                selectedWallet = null;
+                userAccount = null;
+                moneyDEXContract = null;
+                pairContract = null;
+                token0Contract = null;
+                token1Contract = null;
+                window.updateAccountDisplay();
+                await window.updateStats(); // Update stats display for disconnected state
+            }
+            updateUIVisibility();
+        };
+
+        // Update UI Visibility
+        function updateUIVisibility() {
+            const connected = !!userAccount;
+            document.querySelectorAll('.section:not(.wallet-info)').forEach(section => {
+                section.style.display = connected ? 'block' : 'none';
+            });
+        }
+
+        // Connect MetaMask
+        window.connectMetaMask = async function() {
+            if (!window.ethereum) {
+                window.showStatusBanner("Please install MetaMask!", true);
+                return;
+            }
+            window.showStatusBanner("Connecting MetaMask...");
+            try {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await window.ethereum.request({ method: "eth_requestAccounts" });
+                const chainId = await provider.getNetwork().then(net => net.chainId);
+                if (chainId !== 1) throw new Error("Please switch to Ethereum Mainnet (Chain ID: 1)");
+                signer = provider.getSigner();
+                userAccount = await signer.getAddress();
+                moneyDEXContract = new ethers.Contract(MONEYDEX_ADDRESS, MONEYDEX_ABI, signer);
+                await window.initializeWallets();
+                window.updateStatusBanner({ message: "MetaMask connected successfully", address: userAccount, success: true });
+            } catch (error) {
+                console.error("MetaMask connection error:", error);
+                window.updateStatusBanner({ message: `Failed to connect: ${error.message}`, isError: true });
+            }
+        };
+
+        // Create MoneyFund Wallet
+        window.createMoneyFundWallet = async function() {
+            window.showStatusBanner("Creating MoneyFund Wallet...");
+            try {
+                web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                let wallet;
+                let attempts = 0;
+                while (true) {
+                    attempts++;
+                    wallet = web3.eth.accounts.create();
+                    if (wallet.address.startsWith('0x100')) break;
+                    if (attempts > 10000) throw new Error("Failed to generate vanity address after 10000 attempts");
+                }
+                const newWallet = { address: wallet.address, privateKey: wallet.privateKey, type: 'moneyfund', isMetaMask: false };
+                wallets.push(newWallet);
+                localStorage.setItem('wallets', JSON.stringify(wallets));
+                selectedWallet = newWallet;
+                userAccount = selectedWallet.address;
+                await window.initializeWallets();
+                window.updateStatusBanner({ message: "MoneyFund Wallet created successfully", address: userAccount, success: true });
+            } catch (error) {
+                console.error("MoneyFund wallet creation error:", error);
+                window.updateStatusBanner({ message: `Failed to create wallet: ${error.message}`, isError: true });
+            }
+        };
+
+        // Update Account Display
+        window.updateAccountDisplay = function() {
+            const accountSpan = document.getElementById("account");
+            if (userAccount) {
+                accountSpan.textContent = `${userAccount.slice(0, 6)}...${userAccount.slice(-4)} (${selectedWallet.type})`;
+            } else {
+                accountSpan.textContent = "Not connected";
+            }
+        };
+
+        // Execute Transaction
+        window.executeTransaction = async function(contract, method, args = [], value = "0") {
+            console.log(`Executing transaction: ${method} with args:`, args);
+            if (!contract || !userAccount) {
+                console.error("Contract or user account not initialized");
+                throw new Error("Connect wallet first!");
+            }
+            try {
+                let txOptions = { value };
+                try {
+                    const gasLimit = await contract.estimateGas[method](...args, { value });
+                    txOptions.gasLimit = gasLimit.mul(115).div(100); // Add 15% buffer
+                } catch (gasError) {
+                    console.warn("Gas estimation failed, using fallback:", gasError);
+                    txOptions.gasLimit = ethers.BigNumber.from("300000"); // Fallback gas limit
+                }
+                const gasPrice = await provider.getGasPrice();
+                txOptions.gasPrice = gasPrice;
+
+                const tx = await contract.connect(signer)[method](...args, txOptions);
+                const receipt = await tx.wait();
+                await window.updateStats(); // Update stats after transaction
+                return receipt.transactionHash;
+            } catch (error) {
+                console.error(`Error executing transaction ${method}:`, error);
+                throw error;
+            }
+        };
+
+        // Approve and Execute
+        window.approveAndExecute = async function(contract, method, tokenAddress, amountWei, args = [], value = "0") {
+            console.log(`Approving and executing: ${method} for token ${tokenAddress}`);
+            if (!contract) {
+                console.error("Contract not initialized");
+                throw new Error("Connect wallet first!");
+            }
+            const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
+            const allowance = await tokenContract.allowance(userAccount, contract.address);
+
+            if (BigInt(allowance.toString()) < BigInt(amountWei.toString())) {
+                const txApprove = await tokenContract.approve(contract.address, amountWei);
+                await txApprove.wait();
+            }
+
+            return await window.executeTransaction(contract, method, args, value);
+        };
+
+        // Create Pair
+        window.createPair = async function() {
+            console.log("Create Pair button clicked");
+            const token0 = document.getElementById("token0");
+            const token1 = document.getElementById("token1");
+            const btn = document.querySelector('button[onclick="createPair()"]');
+            if (!validateAddress(token0) || !validateAddress(token1)) {
+                window.showStatusBanner("Invalid token addresses", true);
+                return;
+            }
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+            window.showStatusBanner("Creating pair...");
+            try {
+                const pairAddress = await moneyDEXContract.getPair(token0.value, token1.value);
+                if (pairAddress !== ethers.constants.AddressZero) {
+                    window.updateStatusBanner({ message: `Pair already exists at address: ${pairAddress}`, isError: true });
+                    return;
+                }
+
+                const txHash = await window.executeTransaction(moneyDEXContract, "createPair", [token0.value, token1.value]);
+                window.updateStatusBanner({ message: "Pair created successfully", success: true, txHash });
+                if (document.getElementById("pairList").classList.contains('active')) {
+                    window.listPairs();
+                }
+            } catch (error) {
+                console.error("Failed to create pair:", error);
+                window.updateStatusBanner({ message: `Failed to create pair: ${error.message}`, isError: true });
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        };
+
+        // List Pairs
+        window.listPairs = async function() {
+            console.log("Listing pairs...");
+            if (!moneyDEXContract) {
+                window.showStatusBanner("MoneyDEX contract not initialized. Please connect a wallet.", true);
+                return;
+            }
+            window.showStatusBanner("Loading pairs...");
+            try {
+                const pairs = await moneyDEXContract.getAllPairs();
+                let pairInfo = "";
+                for (const pairAddress of pairs) {
+                    const pair = new ethers.Contract(pairAddress, PAIR_ABI, provider);
+                    const token0 = await pair.token0();
+                    const token1 = await pair.token1();
+                    const token0Contract = new ethers.Contract(token0, ERC20_ABI, provider);
+                    const token1Contract = new ethers.Contract(token1, ERC20_ABI, provider);
+                    const token0Symbol = await token0Contract.symbol();
+                    const token1Symbol = await token1Contract.symbol();
+                    pairInfo += `
+                        <div class="pair-item">
+                            <div>
+                                Token 1: ${token0Symbol}<br>
+                                Token 2: ${token1Symbol}<br>
+                                Address: ${pairAddress}
+                            </div>
+                            <button onclick="loadPairFromList('${pairAddress}')">Load</button>
+                        </div><hr>`;
+                }
+                if (pairInfo.endsWith("<hr>")) pairInfo = pairInfo.slice(0, -4);
+                document.getElementById("pairList").innerHTML = pairInfo || "No pairs found.";
+                window.updateStatusBanner({ message: "Pairs loaded successfully", success: true });
+            } catch (error) {
+                console.error("Error listing pairs:", error);
+                document.getElementById("pairList").innerHTML = `Error: ${error.message}`;
+                window.updateStatusBanner({ message: `Error loading pairs: ${error.message}`, isError: true });
+            }
+        };
+
+        // Load Pair from List
+        window.loadPairFromList = function(pairAddress) {
+            console.log("Loading pair from list:", pairAddress);
+            document.getElementById("pairAddress").value = pairAddress;
+            window.loadPair();
+        };
+
+        // Load Pair
+        window.loadPair = async function() {
+            console.log("Loading pair...");
+            const pairAddress = document.getElementById("pairAddress");
+            if (!validateAddress(pairAddress)) {
+                window.showStatusBanner("Invalid pair address", true);
+                return;
+            }
+
+            window.showStatusBanner("Loading pair details...");
+            try {
+                pairContract = new ethers.Contract(pairAddress.value, PAIR_ABI, signer);
+                const token0 = await pairContract.token0();
+                const token1 = await pairContract.token1();
+                token0Contract = new ethers.Contract(token0, ERC20_ABI, signer);
+                token1Contract = new ethers.Contract(token1, ERC20_ABI, signer);
+                const token0Symbol = await token0Contract.symbol();
+                const token1Symbol = await token1Contract.symbol();
+                const reserves = await moneyDEXContract.getReserves(token0, token1);
+                document.getElementById("pairDetails").innerHTML = `
+                    Token 1: ${token0Symbol} (${token0})<br>
+                    Token 2: ${token1Symbol} (${token1})<br><hr>
+                    Reserves:<br>
+                    ${ethers.utils.formatEther(reserves[0])} ${token0Symbol}<br>
+                    ${ethers.utils.formatEther(reserves[1])} ${token1Symbol}
+                `;
+                window.updateStatusBanner({ message: "Pair loaded successfully", success: true });
+            } catch (error) {
+                console.error("Error loading pair:", error);
+                document.getElementById("pairDetails").innerHTML = `Error: ${error.message}`;
+                window.updateStatusBanner({ message: `Error loading pair: ${error.message}`, isError: true });
+            }
+        };
+
+        // Approve and Add Liquidity
+        window.approveAndAddLiquidity = async function() {
+            console.log("Approving and adding liquidity...");
+            if (!moneyDEXContract || !token0Contract || !token1Contract) {
+                window.showStatusBanner("Load a pair first!", true);
+                return;
+            }
+            const amount0 = document.getElementById("amount0Add").value;
+            const amount1 = document.getElementById("amount1Add").value;
+            const btn = document.querySelector('button[onclick="approveAndAddLiquidity()"]');
+            if (!amount0 || !amount1 || amount0 <= 0 || amount1 <= 0) {
+                window.showStatusBanner("Enter valid amounts", true);
+                return;
+            }
+
+            const amount0Wei = ethers.utils.parseEther(amount0);
+            const amount1Wei = ethers.utils.parseEther(amount1);
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+            window.showStatusBanner("Approving and adding liquidity...");
+            try {
+                const allowance0 = await token0Contract.allowance(userAccount, MONEYDEX_ADDRESS);
+                if (BigInt(allowance0.toString()) < BigInt(amount0Wei.toString())) {
+                    console.log("Approving token0...");
+                    const txApprove0 = await token0Contract.approve(MONEYDEX_ADDRESS, amount0Wei);
+                    await txApprove0.wait();
+                    console.log("Token0 approved");
+                }
+
+                const allowance1 = await token1Contract.allowance(userAccount, MONEYDEX_ADDRESS);
+                if (BigInt(allowance1.toString()) < BigInt(amount1Wei.toString())) {
+                    console.log("Approving token1...");
+                    const txApprove1 = await token1Contract.approve(MONEYDEX_ADDRESS, amount1Wei);
+                    await txApprove1.wait();
+                    console.log("Token1 approved");
+                }
+
+                console.log("Adding liquidity...");
+                const txHash = await window.executeTransaction(moneyDEXContract, "addLiquidity", [token0Contract.address, token1Contract.address, amount0Wei, amount1Wei]);
+                window.updateStatusBanner({ message: "Liquidity added successfully", success: true, txHash });
+                window.loadPair();
+            } catch (error) {
+                console.error("Failed to add liquidity:", error);
+                window.updateStatusBanner({ message: `Failed to add liquidity: ${error.message}`, isError: true });
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        };
+
+        // Approve and Swap
+        window.approveAndSwap = async function(isToken0ToToken1) {
+            console.log("Approving and swapping...");
+            if (!moneyDEXContract || !token0Contract || !token1Contract) {
+                window.showStatusBanner("Load a pair first!", true);
+                return;
+            }
+            const amount = document.getElementById("swapAmount").value;
+            const slippageTolerance = document.getElementById("slippageTolerance").value;
+            const btn = document.querySelector(`button[onclick="approveAndSwap(${isToken0ToToken1})"]`);
+            if (!amount || amount <= 0) {
+                window.showStatusBanner("Enter a valid amount", true);
+                return;
+            }
+            if (!slippageTolerance || slippageTolerance <= 0 || slippageTolerance > 50) {
+                window.showStatusBanner("Slippage tolerance must be between 0.1% and 50%", true);
+                return;
+            }
+
+            const amountWei = ethers.utils.parseEther(amount);
+            const slippagePercent = 100 - parseFloat(slippageTolerance); // e.g., 5% slippage -> 95% of input amount
+            const minAmountOut = amountWei.mul(Math.floor(slippagePercent * 10)).div(1000); // Multiply by 10 to handle decimal percentage, then divide by 1000
+            const tokenContract = isToken0ToToken1 ? token0Contract : token1Contract;
+            const method = isToken0ToToken1 ? "swapToken0ForToken1" : "swapToken1ForToken0";
+            const args = isToken0ToToken1 
+                ? [token0Contract.address, token1Contract.address, amountWei, minAmountOut]
+                : [token0Contract.address, token1Contract.address, amountWei, minAmountOut];
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+            window.showStatusBanner("Processing swap...");
+            try {
+                const txHash = await window.approveAndExecute(moneyDEXContract, method, tokenContract.address, amountWei, args);
+                window.updateStatusBanner({ message: "Swap successful", success: true, txHash });
+                window.loadPair();
+            } catch (error) {
+                console.error("Failed to swap:", error);
+                window.updateStatusBanner({ message: `Failed to swap: ${error.message}`, isError: true });
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        };
+
+        // Approve and Remove Liquidity
+        window.approveAndRemoveLiquidity = async function() {
+            console.log("Approving and removing liquidity...");
+            if (!pairContract || !moneyDEXContract) {
+                window.showStatusBanner("Load a pair first!", true);
+                return;
+            }
+            const liquidity = document.getElementById("liquidityRemove").value;
+            const btn = document.querySelector('button[onclick="approveAndRemoveLiquidity()"]');
+            if (!liquidity || liquidity <= 0) {
+                window.showStatusBanner("Enter a valid liquidity amount", true);
+                return;
+            }
+
+            const liquidityWei = ethers.utils.parseEther(liquidity);
+            const lpTokenContract = new ethers.Contract(pairContract.address, ERC20_ABI, signer);
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+            window.showStatusBanner("Removing liquidity...");
+            try {
+                const allowance = await lpTokenContract.allowance(userAccount, MONEYDEX_ADDRESS);
+                if (BigInt(allowance.toString()) < BigInt(liquidityWei.toString())) {
+                    console.log("Approving LP tokens...");
+                    const txApprove = await lpTokenContract.approve(MONEYDEX_ADDRESS, liquidityWei);
+                    await txApprove.wait();
+                    console.log("LP tokens approved");
+                }
+
+                console.log("Removing liquidity...");
+                const txHash = await window.executeTransaction(moneyDEXContract, "removeLiquidity", [token0Contract.address, token1Contract.address, liquidityWei]);
+                window.updateStatusBanner({ message: "Liquidity removed successfully", success: true, txHash });
+                window.loadPair();
+            } catch (error) {
+                console.error("Failed to remove liquidity:", error);
+                window.updateStatusBanner({ message: `Failed to remove liquidity: ${error.message}`, isError: true });
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        };
+
+        // Check Fee Pool
+        window.checkFeePool = async function() {
+            console.log("Checking fee pool...");
+            if (!moneyDEXContract) {
+                window.showStatusBanner("MoneyDEX contract not initialized. Please connect a wallet.", true);
+                return;
+            }
+            const token = document.getElementById("feeToken").value;
+            if (!ethers.utils.isAddress(token)) {
+                window.showStatusBanner("Enter a valid token address.", true);
+                return;
+            }
+
+            window.showStatusBanner("Checking fee pool...");
+            try {
+                const fee = await moneyDEXContract.getFeePool(token);
+                document.getElementById("feePoolInfo").innerHTML = `Fee Pool: ${ethers.utils.formatEther(fee)} tokens`;
+                window.updateStatusBanner({ message: "Fee pool checked successfully", success: true });
+            } catch (error) {
+                console.error("Error checking fee pool:", error);
+                document.getElementById("feePoolInfo").innerHTML = `Error: ${error.message}`;
+                window.updateStatusBanner({ message: `Error checking fee pool: ${error.message}`, isError: true });
+            }
+        };
+
+        // Initialization
+        async function init() {
+            console.log("Initializing app...");
+            try {
+                const ethers = await loadEthers();
+                if (!ethers) throw new Error("ethers.js not loaded");
+                window.ethers = ethers;
+                await window.initializeWallets();
+                document.getElementById("connectMetaMaskBtn").onclick = window.connectMetaMask;
+                document.getElementById("closeStatusBtn").onclick = window.hideStatusBanner;
+                document.getElementById("retryStatusBtn").onclick = window.connectMetaMask;
+
+                document.querySelectorAll('input[type="text"]').forEach(input => {
+                    input.addEventListener('input', debounce(() => validateAddress(input), 300));
+                });
+
+                if (window.ethereum) {
+                    window.ethereum.on("accountsChanged", () => window.location.reload());
+                    window.ethereum.on("chainChanged", () => window.location.reload());
+                }
+            } catch (error) {
+                console.error("Initialization error:", error);
+                window.showStatusBanner(`Failed to initialize app: ${error.message}`, true);
+            }
+        }
+
+        // Run initialization
+        window.onload = function() {
+            console.log("Window loaded, starting initialization...");
+            init();
+        };
+    </script>
+</body>
+</html>
