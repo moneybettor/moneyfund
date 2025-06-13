@@ -142,22 +142,6 @@
       transform: none;
     }
 
-    #connectWalletBtn {
-      position: fixed;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: auto;
-      padding: 8px 16px;
-      font-size: 14px;
-      background: #4B5EAA;
-      border-radius: 8px;
-    }
-
-    #connectWalletBtn:hover {
-      background: #334C8C;
-    }
-
     .panel {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(10px);
@@ -252,12 +236,6 @@
         padding: 8px;
       }
 
-      #connectWalletBtn {
-        top: 8px;
-        padding: 6px 12px;
-        font-size: 12px;
-      }
-
       .panel {
         padding: 16px;
         gap: 12px;
@@ -281,7 +259,6 @@
 <body>
   <div class="container">
     <h1>Staking Pool Factory</h1>
-    <button id="connectWalletBtn">Connect Wallet</button>
     <div class="panel">
       <label for="walletSelector">Select Wallet:</label>
       <select id="walletSelector" onchange="selectWallet(this.value)">
@@ -313,1461 +290,1426 @@
   <div id="statusBox"></div>
 
   <script>
-    function loadEthers() {
-      return new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = "https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js";
-        script.onload = () => resolve(window.ethers);
-        script.onerror = () => {
-          console.warn("Primary CDN failed, trying fallback...");
-          const fallback = document.createElement('script');
-          fallback.src = "https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js";
-          fallback.onload = () => resolve(window.ethers);
-          fallback.onerror = () => reject(new Error("Failed to load ethers.js from both CDNs"));
-          document.head.appendChild(fallback);
-        };
-        document.head.appendChild(script);
+    const contractAddress = "0x40511a6daa80d4412e3dd50377149bd2991c4d11";
+    const NETWORK_ID = "1"; // Ethereum Mainnet
+    const INFURA_URL = "https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73";
+
+    const factoryAbi = [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          }
+        ],
+        "name": "createPool",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "bytes",
+            "name": "reason",
+            "type": "bytes"
+          }
+        ],
+        "name": "PoolInitializationFailed",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "poolAddress",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          }
+        ],
+        "name": "StakingPoolCreated",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          }
+        ],
+        "name": "getPool",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "pools",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    const poolAbi = [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_factory",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_token",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "name": "OwnableInvalidOwner",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "name": "OwnableUnauthorizedAccount",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          }
+        ],
+        "name": "SafeERC20FailedOperation",
+        "type": "error"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "previousOwner",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "poolToken",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "rewardToken",
+            "type": "address"
+          }
+        ],
+        "name": "RewardTokenAdded",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "poolToken",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "rewardToken",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "RewardsClaimed",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "poolToken",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "rewardToken",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "RewardsDistributed",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "Staked",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "Unstaked",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "FEE_DENOMINATOR",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "FEE_PERCENT",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "FEE_RECIPIENT",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "PENALTY_DECREASE_PERIOD",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "PENALTY_DURATION",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "PENALTY_INITIAL_PERCENT",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "claimRewards",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "factoryAddress",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "pendingEthRewards",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "pendingTokenRewards",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "registeredTokens",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "rewardPerTokenStored",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "rewardPerTokenStoredEth",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "rewardPerTokenStoredToken",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "name": "rewardTokens",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "rewards",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "stake",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "stakerIndex",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "name": "stakers",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "stakes",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "userRewardPerTokenPaidEth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "userRewardPerTokenPaidToken",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rewardsEth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rewardsToken",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "stakeTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastClaimTimestamp",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "token",
+        "outputs": [
+          {
+            "internalType": "contract IERC20",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "tokenBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "totalEthRewards",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "totalStaked",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "totalTokenRewards",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "unstake",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "userRewardPerTokenPaid",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "stateMutability": "payable",
+        "type": "receive"
+      }
+    ];
+
+    const erc20Abi = [
+      {
+        "constant": false,
+        "inputs": [
+          { name: "spender", type: "address" },
+          { name: "amount", type: "uint256" }
+        ],
+        "name": "approve",
+        "outputs": [{ type: "boolean" }],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [
+          { name: "owner", type: "address" },
+          { name: "spender", type: "address" }
+        ],
+        "name": "allowance",
+        "outputs": [{ type: "uint256" }],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [{ name: "owner", type: "address" }],
+        "name": "balanceOf",
+        "outputs": [{ type: "uint256" }],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [{ type: "uint8" }],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [{ type: "string" }],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    let web3, userAccount;
+    let wallets = [];
+    let selectedWallet = null;
+    let selectedPoolToken = null;
+    let pools = JSON.parse(localStorage.getItem('pools') || '{}');
+
+    function updateStatusMessage(message, isError = false) {
+      const statusBox = document.getElementById("statusBox");
+      const statusMessage = document.createElement("div");
+      statusMessage.className = `status-message ${isError ? "error" : "success"}`;
+      const timestamp = new Date().toLocaleTimeString();
+      statusMessage.textContent = `[${timestamp}] ${message}`;
+      statusBox.appendChild(statusMessage);
+      statusBox.scrollTop = statusBox.scrollHeight;
+    }
+
+    async function initializeWallets() {
+      console.log("Testing Infura connection...");
+      try {
+        web3 = new Web3(INFURA_URL);
+        const blockNumber = await web3.eth.getBlockNumber();
+        console.log("Current block number:", blockNumber);
+        updateStatusMessage("Connected to Ethereum network");
+      } catch (error) {
+        console.error("Infura connection failed:", error);
+        updateStatusMessage("Failed to connect to Infura. Some features may not work.", true);
+        web3 = new Web3(INFURA_URL); // Proceed anyway
+      }
+
+      wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+
+      const walletSelector = document.getElementById('walletSelector');
+      walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+      wallets.forEach((wallet, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `MoneyFund: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+        walletSelector.appendChild(option);
+      });
+
+      const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex')) || 0;
+      if (wallets.length > 0 && selectedIndex >= 0 && selectedIndex < wallets.length) {
+        selectedWallet = wallets[selectedIndex];
+        walletSelector.value = selectedIndex;
+        userAccount = selectedWallet.address;
+        await selectWallet(selectedIndex);
+      } else if (wallets.length > 0) {
+        selectedWallet = wallets[0];
+        localStorage.setItem('selectedWalletIndex', 0);
+        walletSelector.value = 0;
+        userAccount = selectedWallet.address;
+        await selectWallet(0);
+      } else {
+        await createMoneyFundWallet();
+      }
+    }
+
+    async function selectWallet(index) {
+      const idx = parseInt(index);
+      if (idx >= 0 && idx < wallets.length) {
+        selectedWallet = wallets[idx];
+        localStorage.setItem('selectedWalletIndex', idx);
+        userAccount = selectedWallet.address;
+        updateStatus();
+        await updateSearchSuggestions();
+      } else {
+        selectedWallet = null;
+        userAccount = null;
+        updateStatus();
+      }
+    }
+
+    async function createMoneyFundWallet() {
+      updateStatusMessage("Creating MoneyFund Wallet...");
+      try {
+        let wallet;
+        let attempts = 0;
+        while (true) {
+          attempts++;
+          wallet = web3.eth.accounts.create();
+          if (wallet.address.startsWith('0x100')) break;
+          if (attempts > 10000) throw new Error("Failed to generate vanity address after 10000 attempts");
+        }
+        const newWallet = { address: wallet.address, privateKey: wallet.privateKey, type: 'moneyfund' };
+        wallets.push(newWallet);
+        localStorage.setItem('wallets', JSON.stringify(wallets));
+        selectedWallet = newWallet;
+        userAccount = selectedWallet.address;
+        await initializeWallets();
+        updateStatusMessage(`MoneyFund Wallet created: ${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`);
+        enableButtons();
+      } catch (error) {
+        updateStatusMessage(`Failed to create wallet: ${error.message}`, true);
+      }
+    }
+
+    function updateStatus() {
+      if (userAccount) {
+        enableButtons();
+      } else {
+        disableButtons();
+      }
+    }
+
+    function enableButtons() {
+      document.getElementById("createPoolBtn").disabled = false;
+      document.getElementById("stakeBtn").disabled = false;
+      document.getElementById("unstakeBtn").disabled = false;
+      document.getElementById("claimRewardsBtn").disabled = false;
+    }
+
+    function disableButtons() {
+      document.getElementById("createPoolBtn").disabled = true;
+      document.getElementById("stakeBtn").disabled = true;
+      document.getElementById("unstakeBtn").disabled = true;
+      document.getElementById("claimRewardsBtn").disabled = true;
+    }
+
+    async function updateSearchSuggestions() {
+      const poolSearch = document.getElementById("poolSearch");
+      const stakePoolSearch = document.getElementById("stakePoolSearch");
+      const poolSuggestions = document.getElementById("poolSuggestions");
+      const stakePoolSuggestions = document.getElementById("stakePoolSuggestions");
+
+      const showSuggestions = (input, suggestionsDiv) => {
+        suggestionsDiv.innerHTML = '';
+        const query = input.value.trim().toLowerCase();
+        if (query) {
+          for (const token in pools) {
+            const symbol = pools[token].symbol || 'Unknown';
+            const display = `${symbol} (${token.slice(0, 6)}...${token.slice(-4)})`;
+            if (token.toLowerCase().includes(query) || symbol.toLowerCase().includes(query)) {
+              const suggestion = document.createElement('div');
+              suggestion.className = 'suggestion-item';
+              suggestion.textContent = display;
+              suggestion.dataset.token = token;
+              suggestion.onclick = () => {
+                input.value = token;
+                suggestionsDiv.style.display = 'none';
+                if (input.id === 'poolSearch') {
+                  selectedPoolToken = token;
+                  fetchPoolData(token);
+                } else {
+                  selectedPoolToken = token;
+                }
+              };
+              suggestionsDiv.appendChild(suggestion);
+            }
+          }
+          suggestionsDiv.style.display = suggestionsDiv.children.length ? 'block' : 'none';
+        } else {
+          suggestionsDiv.style.display = 'none';
+        }
+      };
+
+      poolSearch.oninput = () => showSuggestions(poolSearch, poolSuggestions);
+      stakePoolSearch.oninput = () => showSuggestions(stakePoolSearch, stakePoolSuggestions);
+      poolSearch.onclick = () => showSuggestions(poolSearch, poolSuggestions);
+      stakePoolSearch.onclick = () => showSuggestions(stakePoolSearch, stakePoolSuggestions);
+      document.addEventListener('click', (e) => {
+        if (!poolSearch.contains(e.target) && !poolSuggestions.contains(e.target)) {
+          poolSuggestions.style.display = 'none';
+        }
+        if (!stakePoolSearch.contains(e.target) && !stakePoolSuggestions.contains(e.target)) {
+          stakePoolSuggestions.style.display = 'none';
+        }
       });
     }
 
-    (async () => {
+    async function fetchTokenMetadata(tokenAddress) {
       try {
-        const ethers = await loadEthers();
-        if (!ethers) throw new Error("ethers.js not loaded");
-
-        const contractAddress = "0x1f06b41b3ae168744a08a9fae0ce14cf95d483dc";
-        const NETWORK_ID = "1"; // Ethereum Mainnet
-        const INFURA_URL = "https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73";
-
-        const factoryAbi = [
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-              }
-            ],
-            "name": "createPool",
-            "outputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "stateMutability": "nonpayable",
-            "type": "function"
-          },
-          {
-            "anonymous": false,
-            "inputs": [
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-              },
-              {
-                "indexed": false,
-                "internalType": "bytes",
-                "name": "reason",
-                "type": "bytes"
-              }
-            ],
-            "name": "PoolInitializationFailed",
-            "type": "event"
-          },
-          {
-            "anonymous": false,
-            "inputs": [
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "poolAddress",
-                "type": "address"
-              },
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-              }
-            ],
-            "name": "StakingPoolCreated",
-            "type": "event"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-              }
-            ],
-            "name": "getPool",
-            "outputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "name": "pools",
-            "outputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          }
-        ];
-
-        const poolAbi = [
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "_factory",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "_token",
-                "type": "address"
-              }
-            ],
-            "stateMutability": "nonpayable",
-            "type": "constructor"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              }
-            ],
-            "name": "OwnableInvalidOwner",
-            "type": "error"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-              }
-            ],
-            "name": "OwnableUnauthorizedAccount",
-            "type": "error"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-              }
-            ],
-            "name": "SafeERC20FailedOperation",
-            "type": "error"
-          },
-          {
-            "anonymous": false,
-            "inputs": [
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "previousOwner",
-                "type": "address"
-              },
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "newOwner",
-                "type": "address"
-              }
-            ],
-            "name": "OwnershipTransferred",
-            "type": "event"
-          },
-          {
-            "anonymous": false,
-            "inputs": [
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "poolToken",
-                "type": "address"
-              },
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "rewardToken",
-                "type": "address"
-              }
-            ],
-            "name": "RewardTokenAdded",
-            "type": "event"
-          },
-          {
-            "anonymous": false,
-            "inputs": [
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "poolToken",
-                "type": "address"
-              },
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-              },
-              {
-                "indexed": false,
-                "internalType": "address",
-                "name": "rewardToken",
-                "type": "address"
-              },
-              {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-              }
-            ],
-            "name": "RewardsClaimed",
-            "type": "event"
-          },
-          {
-            "anonymous": false,
-            "inputs": [
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "poolToken",
-                "type": "address"
-              },
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "rewardToken",
-                "type": "address"
-              },
-              {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-              }
-            ],
-            "name": "RewardsDistributed",
-            "type": "event"
-          },
-          {
-            "anonymous": false,
-            "inputs": [
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-              },
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-              },
-              {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-              }
-            ],
-            "name": "Staked",
-            "type": "event"
-          },
-          {
-            "anonymous": false,
-            "inputs": [
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-              },
-              {
-                "indexed": true,
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-              },
-              {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-              }
-            ],
-            "name": "Unstaked",
-            "type": "event"
-          },
-          {
-            "inputs": [],
-            "name": "FEE_DENOMINATOR",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "FEE_PERCENT",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "FEE_RECIPIENT",
-            "outputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "PENALTY_DECREASE_PERIOD",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "PENALTY_DURATION",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "PENALTY_INITIAL_PERCENT",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "claimRewards",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "factoryAddress",
-            "outputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "owner",
-            "outputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "pendingEthRewards",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "name": "pendingTokenRewards",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "name": "registeredTokens",
-            "outputs": [
-              {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "renounceOwnership",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "name": "rewardPerTokenStored",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "rewardPerTokenStoredEth",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "rewardPerTokenStoredToken",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "name": "rewardTokens",
-            "outputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "name": "rewards",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-              },
-              {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-              }
-            ],
-            "name": "stake",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "name": "stakerIndex",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "name": "stakers",
-            "outputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "name": "stakes",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "userRewardPerTokenPaidEth",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "userRewardPerTokenPaidToken",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "rewardsEth",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "rewardsToken",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "stakeTimestamp",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "lastClaimTimestamp",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "token",
-            "outputs": [
-              {
-                "internalType": "contract IERC20",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "name": "tokenBalance",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "totalEthRewards",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "totalStaked",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "totalTokenRewards",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "newOwner",
-                "type": "address"
-              }
-            ],
-            "name": "transferOwnership",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-          },
-          {
-            "inputs": [],
-            "name": "unstake",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-          },
-          {
-            "inputs": [
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-              }
-            ],
-            "name": "userRewardPerTokenPaid",
-            "outputs": [
-              {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-              }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "stateMutability": "payable",
-            "type": "receive"
-          }
-        ];
-
-        const erc20Abi = [
-          {
-            "constant": false,
-            "inputs": [
-              { name: "spender", type: "address" },
-              { name: "amount", type: "uint256" }
-            ],
-            "name": "approve",
-            "outputs": [{ type: "boolean" }],
-            "payable": false,
-            "stateMutability": "nonpayable",
-            "type": "function"
-          },
-          {
-            "constant": true,
-            "inputs": [
-              { name: "owner", type: "address" },
-              { name: "spender", type: "address" }
-            ],
-            "name": "allowance",
-            "outputs": [{ type: "uint256" }],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "constant": true,
-            "inputs": [{ name: "owner", type: "address" }],
-            "name": "balanceOf",
-            "outputs": [{ type: "uint256" }],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "constant": true,
-            "inputs": [],
-            "name": "decimals",
-            "outputs": [{ type: "uint8" }],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-          },
-          {
-            "constant": true,
-            "inputs": [],
-            "name": "symbol",
-            "outputs": [{ type: "string" }],
-            "payable": false,
-            "stateMutability": "view",
-            "type": "function"
-          }
-        ];
-
-        let provider, factoryContract, poolContract, tokenContract, web3, userAccount;
-        let wallets = [];
-        let selectedWallet = null;
-        let selectedPoolToken = null;
-        let pools = JSON.parse(localStorage.getItem('pools') || '{}');
-
-        function updateStatusMessage(message, isError = false) {
-          const statusBox = document.getElementById("statusBox");
-          const statusMessage = document.createElement("div");
-          statusMessage.className = `status-message ${isError ? "error" : "success"}`;
-          const timestamp = new Date().toLocaleTimeString();
-          statusMessage.textContent = `[${timestamp}] ${message}`;
-          statusBox.appendChild(statusMessage);
-          statusBox.scrollTop = statusBox.scrollHeight;
-        }
-
-        async function initializeWallets() {
-          console.log("Testing Infura connection...");
-          try {
-            web3 = new Web3(INFURA_URL);
-            const blockNumber = await web3.eth.getBlockNumber();
-            console.log("Current block number:", blockNumber);
-            updateStatusMessage("Connected to Ethereum network");
-          } catch (error) {
-            console.error("Infura connection failed:", error);
-            updateStatusMessage("Failed to connect to Infura. Some features may not work.", true);
-            web3 = new Web3(INFURA_URL); // Proceed anyway
-          }
-
-          wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
-
-          const walletSelector = document.getElementById('walletSelector');
-          walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
-          wallets.forEach((wallet, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = `MoneyFund: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
-            walletSelector.appendChild(option);
-          });
-
-          const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex')) || 0;
-          if (wallets.length > 0 && selectedIndex >= 0 && selectedIndex < wallets.length) {
-            selectedWallet = wallets[selectedIndex];
-            walletSelector.value = selectedIndex;
-            userAccount = selectedWallet.address;
-            await selectWallet(selectedIndex);
-            updateStatus();
-          } else if (wallets.length > 0) {
-            selectedWallet = wallets[0];
-            localStorage.setItem('selectedWalletIndex', 0);
-            walletSelector.value = 0;
-            userAccount = selectedWallet.address;
-            await selectWallet(0);
-            updateStatus();
-          }
-        }
-
-        async function selectWallet(index) {
-          const idx = parseInt(index);
-          if (idx >= 0 && idx < wallets.length) {
-            selectedWallet = wallets[idx];
-            localStorage.setItem('selectedWalletIndex', idx);
-            userAccount = selectedWallet.address;
-            provider = new ethers.providers.JsonRpcProvider(INFURA_URL);
-            factoryContract = new ethers.Contract(contractAddress, factoryAbi, provider);
-            poolContract = null;
-            tokenContract = null;
-            updateStatus();
-            await updateSearchSuggestions();
-          } else {
-            selectedWallet = null;
-            userAccount = null;
-            poolContract = null;
-            tokenContract = null;
-            updateStatus();
-          }
-        }
-
-        async function createMoneyFundWallet() {
-          updateStatusMessage("Creating MoneyFund Wallet...");
-          try {
-            let wallet;
-            let attempts = 0;
-            while (true) {
-              attempts++;
-              wallet = web3.eth.accounts.create();
-              if (wallet.address.startsWith('0x100')) break;
-              if (attempts > 10000) throw new Error("Failed to generate vanity address after 10000 attempts");
-            }
-            const newWallet = { address: wallet.address, privateKey: wallet.privateKey, type: 'moneyfund' };
-            wallets.push(newWallet);
-            localStorage.setItem('wallets', JSON.stringify(wallets));
-            selectedWallet = newWallet;
-            userAccount = selectedWallet.address;
-            await initializeWallets();
-            updateStatusMessage(`MoneyFund Wallet created: ${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`);
-            enableButtons();
-          } catch (error) {
-            updateStatusMessage(`Failed to create wallet: ${error.message}`, true);
-          }
-        }
-
-        function updateStatus() {
-          if (userAccount) {
-            document.getElementById("connectWalletBtn").innerHTML = `MoneyFund Connected: ${userAccount.slice(0, 6)}...${userAccount.slice(-4)}`;
-            enableButtons();
-          } else {
-            document.getElementById("connectWalletBtn").innerHTML = "Connect Wallet";
-            disableButtons();
-          }
-        }
-
-        function enableButtons() {
-          document.getElementById("createPoolBtn").disabled = false;
-          document.getElementById("stakeBtn").disabled = false;
-          document.getElementById("unstakeBtn").disabled = false;
-          document.getElementById("claimRewardsBtn").disabled = false;
-        }
-
-        function disableButtons() {
-          document.getElementById("createPoolBtn").disabled = true;
-          document.getElementById("stakeBtn").disabled = true;
-          document.getElementById("unstakeBtn").disabled = true;
-          document.getElementById("claimRewardsBtn").disabled = true;
-        }
-
-        async function updateSearchSuggestions() {
-          const poolSearch = document.getElementById("poolSearch");
-          const stakePoolSearch = document.getElementById("stakePoolSearch");
-          const poolSuggestions = document.getElementById("poolSuggestions");
-          const stakePoolSuggestions = document.getElementById("stakePoolSuggestions");
-
-          const showSuggestions = (input, suggestionsDiv) => {
-            suggestionsDiv.innerHTML = '';
-            const query = input.value.trim().toLowerCase();
-            if (query) {
-              for (const token in pools) {
-                const symbol = pools[token].symbol || 'Unknown';
-                const display = `${symbol} (${token.slice(0, 6)}...${token.slice(-4)})`;
-                if (token.toLowerCase().includes(query) || symbol.toLowerCase().includes(query)) {
-                  const suggestion = document.createElement('div');
-                  suggestion.className = 'suggestion-item';
-                  suggestion.textContent = display;
-                  suggestion.dataset.token = token;
-                  suggestion.onclick = () => {
-                    input.value = token;
-                    suggestionsDiv.style.display = 'none';
-                    if (input.id === 'poolSearch') {
-                      selectedPoolToken = token;
-                      fetchPoolData(token);
-                    } else {
-                      selectedPoolToken = token;
-                    }
-                  };
-                  suggestionsDiv.appendChild(suggestion);
-                }
-              }
-              suggestionsDiv.style.display = suggestionsDiv.children.length ? 'block' : 'none';
-            } else {
-              suggestionsDiv.style.display = 'none';
-            }
-          };
-
-          poolSearch.oninput = () => showSuggestions(poolSearch, poolSuggestions);
-          stakePoolSearch.oninput = () => showSuggestions(stakePoolSearch, stakePoolSuggestions);
-          poolSearch.onclick = () => showSuggestions(poolSearch, poolSuggestions);
-          stakePoolSearch.onclick = () => showSuggestions(stakePoolSearch, stakePoolSuggestions);
-          document.addEventListener('click', (e) => {
-            if (!poolSearch.contains(e.target) && !poolSuggestions.contains(e.target)) {
-              poolSuggestions.style.display = 'none';
-            }
-            if (!stakePoolSearch.contains(e.target) && !stakePoolSuggestions.contains(e.target)) {
-              stakePoolSuggestions.style.display = 'none';
-            }
-          });
-        }
-
-        async function fetchTokenMetadata(tokenAddress) {
-          try {
-            const tokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
-            const symbol = await tokenContract.methods.symbol().call();
-            const decimals = await tokenContract.methods.decimals().call();
-            return { symbol, decimals: parseInt(decimals) };
-          } catch {
-            return { symbol: 'Unknown', decimals: 18 };
-          }
-        }
-
-        async function fetchPoolData(tokenAddress) {
-          if (!userAccount || !ethers.utils.isAddress(tokenAddress)) {
-            updateStatusMessage("Please connect a wallet and enter a valid token address.", true);
-            return;
-          }
-          try {
-            const web3FactoryContract = new web3.eth.Contract(factoryAbi, contractAddress);
-            const poolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
-            if (poolAddress === '0x0000000000000000000000000000000000000000') {
-              updateStatusMessage("No pool found for this token.", true);
-              document.getElementById("poolStats").innerHTML = "";
-              return;
-            }
-            const web3PoolContract = new web3.eth.Contract(poolAbi, poolAddress);
-            const web3TokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
-            const decimals = await web3TokenContract.methods.decimals().call();
-
-            const totalStaked = await web3PoolContract.methods.totalStaked().call();
-            const totalEthRewards = await web3PoolContract.methods.totalEthRewards().call();
-            const totalTokenRewards = await web3PoolContract.methods.totalTokenRewards().call();
-            const userStakeInfo = await web3PoolContract.methods.stakes(userAccount).call();
-            const userBalance = await web3TokenContract.methods.balanceOf(userAccount).call();
-            const feePercent = await web3PoolContract.methods.FEE_PERCENT().call();
-            const penaltyInitialPercent = await web3PoolContract.methods.PENALTY_INITIAL_PERCENT().call();
-            const penaltyDuration = await web3PoolContract.methods.PENALTY_DURATION().call();
-            const penaltyDecreasePeriod = await web3PoolContract.methods.PENALTY_DECREASE_PERIOD().call();
-
-            document.getElementById("poolStats").innerHTML = `
-              <div class="stat-entry">
-                <strong>Pool Stats:</strong><br>
-                Total Staked: ${ethers.utils.formatUnits(totalStaked, decimals)} Tokens<br>
-                Your Staked: ${ethers.utils.formatUnits(userStakeInfo.amount, decimals)} Tokens<br>
-                Your Balance: ${ethers.utils.formatUnits(userBalance, decimals)} Tokens<br>
-                Total ETH Rewards: ${ethers.utils.formatUnits(totalEthRewards, 18)} ETH<br>
-                Total Token Rewards: ${ethers.utils.formatUnits(totalTokenRewards, decimals)} Tokens<br>
-                Pending ETH Rewards: ${ethers.utils.formatUnits(userStakeInfo.rewardsEth, 18)} ETH<br>
-                Pending Token Rewards: ${ethers.utils.formatUnits(userStakeInfo.rewardsToken, decimals)} Tokens<br>
-                Fee: ${(feePercent / 10000).toFixed(2)}%<br>
-                Initial Penalty: ${(penaltyInitialPercent / 10000).toFixed(2)}% (within ${penaltyDuration / 86400} days)<br>
-                Penalty Decrease Period: ${penaltyDecreasePeriod / 86400} days
-              </div>
-            `;
-            updateStatusMessage("Pool stats updated");
-          } catch (error) {
-            updateStatusMessage(`Error fetching pool data: ${error.message}`, true);
-            document.getElementById("poolStats").innerHTML = "";
-          }
-        }
-
-        async function createPool() {
-          if (!selectedWallet || !userAccount) {
-            updateStatusMessage("Please connect and select a wallet!", true);
-            return;
-          }
-          const tokenAddress = document.getElementById("newPoolToken").value.trim();
-          if (!ethers.utils.isAddress(tokenAddress)) {
-            updateStatusMessage("Invalid token address format!", true);
-            return;
-          }
-          try {
-            updateStatusMessage("Creating pool...");
-
-            const web3FactoryContract = new web3.eth.Contract(factoryAbi, contractAddress);
-            const gasPrice = await web3.eth.getGasPrice();
-            const fixedGasLimit = "3000000";
-
-            const poolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
-            if (poolAddress !== "0x0000000000000000000000000000000000000000") {
-              updateStatusMessage("Pool already exists for this token!", true);
-              return;
-            }
-
-            const ethBalance = await web3.eth.getBalance(userAccount);
-            const estimatedCost = web3.utils.toBN(fixedGasLimit).mul(web3.utils.toBN(gasPrice));
-            if (web3.utils.toBN(ethBalance).lt(estimatedCost)) {
-              updateStatusMessage(`Insufficient ETH: Need ~${web3.utils.fromWei(estimatedCost, "ether")} ETH, have ${web3.utils.fromWei(ethBalance, "ether")} ETH`, true);
-              return;
-            }
-
-            const txData = web3FactoryContract.methods.createPool(tokenAddress).encodeABI();
-            const tx = {
-              from: userAccount,
-              to: contractAddress,
-              data: txData,
-              gasPrice: gasPrice.toString(),
-              gas: fixedGasLimit
-            };
-
-            const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
-            const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-
-            if (receipt.status) {
-              const newPoolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
-              const metadata = await fetchTokenMetadata(tokenAddress);
-              pools[tokenAddress] = { poolAddress: newPoolAddress, symbol: metadata.symbol };
-              localStorage.setItem('pools', JSON.stringify(pools));
-              await updateSearchSuggestions();
-              document.getElementById("newPoolToken").value = "";
-              updateStatusMessage("Pool created successfully");
-            } else {
-              updateStatusMessage("Transaction failed!", true);
-            }
-          } catch (error) {
-            let errorMsg = error.message;
-            if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
-            else if (error.code === -32603) errorMsg = "Gas or network issue.";
-            else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
-            updateStatusMessage(`Error: ${errorMsg}`, true);
-            console.error("Create pool error:", error);
-          }
-        }
-
-        async function approveTokens(amount, tokenAddress, poolAddress) {
-          try {
-            updateStatusMessage("Approving tokens...");
-
-            const ethBalance = await web3.eth.getBalance(userAccount);
-            if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
-              updateStatusMessage("Insufficient ETH for gas (need at least 0.0001 ETH)!", true);
-              return false;
-            }
-
-            const web3TokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
-            const decimals = await web3TokenContract.methods.decimals().call();
-            const amountWei = ethers.utils.parseUnits(amount.toString(), decimals);
-
-            const allowance = await web3TokenContract.methods.allowance(userAccount, poolAddress).call();
-            if (BigInt(allowance) >= BigInt(amountWei.toString())) {
-              updateStatusMessage("Tokens already approved");
-              return true;
-            }
-
-            let gasLimit;
-            try {
-              gasLimit = await web3TokenContract.methods.approve(poolAddress, amountWei.toString()).estimateGas({ from: userAccount });
-              gasLimit = Math.ceil(gasLimit * 1.1).toString();
-            } catch (error) {
-              console.warn("Gas estimation failed, using default limit:", error);
-              gasLimit = "100000";
-            }
-
-            const txData = web3TokenContract.methods.approve(poolAddress, amountWei.toString()).encodeABI();
-            const tx = {
-              from: userAccount,
-              to: tokenAddress,
-              data: txData,
-              gasPrice: (await web3.eth.getGasPrice()).toString(),
-              gas: gasLimit
-            };
-
-            const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
-            const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-
-            if (receipt.status) {
-              updateStatusMessage("Approval successful");
-              return true;
-            } else {
-              updateStatusMessage("Approval failed!", true);
-              return false;
-            }
-          } catch (error) {
-            let errorMsg = error.message;
-            if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
-            else if (error.code === -32603) errorMsg = "Gas or network issue.";
-            else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
-            updateStatusMessage(`Error: ${errorMsg}`, true);
-            console.error("Approval error:", error);
-            return false;
-          }
-        }
-
-        async function stake() {
-          if (!selectedWallet || !userAccount) {
-            updateStatusMessage("Please connect and select a wallet!", true);
-            return;
-          }
-          const tokenAddress = document.getElementById("stakePoolSearch").value.trim();
-          const amount = document.getElementById("stakeAmount").value.trim();
-          if (!ethers.utils.isAddress(tokenAddress) || !amount || parseFloat(amount) <= 0) {
-            updateStatusMessage("Enter a valid token address and amount!", true);
-            return;
-          }
-          try {
-            updateStatusMessage("Staking tokens...");
-
-            const web3FactoryContract = new web3.eth.Contract(factoryAbi, contractAddress);
-            const poolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
-            if (poolAddress === "0x0000000000000000000000000000000000000000") {
-              updateStatusMessage("No pool found for this token!", true);
-              return;
-            }
-
-            const approved = await approveTokens(amount, tokenAddress, poolAddress);
-            if (!approved) return;
-
-            const web3PoolContract = new web3.eth.Contract(poolAbi, poolAddress);
-            const ethBalance = await web3.eth.getBalance(userAccount);
-            if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
-              updateStatusMessage("Insufficient ETH for gas (need at least 0.0001 ETH)!", true);
-              return;
-            }
-
-            const decimals = await new web3.eth.Contract(erc20Abi, tokenAddress).methods.decimals().call();
-            const amountWei = ethers.utils.parseUnits(amount, decimals);
-
-            let gasLimit;
-            try {
-              gasLimit = await web3PoolContract.methods.stake(userAccount, amountWei.toString()).estimateGas({ from: userAccount });
-              gasLimit = Math.ceil(gasLimit * 1.1).toString();
-            } catch (error) {
-              console.warn("Gas estimation failed, using default limit:", error);
-              gasLimit = "300000";
-            }
-
-            const txData = web3PoolContract.methods.stake(userAccount, amountWei.toString()).encodeABI();
-            const tx = {
-              from: userAccount,
-              to: poolAddress,
-              data: txData,
-              gasPrice: (await web3.eth.getGasPrice()).toString(),
-              gas: gasLimit
-            };
-
-            const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
-            const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-
-            if (receipt.status) {
-              updateStatusMessage("Stake successful");
-              document.getElementById("stakeAmount").value = "";
-              if (selectedPoolToken === tokenAddress) {
-                await fetchPoolData(tokenAddress);
-              }
-            } else {
-              updateStatusMessage("Stake failed!", true);
-            }
-          } catch (error) {
-            let errorMsg = error.message;
-            if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
-            else if (error.code === -32603) errorMsg = "Gas or network issue.";
-            else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
-            updateStatusMessage(`Error: ${errorMsg}`, true);
-            console.error("Stake error:", error);
-          }
-        }
-
-        async function unstake() {
-          if (!selectedWallet || !userAccount) {
-            updateStatusMessage("Please connect and select a wallet!", true);
-            return;
-          }
-          const tokenAddress = document.getElementById("stakePoolSearch").value.trim();
-          if (!ethers.utils.isAddress(tokenAddress)) {
-            updateStatusMessage("Enter a valid token address!", true);
-            return;
-          }
-          try {
-            updateStatusMessage("Unstaking tokens...");
-
-            const web3FactoryContract = new web3.eth.Contract(factoryAbi, contractAddress);
-            const poolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
-            if (poolAddress === "0x0000000000000000000000000000000000000000") {
-              updateStatusMessage("No pool found for this token!", true);
-              return;
-            }
-
-            const web3PoolContract = new web3.eth.Contract(poolAbi, poolAddress);
-            const ethBalance = await web3.eth.getBalance(userAccount);
-            if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
-              updateStatusMessage("Insufficient ETH for gas (need at least 0.0001 ETH)!", true);
-              return;
-            }
-
-            let gasLimit;
-            try {
-              gasLimit = await web3PoolContract.methods.unstake().estimateGas({ from: userAccount });
-              gasLimit = Math.ceil(gasLimit * 1.1).toString();
-            } catch (error) {
-              console.warn("Gas estimation failed, using default limit:", error);
-              gasLimit = "300000";
-            }
-
-            const txData = web3PoolContract.methods.unstake().encodeABI();
-            const tx = {
-              from: userAccount,
-              to: poolAddress,
-              data: txData,
-              gasPrice: (await web3.eth.getGasPrice()).toString(),
-              gas: gasLimit
-            };
-
-            const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
-            const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-
-            if (receipt.status) {
-              updateStatusMessage("Unstake successful");
-              if (selectedPoolToken === tokenAddress) {
-                await fetchPoolData(tokenAddress);
-              }
-            } else {
-              updateStatusMessage("Unstake failed!", true);
-            }
-          } catch (error) {
-            let errorMsg = error.message;
-            if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
-            else if (error.code === -32603) errorMsg = "Gas or network issue.";
-            else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
-            updateStatusMessage(`Error: ${errorMsg}`, true);
-            console.error("Unstake error:", error);
-          }
-        }
-
-        async function claimRewards() {
-          if (!selectedWallet || !userAccount) {
-            updateStatusMessage("Please connect and select a wallet!", true);
-            return;
-          }
-          const tokenAddress = document.getElementById("stakePoolSearch").value.trim();
-          if (!ethers.utils.isAddress(tokenAddress)) {
-            updateStatusMessage("Enter a valid token address!", true);
-            return;
-          }
-          try {
-            updateStatusMessage("Claiming rewards...");
-
-            const web3FactoryContract = new web3.eth.Contract(factoryAbi, contractAddress);
-            const poolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
-            if (poolAddress === "0x0000000000000000000000000000000000000000") {
-              updateStatusMessage("No pool found for this token!", true);
-              return;
-            }
-
-            const web3PoolContract = new web3.eth.Contract(poolAbi, poolAddress);
-            const ethBalance = await web3.eth.getBalance(userAccount);
-            if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
-              updateStatusMessage("Insufficient ETH for gas (need at least 0.0001 ETH)!", true);
-              return;
-            }
-
-            let gasLimit;
-            try {
-              gasLimit = await web3PoolContract.methods.claimRewards().estimateGas({ from: userAccount });
-              gasLimit = Math.ceil(gasLimit * 1.1).toString();
-            } catch (error) {
-              console.warn("Gas estimation failed, using default limit:", error);
-              gasLimit = "300000";
-            }
-
-            const txData = web3PoolContract.methods.claimRewards().encodeABI();
-            const tx = {
-              from: userAccount,
-              to: poolAddress,
-              data: txData,
-              gasPrice: (await web3.eth.getGasPrice()).toString(),
-              gas: gasLimit
-            };
-
-            const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
-            const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-
-            if (receipt.status) {
-              updateStatusMessage("Rewards claimed successfully");
-              if (selectedPoolToken === tokenAddress) {
-                await fetchPoolData(tokenAddress);
-              }
-            } else {
-              updateStatusMessage("Claim rewards failed!", true);
-            }
-          } catch (error) {
-            let errorMsg = error.message;
-            if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
-            else if (error.code === -32603) errorMsg = "Gas or network issue.";
-            else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
-            updateStatusMessage(`Error: ${errorMsg}`, true);
-            console.error("Claim rewards error:", error);
-          }
-        }
-
-        async function init() {
-          await initializeWallets();
-
-          document.getElementById("connectWalletBtn").onclick = async () => {
-            await createMoneyFundWallet();
-          };
-          document.getElementById("createPoolBtn").onclick = createPool;
-          document.getElementById("stakeBtn").onclick = stake;
-          document.getElementById("unstakeBtn").onclick = unstake;
-          document.getElementById("claimRewardsBtn").onclick = claimRewards;
-          document.getElementById("poolSearch").onchange = (e) => {
-            selectedPoolToken = e.target.value.trim();
-            if (ethers.utils.isAddress(selectedPoolToken)) {
-              fetchPoolData(selectedPoolToken);
-            } else {
-              document.getElementById("poolStats").innerHTML = "";
-              updateStatusMessage("Invalid token address!", true);
-            }
-          };
-          document.getElementById("stakePoolSearch").onchange = (e) => {
-            selectedPoolToken = e.target.value.trim();
-            if (!ethers.utils.isAddress(selectedPoolToken)) {
-              updateStatusMessage("Invalid token address!", true);
-            }
-          };
-
-          await updateSearchSuggestions();
-        }
-
-        window.onload = init;
-      } catch (error) {
-        document.body.innerHTML = `<h1 style='color: #ff4444; text-align: center;'>Error: ${error.message}. Please check your network and try again.</h1>`;
-        console.error(error);
+        const tokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
+        const rawSymbol = await tokenContract.methods.symbol().call();
+        const symbol = typeof rawSymbol === 'string' ? rawSymbol : String(rawSymbol);
+        const decimals = await tokenContract.methods.decimals().call();
+        return { symbol, decimals: parseInt(decimals) };
+      } catch {
+        return { symbol: 'Unknown', decimals: 18 };
       }
-    })();
+    }
+
+    async function fetchPoolData(tokenAddress) {
+      if (!userAccount) {
+        updateStatusMessage("Please connect a wallet.", true);
+        return;
+      }
+      try {
+        const web3FactoryContract = new web3.eth.Contract(factoryAbi, contractAddress);
+        const poolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
+        if (poolAddress === '0x0000000000000000000000000000000000000000') {
+          updateStatusMessage("No pool found for this token.", true);
+          document.getElementById("poolStats").innerHTML = "";
+          return;
+        }
+        const web3PoolContract = new web3.eth.Contract(poolAbi, poolAddress);
+        const web3TokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
+        const decimals = await web3TokenContract.methods.decimals().call();
+
+        const totalStaked = await web3PoolContract.methods.totalStaked().call();
+        const totalEthRewards = await web3PoolContract.methods.totalEthRewards().call();
+        const totalTokenRewards = await web3PoolContract.methods.totalTokenRewards().call();
+        const userStakeInfo = await web3PoolContract.methods.stakes(userAccount).call();
+        const userBalance = await web3TokenContract.methods.balanceOf(userAccount).call();
+        const feePercent = await web3PoolContract.methods.FEE_PERCENT().call();
+        const penaltyInitialPercent = await web3PoolContract.methods.PENALTY_INITIAL_PERCENT().call();
+        const penaltyDuration = await web3PoolContract.methods.PENALTY_DURATION().call();
+        const penaltyDecreasePeriod = await web3PoolContract.methods.PENALTY_DECREASE_PERIOD().call();
+
+        const formatUnits = (value, decimals) => {
+          const factor = web3.utils.toBN(10).pow(web3.utils.toBN(decimals));
+          const quotient = web3.utils.toBN(value).div(factor).toString();
+          const remainder = web3.utils.toBN(value).mod(factor).toString().padStart(decimals, '0').replace(/0+$/, '');
+          return remainder ? `${quotient}.${remainder}` : quotient;
+        };
+
+        document.getElementById("poolStats").innerHTML = `
+          <div class="stat-entry">
+            <strong>Pool Stats:</strong><br>
+            Total Staked: ${formatUnits(totalStaked, decimals)} Tokens<br>
+            Your Staked: ${formatUnits(userStakeInfo.amount, decimals)} Tokens<br>
+            Your Balance: ${formatUnits(userBalance, decimals)} Tokens<br>
+            Total ETH Rewards: ${formatUnits(totalEthRewards, 18)} ETH<br>
+            Total Token Rewards: ${formatUnits(totalTokenRewards, decimals)} Tokens<br>
+            Pending ETH Rewards: ${formatUnits(userStakeInfo.rewardsEth, 18)} ETH<br>
+            Pending Token Rewards: ${formatUnits(userStakeInfo.rewardsToken, decimals)} Tokens<br>
+            Fee: ${(feePercent / 10000).toFixed(2)}%<br>
+            Initial Penalty: ${(penaltyInitialPercent / 10000).toFixed(2)}% (within ${penaltyDuration / 86400} days)<br>
+            Penalty Decrease Period: ${penaltyDecreasePeriod / 86400} days
+          </div>
+        `;
+        updateStatusMessage("Pool stats updated");
+      } catch (error) {
+        updateStatusMessage(`Error fetching pool data: ${error.message}`, true);
+        document.getElementById("poolStats").innerHTML = "";
+      }
+    }
+
+    async function createPool() {
+      if (!selectedWallet || !userAccount) {
+        updateStatusMessage("Please connect and select a wallet!", true);
+        return;
+      }
+      const tokenAddress = document.getElementById("newPoolToken").value.trim();
+      if (!web3.utils.isAddress(tokenAddress)) {
+        updateStatusMessage("Invalid token address format!", true);
+        return;
+      }
+      try {
+        updateStatusMessage("Creating pool...");
+
+        const web3FactoryContract = new web3.eth.Contract(factoryAbi, contractAddress);
+        const gasPrice = await web3.eth.getGasPrice();
+        const fixedGasLimit = "3000000";
+
+        const poolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
+        if (poolAddress !== "0x0000000000000000000000000000000000000000") {
+          updateStatusMessage("Pool already exists for this token!", true);
+          return;
+        }
+
+        const ethBalance = await web3.eth.getBalance(userAccount);
+        const estimatedCost = web3.utils.toBN(fixedGasLimit).mul(web3.utils.toBN(gasPrice));
+        if (web3.utils.toBN(ethBalance).lt(estimatedCost)) {
+          updateStatusMessage(`Insufficient ETH: Need ~${web3.utils.fromWei(estimatedCost, "ether")} ETH, have ${web3.utils.fromWei(ethBalance, "ether")} ETH`, true);
+          return;
+        }
+
+        const txData = web3FactoryContract.methods.createPool(tokenAddress).encodeABI();
+        const tx = {
+          from: userAccount,
+          to: contractAddress,
+          data: txData,
+          gasPrice: gasPrice.toString(),
+          gas: fixedGasLimit
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+        if (receipt.status) {
+          const newPoolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
+          const metadata = await fetchTokenMetadata(tokenAddress);
+          pools[tokenAddress] = { poolAddress: newPoolAddress, symbol: metadata.symbol };
+          localStorage.setItem('pools', JSON.stringify(pools));
+          await updateSearchSuggestions();
+          document.getElementById("newPoolToken").value = "";
+          updateStatusMessage("Pool created successfully");
+        } else {
+          updateStatusMessage("Transaction failed!", true);
+        }
+      } catch (error) {
+        let errorMsg = error.message;
+        if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
+        else if (error.code === -32603) errorMsg = "Gas or network issue.";
+        else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
+        updateStatusMessage(`Error: ${errorMsg}`, true);
+        console.error("Create pool error:", error);
+      }
+    }
+
+    async function approveTokens(amount, tokenAddress, poolAddress) {
+      try {
+        updateStatusMessage("Approving tokens...");
+
+        const ethBalance = await web3.eth.getBalance(userAccount);
+        if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
+          updateStatusMessage("Insufficient ETH for gas (need at least 0.0001 ETH)!", true);
+          return false;
+        }
+
+        const web3TokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
+        const decimals = await web3TokenContract.methods.decimals().call();
+        const amountWei = web3.utils.toWei(amount.toString(), 'ether'); // Simplified for decimals handling
+
+        const allowance = await web3TokenContract.methods.allowance(userAccount, poolAddress).call();
+        if (BigInt(allowance) >= BigInt(amountWei)) {
+          updateStatusMessage("Tokens already approved");
+          return true;
+        }
+
+        let gasLimit;
+        try {
+          gasLimit = await web3TokenContract.methods.approve(poolAddress, amountWei).estimateGas({ from: userAccount });
+          gasLimit = Math.ceil(gasLimit * 1.1).toString();
+        } catch (error) {
+          console.warn("Gas estimation failed, using default limit:", error);
+          gasLimit = "100000";
+        }
+
+        const txData = web3TokenContract.methods.approve(poolAddress, amountWei).encodeABI();
+        const tx = {
+          from: userAccount,
+          to: tokenAddress,
+          data: txData,
+          gasPrice: (await web3.eth.getGasPrice()).toString(),
+          gas: gasLimit
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+        if (receipt.status) {
+          updateStatusMessage("Approval successful");
+          return true;
+        } else {
+          updateStatusMessage("Approval failed!", true);
+          return false;
+        }
+      } catch (error) {
+        let errorMsg = error.message;
+        if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
+        else if (error.code === -32603) errorMsg = "Gas or network issue.";
+        else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
+        updateStatusMessage(`Error: ${errorMsg}`, true);
+        console.error("Approval error:", error);
+        return false;
+      }
+    }
+
+    async function stake() {
+      if (!selectedWallet || !userAccount) {
+        updateStatusMessage("Please connect and select a wallet!", true);
+        return;
+      }
+      const tokenAddress = document.getElementById("stakePoolSearch").value.trim();
+      const amount = document.getElementById("stakeAmount").value.trim();
+      if (!web3.utils.isAddress(tokenAddress) || !amount || parseFloat(amount) <= 0) {
+        updateStatusMessage("Enter a valid token address and amount!", true);
+        return;
+      }
+      try {
+        updateStatusMessage("Staking tokens...");
+
+        const web3FactoryContract = new web3.eth.Contract(factoryAbi, contractAddress);
+        const poolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
+        if (poolAddress === "0x0000000000000000000000000000000000000000") {
+          updateStatusMessage("No pool found for this token!", true);
+          return;
+        }
+
+        const approved = await approveTokens(amount, tokenAddress, poolAddress);
+        if (!approved) return;
+
+        const web3PoolContract = new web3.eth.Contract(poolAbi, poolAddress);
+        const ethBalance = await web3.eth.getBalance(userAccount);
+        if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
+          updateStatusMessage("Insufficient ETH for gas (need at least 0.0001 ETH)!", true);
+          return;
+        }
+
+        const decimals = await new web3.eth.Contract(erc20Abi, tokenAddress).methods.decimals().call();
+        const amountWei = web3.utils.toWei(amount, 'ether'); // Simplified for decimals handling
+
+        let gasLimit;
+        try {
+          gasLimit = await web3PoolContract.methods.stake(amountWei).estimateGas({ from: userAccount });
+          gasLimit = Math.ceil(gasLimit * 1.1).toString();
+        } catch (error) {
+          console.warn("Gas estimation failed, using default limit:", error);
+          gasLimit = "300000";
+        }
+
+        const txData = web3PoolContract.methods.stake(amountWei).encodeABI();
+        const tx = {
+          from: userAccount,
+          to: poolAddress,
+          data: txData,
+          gasPrice: (await web3.eth.getGasPrice()).toString(),
+          gas: gasLimit
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+        if (receipt.status) {
+          updateStatusMessage("Stake successful");
+          document.getElementById("stakeAmount").value = "";
+          if (selectedPoolToken === tokenAddress) {
+            await fetchPoolData(tokenAddress);
+          }
+        } else {
+          updateStatusMessage("Stake failed!", true);
+        }
+      } catch (error) {
+        let errorMsg = error.message;
+        if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
+        else if (error.code === -32603) errorMsg = "Gas or network issue.";
+        else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
+        updateStatusMessage(`Error: ${errorMsg}`, true);
+        console.error("Stake error:", error);
+      }
+    }
+
+    async function unstake() {
+      if (!selectedWallet || !userAccount) {
+        updateStatusMessage("Please connect and select a wallet!", true);
+        return;
+      }
+      const tokenAddress = document.getElementById("stakePoolSearch").value.trim();
+      if (!web3.utils.isAddress(tokenAddress)) {
+        updateStatusMessage("Enter a valid token address!", true);
+        return;
+      }
+      try {
+        updateStatusMessage("Unstaking tokens...");
+
+        const web3FactoryContract = new web3.eth.Contract(factoryAbi, contractAddress);
+        const poolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
+        if (poolAddress === "0x0000000000000000000000000000000000000000") {
+          updateStatusMessage("No pool found for this token!", true);
+          return;
+        }
+
+        const web3PoolContract = new web3.eth.Contract(poolAbi, poolAddress);
+        const ethBalance = await web3.eth.getBalance(userAccount);
+        if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
+          updateStatusMessage("Insufficient ETH for gas (need at least 0.0001 ETH)!", true);
+          return;
+        }
+
+        let gasLimit;
+        try {
+          gasLimit = await web3PoolContract.methods.unstake().estimateGas({ from: userAccount });
+          gasLimit = Math.ceil(gasLimit * 1.1).toString();
+        } catch (error) {
+          console.warn("Gas estimation failed, using default limit:", error);
+          gasLimit = "300000";
+        }
+
+        const txData = web3PoolContract.methods.unstake().encodeABI();
+        const tx = {
+          from: userAccount,
+          to: poolAddress,
+          data: txData,
+          gasPrice: (await web3.eth.getGasPrice()).toString(),
+          gas: gasLimit
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+        if (receipt.status) {
+          updateStatusMessage("Unstake successful");
+          if (selectedPoolToken === tokenAddress) {
+            await fetchPoolData(tokenAddress);
+          }
+        } else {
+          updateStatusMessage("Unstake failed!", true);
+        }
+      } catch (error) {
+        let errorMsg = error.message;
+        if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
+        else if (error.code === -32603) errorMsg = "Gas or network issue.";
+        else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
+        updateStatusMessage(`Error: ${errorMsg}`, true);
+        console.error("Unstake error:", error);
+      }
+    }
+
+    async function claimRewards() {
+      if (!selectedWallet || !userAccount) {
+        updateStatusMessage("Please connect and select a wallet!", true);
+        return;
+      }
+      const tokenAddress = document.getElementById("stakePoolSearch").value.trim();
+      if (!web3.utils.isAddress(tokenAddress)) {
+        updateStatusMessage("Enter a valid token address!", true);
+        return;
+      }
+      try {
+        updateStatusMessage("Claiming rewards...");
+
+        const web3FactoryContract = new web3.eth.Contract(factoryAbi, contractAddress);
+        const poolAddress = await web3FactoryContract.methods.getPool(tokenAddress).call();
+        if (poolAddress === "0x0000000000000000000000000000000000000000") {
+          updateStatusMessage("No pool found for this token!", true);
+          return;
+        }
+
+        const web3PoolContract = new web3.eth.Contract(poolAbi, poolAddress);
+        const ethBalance = await web3.eth.getBalance(userAccount);
+        if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
+          updateStatusMessage("Insufficient ETH for gas (need at least 0.0001 ETH)!", true);
+          return;
+        }
+
+        let gasLimit;
+        try {
+          gasLimit = await web3PoolContract.methods.claimRewards().estimateGas({ from: userAccount });
+          gasLimit = Math.ceil(gasLimit * 1.1).toString();
+        } catch (error) {
+          console.warn("Gas estimation failed, using default limit:", error);
+          gasLimit = "300000";
+        }
+
+        const txData = web3PoolContract.methods.claimRewards().encodeABI();
+        const tx = {
+          from: userAccount,
+          to: poolAddress,
+          data: txData,
+          gasPrice: (await web3.eth.getGasPrice()).toString(),
+          gas: gasLimit
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+        if (receipt.status) {
+          updateStatusMessage("Rewards claimed successfully");
+          if (selectedPoolToken === tokenAddress) {
+            await fetchPoolData(tokenAddress);
+          }
+        } else {
+          updateStatusMessage("Claim rewards failed!", true);
+        }
+      } catch (error) {
+        let errorMsg = error.message;
+        if (error.code === "CALL_EXCEPTION") errorMsg = `Call failed: ${error.data || "Unknown reason"}`;
+        else if (error.code === -32603) errorMsg = "Gas or network issue.";
+        else if (error.reason) errorMsg = `Reverted: ${error.reason}`;
+        updateStatusMessage(`Error: ${errorMsg}`, true);
+        console.error("Claim rewards error:", error);
+      }
+    }
+
+    async function init() {
+      await initializeWallets();
+
+      document.getElementById("createPoolBtn").onclick = createPool;
+      document.getElementById("stakeBtn").onclick = stake;
+      document.getElementById("unstakeBtn").onclick = unstake;
+      document.getElementById("claimRewardsBtn").onclick = claimRewards;
+      document.getElementById("poolSearch").onchange = (e) => {
+        selectedPoolToken = e.target.value.trim();
+        if (web3.utils.isAddress(selectedPoolToken)) {
+          fetchPoolData(selectedPoolToken);
+        } else {
+          document.getElementById("poolStats").innerHTML = "";
+          updateStatusMessage("Invalid token address!", true);
+        }
+      };
+      document.getElementById("stakePoolSearch").onchange = (e) => {
+        selectedPoolToken = e.target.value.trim();
+        if (!web3.utils.isAddress(selectedPoolToken)) {
+          updateStatusMessage("Invalid token address!", true);
+        }
+      };
+
+      await updateSearchSuggestions();
+    }
+
+    window.onload = init;
   </script>
 </body>
 </html>
