@@ -591,10 +591,8 @@
             '#BEF264'
         ];
 
-        // Contract address (Ethereum Mainnet)
         const MANAGER_ADDRESS = "0xa4a107c5b8de797c32ae701ffe2b306cb9044ba6";
 
-        // Hardcoded RPC configuration for Ethereum Mainnet
         const RPC_ENDPOINTS = [
             'https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73',
             'https://rpc.ankr.com/eth',
@@ -602,7 +600,6 @@
         ];
         let currentRpcIndex = 0;
 
-        // ABI for ETFManager
         const managerAbi = [
             {
                 "inputs": [],
@@ -764,194 +761,192 @@
                     {
                         "components": [
                             {
-                                " 
+                                "internalType": "address",
+                                "name": "etfToken",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address[]",
+                                "name": "tokens",
+                                "type": "address[]"
+                            },
+                            {
+                                "internalType": "uint256[]",
+                                "name": "weights",
+                                "type": "uint256[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "currentPrice",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "int256",
+                                "name": "percentAppreciation",
+                                "type": "int256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "thirdFeeReceiver",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "thirdFeeBps",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct ETFManager.ETFInfo[]",
+                        "name": "",
+                        "type": "tuple[]"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
                         "internalType": "address",
                         "name": "etfToken",
                         "type": "address"
                     },
                     {
-                        "internalType": "address[]",
-                        "name": "tokens",
-                        "type": "address[]"
-                    },
-                    {
-                        "internalType": "uint256[]",
-                        "name": "weights",
-                        "type": "uint256[]"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "currentPrice",
-                        "type": "uint256"
-                    },
+                        "internalType": "bool",
+                        "name": "returnPrice",
+                        "type": "bool"
+                    }
+                ],
+                "name": "getPriceOrGain",
+                "outputs": [
                     {
                         "internalType": "int256",
-                        "name": "percentAppreciation",
+                        "name": "",
                         "type": "int256"
-                    },
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
                     {
                         "internalType": "address",
-                        "name": "thirdFeeReceiver",
+                        "name": "etfToken",
+                        "type": "address"
+                    }
+                ],
+                "name": "getPricePerEtf",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    }
+                ],
+                "name": "getWeiPerEtf",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "etfToken",
                         "type": "address"
                     },
                     {
                         "internalType": "uint256",
-                        "name": "thirdFeeBps",
+                        "name": "etfAmount",
                         "type": "uint256"
                     }
                 ],
-                "internalType": "struct ETFManager.ETFInfo[]",
-                "name": "",
-                "type": "tuple[]"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "etfToken",
-                "type": "address"
+                "name": "mintWithEth",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
             },
             {
-                "internalType": "bool",
-                "name": "returnPrice",
-                "type": "bool"
-            }
-        ],
-        "name": "getPriceOrGain",
-        "outputs": [
-            {
-                "internalType": "int256",
-                "name": "",
-                "type": "int256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "etfToken",
-                "type": "address"
-            }
-        ],
-        "name": "getPricePerEtf",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "etfToken",
-                "type": "address"
-            }
-        ],
-        "name": "getWeiPerEtf",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "etfToken",
-                "type": "address"
+                "inputs": [],
+                "name": "priceFeed",
+                "outputs": [
+                    {
+                        "internalType": "contract AggregatorV3Interface",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
             },
             {
-                "internalType": "uint256",
-                "name": "etfAmount",
-                "type": "uint256"
-            }
-        ],
-        "name": "mintWithEth",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "priceFeed",
-        "outputs": [
-            {
-                "internalType": "contract AggregatorV3Interface",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "uniswapRouter",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "weth",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "etfToken",
-                "type": "address"
+                "inputs": [],
+                "name": "uniswapRouter",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
             },
             {
-                "internalType": "uint256",
-                "name": "etfAmount",
-                "type": "uint256"
+                "inputs": [],
+                "name": "weth",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "etfAmount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "withdraw",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "stateMutability": "payable",
+                "type": "receive"
             }
-        ],
-        "name": "withdraw",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "stateMutability": "payable",
-        "type": "receive"
-    }
-];
+        ];
 
-        // ABI for ETFToken
         const tokenAbi = [
             {
                 "inputs": [
@@ -1730,7 +1725,7 @@
                 const price = await withRetry(() => manager.methods.getPricePerEtf(tokenAddress).call());
                 const priceUsd = Number(web3.utils.fromWei(price, 'ether')).toFixed(2);
                 const percentAppreciation = await withRetry(() => manager.methods.getPriceOrGain(tokenAddress, false).call());
-                const appreciationPercent = (Number(percentAppreciation) / 100).toFixed(2); // Convert bps to percentage
+                const appreciationPercent = (Number(percentAppreciation) / 100).toFixed(2);
                 return { price: priceUsd, appreciation: appreciationPercent };
             } catch (error) {
                 console.log("Update price error details:", error);
@@ -1739,7 +1734,6 @@
             }
         }
 
-        // Object to store updated price and appreciation for each ETF
         const updatedValues = {};
 
         async function refreshETFs() {
@@ -1763,7 +1757,6 @@
                 }
 
                 for (const etf of etfs) {
-                    // Fetch name and symbol from the ETF token contract
                     const tokenContract = new web3.eth.Contract(tokenAbi, etf.etfToken);
                     let name = "Unknown";
                     let symbol = "UNK";
@@ -1776,14 +1769,12 @@
 
                     const thirdFeeBps = etf.thirdFeeBps;
 
-                    // Use stored values if available, otherwise use placeholder
                     const priceDisplay = updatedValues[etf.etfToken]?.price ? `$${updatedValues[etf.etfToken].price}` : "Update to view";
                     const appreciationDisplay = updatedValues[etf.etfToken]?.appreciation ? `${updatedValues[etf.etfToken].appreciation}%` : "Update to view";
 
                     const card = document.createElement("div");
                     card.className = "etf-card";
 
-                    // Create token blocks with click functionality and weights
                     let tokenBlocks = '';
                     etf.tokens.forEach((token, index) => {
                         const tokenLabel = `Token ${index + 1}`;
@@ -1799,7 +1790,6 @@
                         `;
                     });
 
-                    // Create pie chart container
                     const chartId = `chart-${etf.etfToken}`;
                     const weightsPercent = etf.weights.map(weight => (weight / 100).toFixed(2));
                     const chartColors = etf.tokens.map((_, index) => tokenColors[index % tokenColors.length]);
@@ -1853,7 +1843,6 @@
                     `;
                     cardContainer.appendChild(card);
 
-                    // Create pie chart
                     new Chart(document.getElementById(chartId), {
                         type: 'pie',
                         data: {
@@ -1875,7 +1864,6 @@
                         }
                     });
 
-                    // Add click event listeners to token blocks
                     etf.tokens.forEach((_, index) => {
                         const tokenBlock = document.getElementById(`token-${etf.etfToken}-${index}`);
                         tokenBlock.addEventListener('click', () => {
@@ -1885,7 +1873,6 @@
                             const color = tokenColors[index % tokenColors.length];
                             const weightPercent = (etf.weights[index] / 100).toFixed(2);
 
-                            // Replace the clicked token block with expanded version
                             const expandedBlock = document.createElement('div');
                             expandedBlock.className = 'expanded-token';
                             expandedBlock.innerHTML = `
@@ -1897,7 +1884,6 @@
                             `;
                             container.replaceChild(expandedBlock, tokenBlock);
 
-                            // Add event listener to copy button
                             expandedBlock.querySelector('.copy-button').addEventListener('click', () => {
                                 navigator.clipboard.writeText(tokenAddress).then(() => {
                                     logMessage(`Copied address ${tokenAddress} to clipboard`);
@@ -1906,7 +1892,6 @@
                                 });
                             });
 
-                            // Add event listener to close button
                             expandedBlock.querySelector('.close-button').addEventListener('click', () => {
                                 const newTokenBlock = document.createElement('div');
                                 newTokenBlock.className = 'token-block';
@@ -1920,7 +1905,6 @@
                                 `;
                                 container.replaceChild(newTokenBlock, expandedBlock);
 
-                                // Reattach click event to the new token block
                                 newTokenBlock.addEventListener('click', arguments.callee);
                             });
                         });
@@ -1939,7 +1923,6 @@
 
                         logMessage(`Mint button clicked for token ${token} with amount ${amount}`);
                         
-                        // Validate amount before calling mintETF
                         if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
                             logMessage(`Invalid amount entered: ${amount}`);
                             error.innerText = "Please enter a valid positive amount.";
@@ -1949,7 +1932,6 @@
                         const result = await mintETF(token, amount);
                         if (result.success) {
                             status.innerText = result.success;
-                            // Refresh ETFs to update price
                             await refreshETFs();
                         } else {
                             error.innerText = result.error;
@@ -1969,7 +1951,6 @@
 
                         logMessage(`Burn button clicked for token ${token} with amount ${amount}`);
                         
-                        // Validate amount before calling burnETF
                         if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
                             logMessage(`Invalid amount entered: ${amount}`);
                             error.innerText = "Please enter a valid positive amount.";
@@ -1979,7 +1960,6 @@
                         const result = await burnETF(token, amount);
                         if (result.success) {
                             status.innerText = result.success;
-                            // Refresh ETFs to update price
                             await refreshETFs();
                         } else {
                             error.innerText = result.error;
@@ -1990,6 +1970,7 @@
                 document.querySelectorAll('.withdraw-etf-button').forEach(button => {
                     button.addEventListener('click', async () => {
                         const token = button.getAttribute('data-token');
+                        // New event listener for withdraw-etf-button - Added
                         const amountInput = document.getElementById(`amount-${token}`);
                         const amount = amountInput.value;
                         const status = document.getElementById(`action-status-${token}`);
@@ -1998,15 +1979,15 @@
                         error.innerText = "";
 
                         logMessage(`Withdraw button clicked for token ${token} with amount ${amount}`);
-                        
-                                                // Validate amount before calling withdrawETF
+
+                        // Validate amount before calling withdrawETF
                         if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
                             logMessage(`Invalid amount entered: ${amount}`);
                             error.innerText = "Please enter a valid positive amount.";
                             return;
                         }
 
-                        const result = await withdrawETF(token, amount);
+                                               const result = await withdrawETF(token, amount);
                         if (result.success) {
                             status.innerText = result.success;
                             // Refresh ETFs to update price
