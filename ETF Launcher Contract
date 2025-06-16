@@ -1,0 +1,479 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
+import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+
+contract ETFToken is ERC20 {
+    address public immutable manager;
+
+    constructor(string memory name, string memory symbol, address _manager) ERC20(name, symbol) {
+        manager = _manager;
+    }
+
+    function mint(address to, uint256 amount) external {
+        require(msg.sender == manager);
+        _mint(to, amount);
+    }
+
+    function burn(address from, uint256 amount) external {
+        require(msg.sender == manager);
+        _burn(from, amount);
+    }
+}
+
+interface IERC20Extended {
+    function balanceOf(address account) external view returns (uint256);
+    function approve(address spender, uint256 amount) external returns (bool);
+    function transfer(address recipient, uint256 amount) external returns (bool);
+}
+
+contract ETFManager is ReentrancyGuard {
+    address public immutable weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public immutable uniswapRouter = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+    AggregatorV3Interface public immutable priceFeed;
+
+    uint256 private constant TOTAL_BASIS_POINTS = 10000;
+    uint256 private constant SWAP_DEADLINE = 20 minutes;
+    uint256 private constant SLIPPAGE = 9500;
+    uint256 private constant WEI_PER_ETH = 1e18;
+    uint256 private constant ETH_BUFFER = 1005;
+    address private constant FEE_RECEIVER_1 = 0x9759883ea07e2cA1E2d32E97f42d254841616AB5;
+    address private constant FEE_RECEIVER_2 = 0x1004BA0072DB79C5463bA4aE2b3c455bDB84118D;
+    address private constant DEAD_ADDRESS = 0x000000000000000000000000000000000000dEaD;
+    address private constant ADDITIONAL_TOKEN = 0x100DB67F41A2dF3c32cC7c0955694b98339B7311;
+    uint256 private constant HARDCODED_FEE_BPS = 10; // 0.1%
+    uint256 private constant ADDITIONAL_FEE_BPS = 10; // 0.1%
+
+    struct Token {
+        address addr;
+        uint256 weight;
+    }
+
+    struct ETFInfo {
+        address etfToken;
+        address[] tokens;
+        uint256[] weights;
+        address creator;
+        uint256 createdAt;
+        uint256 startingPrice;
+        uint256 currentPrice;
+        address thirdFeeReceiver;
+        uint256 thirdFeeBps;
+    }
+
+    ETFInfo[] private allETFs;
+    mapping(address => bool) private isETF;
+    mapping(address => Token[]) private baskets;
+    mapping(address => mapping(address => uint256)) private etfTokenBalances; // etfToken => token => balance
+
+    event ETFCreated(address indexed creator, address indexed etfToken);
+    event Minted(address indexed user, address indexed etfToken, uint256 amount, uint256 ethUsed);
+    event Burned(address indexed user, address indexed etfToken, uint256 amount, uint256 ethReceived);
+    event Withdrawn(address indexed user, address indexed etfToken, uint256 amount);
+
+    constructor() {
+        priceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
+    }
+
+    function createETF(
+        string memory name,
+        string memory symbol,
+        address[] calldata tokens,
+        uint256[] calldata weights,
+        address thirdFeeReceiver,
+        uint256 thirdFeeBps
+    ) external nonReentrant returns (address etfToken) {
+        require(tokens.length > 0 && tokens.length == weights.length && thirdFeeBps <= TOTAL_BASIS_POINTS);
+
+        uint256 totalWeight;
+        for (uint256 i = 0; i < tokens.length; i++) {
+            require(tokens[i] != weth && weights[i] > 0);
+            totalWeight += weights[i];
+        }
+        require(totalWeight == TOTAL_BASIS_POINTS);
+
+        ETFToken token = new ETFToken(name, symbol, address(this));
+        etfToken = address(token);
+
+        for (uint256 i = 0; i < tokens.length; i++) {
+            baskets[etfToken].push(Token(tokens[i], weights[i]));
+        }
+
+        allETFs.push(ETFInfo({
+            etfToken: etfToken,
+            tokens: tokens,
+            weights: weights,
+            creator: msg.sender,
+            createdAt: block.timestamp,
+            startingPrice: WEI_PER_ETH,
+            currentPrice: WEI_PER_ETH,
+            thirdFeeReceiver: thirdFeeReceiver,
+            thirdFeeBps: thirdFeeBps
+        }));
+        isETF[etfToken] = true;
+
+        emit ETFCreated(msg.sender, etfToken);
+        return etfToken;
+    }
+
+    function getFeeReceiverAndBps(address etfToken) private view returns (address thirdFeeReceiver, uint256 thirdFeeBps) {
+        for (uint256 i = 0; i < allETFs.length; i++) {
+            if (allETFs[i].etfToken == etfToken) {
+                return (allETFs[i].thirdFeeReceiver, allETFs[i].thirdFeeBps);
+            }
+        }
+        revert("ETF not found");
+    }
+
+    function executeSwap(
+        address etfToken,
+        address tokenAddr,
+        uint256 ethToSwap
+    ) private returns (uint256 ethUsed) {
+        address[] memory path = new address[](2);
+        path[0] = weth;
+        path[1] = tokenAddr;
+
+        uint256 minTokenOut = calculateMinAmountOut(tokenAddr, ethToSwap, true);
+        if (minTokenOut == 0) return 0;
+
+        try IUniswapV2Router02(uniswapRouter).swapExactETHForTokens{value: ethToSwap}(
+            minTokenOut,
+            path,
+            address(this),
+            block.timestamp + SWAP_DEADLINE
+        ) returns (uint256[] memory amounts) {
+            etfTokenBalances[etfToken][tokenAddr] += amounts[1];
+            return ethToSwap;
+        } catch {
+            return 0;
+        }
+    }
+
+    function distributeFees(
+        uint256 feeEth1,
+        uint256 feeEth2,
+        uint256 feeEth3,
+        uint256 feeEthAdditional,
+        address thirdFeeReceiver
+    ) private {
+        if (feeEth1 > 0) {
+            FEE_RECEIVER_1.call{value: feeEth1}("");
+        }
+        if (feeEth2 > 0) {
+            FEE_RECEIVER_2.call{value: feeEth2}("");
+        }
+        if (feeEth3 > 0) {
+            thirdFeeReceiver.call{value: feeEth3}("");
+        }
+        if (feeEthAdditional > 0) {
+            buyAndSendToDeadAddress(feeEthAdditional);
+        }
+    }
+
+    function handleFees(
+        uint256 ethAmount,
+        address thirdFeeReceiver,
+        uint256 thirdFeeBps
+    ) private returns (uint256 totalFees) {
+        uint256 feeEth1 = (ethAmount * HARDCODED_FEE_BPS) / TOTAL_BASIS_POINTS;
+        uint256 feeEth2 = (ethAmount * HARDCODED_FEE_BPS) / TOTAL_BASIS_POINTS;
+        uint256 feeEth3 = (ethAmount * thirdFeeBps) / TOTAL_BASIS_POINTS;
+        uint256 feeEthAdditional = (ethAmount * ADDITIONAL_FEE_BPS) / TOTAL_BASIS_POINTS;
+
+        totalFees = feeEth1 + feeEth2 + feeEth3 + feeEthAdditional;
+
+        distributeFees(feeEth1, feeEth2, feeEth3, feeEthAdditional, thirdFeeReceiver);
+    }
+
+    function performSwap(
+        address etfToken,
+        address tokenAddr,
+        uint256 ethAmount,
+        uint256 ethToSwap
+    ) private returns (uint256 swapEthUsed) {
+        if (ethAmount == 0) return 0;
+        return executeSwap(etfToken, tokenAddr, ethAmount);
+    }
+
+    function mintWithEth(address etfToken, uint256 etfAmount) external payable nonReentrant {
+        require(isETF[etfToken] && etfAmount > 0);
+        Token[] memory basket = baskets[etfToken];
+
+        uint256 totalSupply_ = ETFToken(etfToken).totalSupply();
+        uint256 weiPerEtf = getWeiPerEtf(etfToken);
+        uint256 totalEthNeeded = (etfAmount * weiPerEtf) / WEI_PER_ETH;
+        require(msg.value >= (totalEthNeeded * ETH_BUFFER) / TOTAL_BASIS_POINTS);
+
+        (address thirdFeeReceiver, uint256 thirdFeeBps) = getFeeReceiverAndBps(etfToken);
+        uint256 totalFees = handleFees(msg.value, thirdFeeReceiver, thirdFeeBps);
+        uint256 ethToSwap = msg.value - totalFees;
+
+        uint256 ethUsed = totalFees;
+        uint256 successfulSwaps;
+
+        for (uint256 i = 0; i < basket.length; i++) {
+            uint256 ethAmount = (ethToSwap * basket[i].weight) / TOTAL_BASIS_POINTS;
+            uint256 swapEthUsed = performSwap(etfToken, basket[i].addr, ethAmount, ethToSwap);
+            if (swapEthUsed > 0) {
+                ethUsed += swapEthUsed;
+                successfulSwaps++;
+            }
+        }
+        require(successfulSwaps > 0);
+
+        ETFToken(etfToken).mint(msg.sender, etfAmount);
+        updatePriceForETF(etfToken);
+
+        emit Minted(msg.sender, etfToken, etfAmount, ethUsed);
+    }
+
+    function executeBurnSwap(
+        address etfToken,
+        address tokenAddr,
+        uint256 tokensToSwap
+    ) private returns (uint256 ethReceived, bool success) {
+        uint256 minEthOut = calculateMinAmountOut(tokenAddr, tokensToSwap, false);
+        if (minEthOut == 0) return (0, false);
+
+        address[] memory path = new address[](2);
+        path[0] = tokenAddr;
+        path[1] = weth;
+
+        try IERC20Extended(tokenAddr).approve(uniswapRouter, tokensToSwap) {
+            try IUniswapV2Router02(uniswapRouter).swapExactTokensForETH(
+                tokensToSwap,
+                minEthOut,
+                path,
+                address(this),
+                block.timestamp + SWAP_DEADLINE
+            ) returns (uint256[] memory amounts) {
+                etfTokenBalances[etfToken][tokenAddr] -= tokensToSwap;
+                return (amounts[1], true);
+            } catch {
+                return (0, false);
+            }
+        } catch {
+            return (0, false);
+        }
+    }
+
+    function transferTokenFees(
+        address token,
+        uint256 feeTokens1,
+        uint256 feeTokens2,
+        uint256 feeTokens3,
+        uint256 feeTokensAdditional,
+        address thirdFeeReceiver
+    ) private {
+        if (feeTokens1 > 0) IERC20Extended(token).transfer(FEE_RECEIVER_1, feeTokens1);
+        if (feeTokens2 > 0) IERC20Extended(token).transfer(FEE_RECEIVER_2, feeTokens2);
+        if (feeTokens3 > 0) IERC20Extended(token).transfer(thirdFeeReceiver, feeTokens3);
+        if (feeTokensAdditional > 0) IERC20Extended(token).transfer(DEAD_ADDRESS, feeTokensAdditional);
+    }
+
+    function calculateAndTransferTokenFees(
+        address token,
+        uint256 tokenAmt,
+        address thirdFeeReceiver,
+        uint256 thirdFeeBps
+    ) private returns (uint256 tokensToSwap) {
+        uint256 feeTokens1 = (tokenAmt * HARDCODED_FEE_BPS) / TOTAL_BASIS_POINTS;
+        uint256 feeTokens2 = (tokenAmt * HARDCODED_FEE_BPS) / TOTAL_BASIS_POINTS;
+        uint256 feeTokens3 = (tokenAmt * thirdFeeBps) / TOTAL_BASIS_POINTS;
+        uint256 feeTokensAdditional = (tokenAmt * ADDITIONAL_FEE_BPS) / TOTAL_BASIS_POINTS;
+
+        tokensToSwap = tokenAmt - feeTokens1 - feeTokens2 - feeTokens3 - feeTokensAdditional;
+
+        transferTokenFees(token, feeTokens1, feeTokens2, feeTokens3, feeTokensAdditional, thirdFeeReceiver);
+    }
+
+    function burn(address etfToken, uint256 etfAmount) external nonReentrant {
+        require(isETF[etfToken] && etfAmount > 0 && ETFToken(etfToken).balanceOf(msg.sender) >= etfAmount);
+        Token[] memory basket = baskets[etfToken];
+
+        ETFToken(etfToken).burn(msg.sender, etfAmount);
+        uint256 totalSupply = ETFToken(etfToken).totalSupply();
+        uint256 ethReceived;
+        uint256 successfulSwaps;
+
+        (address thirdFeeReceiver, uint256 thirdFeeBps) = getFeeReceiverAndBps(etfToken);
+
+        for (uint256 i = 0; i < basket.length; i++) {
+            uint256 tokenBal = etfTokenBalances[etfToken][basket[i].addr];
+            uint256 tokenAmt = (tokenBal * etfAmount) / (totalSupply + etfAmount);
+            if (tokenAmt == 0) continue;
+
+            (uint256 tokensToSwap) = calculateAndTransferTokenFees(
+                basket[i].addr,
+                tokenAmt,
+                thirdFeeReceiver,
+                thirdFeeBps
+            );
+
+            (uint256 ethFromSwap, bool success) = executeBurnSwap(
+                etfToken,
+                basket[i].addr,
+                tokensToSwap
+            );
+            if (success) {
+                ethReceived += ethFromSwap;
+                successfulSwaps++;
+            }
+        }
+        require(successfulSwaps > 0 && ethReceived > 0);
+
+        (bool success,) = msg.sender.call{value: ethReceived}("");
+        require(success);
+
+        updatePriceForETF(etfToken);
+
+        emit Burned(msg.sender, etfToken, etfAmount, ethReceived);
+    }
+
+    function withdraw(address etfToken, uint256 etfAmount) external nonReentrant {
+        require(isETF[etfToken] && etfAmount > 0 && ETFToken(etfToken).balanceOf(msg.sender) >= etfAmount);
+        Token[] memory basket = baskets[etfToken];
+
+        ETFToken(etfToken).burn(msg.sender, etfAmount);
+        uint256 totalSupply = ETFToken(etfToken).totalSupply();
+        (address thirdFeeReceiver, uint256 thirdFeeBps) = getFeeReceiverAndBps(etfToken);
+
+        for (uint256 i = 0; i < basket.length; i++) {
+            uint256 tokenBal = etfTokenBalances[etfToken][basket[i].addr];
+            uint256 tokenAmt = (tokenBal * etfAmount) / (totalSupply + etfAmount);
+            if (tokenAmt == 0) continue;
+
+            (uint256 tokensToTransfer) = calculateAndTransferTokenFees(
+                basket[i].addr,
+                tokenAmt,
+                thirdFeeReceiver,
+                thirdFeeBps
+            );
+
+            require(IERC20Extended(basket[i].addr).transfer(msg.sender, tokensToTransfer));
+            etfTokenBalances[etfToken][basket[i].addr] -= tokenAmt;
+        }
+
+        updatePriceForETF(etfToken);
+
+        emit Withdrawn(msg.sender, etfToken, etfAmount);
+    }
+
+    function buyAndSendToDeadAddress(uint256 ethAmount) private {
+        address[] memory path = new address[](2);
+        path[0] = weth;
+        path[1] = ADDITIONAL_TOKEN;
+
+        uint256 minTokenOut = calculateMinAmountOut(ADDITIONAL_TOKEN, ethAmount, true);
+        if (minTokenOut == 0) return;
+
+        try IUniswapV2Router02(uniswapRouter).swapExactETHForTokens{value: ethAmount}(
+            minTokenOut,
+            path,
+            DEAD_ADDRESS,
+            block.timestamp + SWAP_DEADLINE
+        ) {
+        } catch {
+        }
+    }
+
+    function setETFPrice(address etfToken, uint256 price) private {
+        for (uint256 i = 0; i < allETFs.length; i++) {
+            if (allETFs[i].etfToken == etfToken) {
+                allETFs[i].currentPrice = price;
+                break;
+            }
+        }
+    }
+
+    function updatePriceForETF(address etfToken) private {
+        uint256 price = uint256(getPriceOrGain(etfToken));
+        setETFPrice(etfToken, price);
+    }
+
+    function getWeiPerEtf(address etfToken) public view returns (uint256) {
+        uint256 pricePerEtf = getPricePerEtf(etfToken);
+        (, int256 price,,,) = priceFeed.latestRoundData();
+        return (pricePerEtf * WEI_PER_ETH) / (uint256(price) * 1e10);
+    }
+
+    function calculateTokenValue(
+        address tokenAddr,
+        uint256 ethPrice,
+        address factory,
+        address etfToken
+    ) private view returns (uint256) {
+        uint256 tokenBalance = etfTokenBalances[etfToken][tokenAddr];
+        if (tokenBalance == 0) return 0;
+
+        address pair = IUniswapV2Factory(factory).getPair(tokenAddr, weth);
+        if (pair == address(0)) return 0;
+
+        (uint112 reserve0, uint112 reserve1,) = IUniswapV2Pair(pair).getReserves();
+        address token0 = IUniswapV2Pair(pair).token0();
+        (uint112 tokenReserve, uint112 wethReserve) = token0 == tokenAddr ? (reserve0, reserve1) : (reserve1, reserve0);
+        if (tokenReserve == 0 || wethReserve == 0) return 0;
+
+        uint256 tokensPerEth = (uint256(tokenReserve) * WEI_PER_ETH) / uint256(wethReserve);
+        if (tokensPerEth == 0) return 0;
+
+        uint256 ethPerToken = (WEI_PER_ETH * WEI_PER_ETH) / tokensPerEth;
+        uint256 tokenValueInEth = (tokenBalance * ethPerToken) / WEI_PER_ETH;
+        return (tokenValueInEth * ethPrice) / WEI_PER_ETH;
+    }
+
+    function calculateTotalValue(address etfToken, uint256 totalSupply_) private view returns (uint256 totalValue) {
+        Token[] memory basket = baskets[etfToken];
+        (, int256 price,,,) = priceFeed.latestRoundData();
+        uint256 ethPrice = uint256(price) * 1e10;
+        address factory = IUniswapV2Router02(uniswapRouter).factory();
+
+        for (uint256 i = 0; i < basket.length; i++) {
+            totalValue += calculateTokenValue(basket[i].addr, ethPrice, factory, etfToken);
+        }
+    }
+
+    function getPricePerEtf(address etfToken) public view returns (uint256) {
+        Token[] memory basket = baskets[etfToken];
+        uint256 totalSupply_ = ETFToken(etfToken).totalSupply();
+        if (totalSupply_ == 0) return WEI_PER_ETH;
+
+        uint256 totalValue = calculateTotalValue(etfToken, totalSupply_);
+        return (totalValue * WEI_PER_ETH) / totalSupply_;
+    }
+
+    function getPriceOrGain(address etfToken) public view returns (int256) {
+        Token[] memory basket = baskets[etfToken];
+        uint256 totalSupply_ = ETFToken(etfToken).totalSupply();
+
+        uint256 totalValue = calculateTotalValue(etfToken, totalSupply_);
+        uint256 pricePerEtf = (totalValue * WEI_PER_ETH) / totalSupply_;
+        return int256(pricePerEtf);
+    }
+
+    function calculateMinAmountOut(address token, uint256 amount, bool isEthToToken) private view returns (uint256) {
+        address pair = IUniswapV2Factory(IUniswapV2Router02(uniswapRouter).factory()).getPair(token, weth);
+        if (pair == address(0)) return 0;
+        (uint112 reserve0, uint112 reserve1,) = IUniswapV2Pair(pair).getReserves();
+        address token0 = IUniswapV2Pair(pair).token0();
+        (uint112 reserveIn, uint112 reserveOut) = isEthToToken
+            ? (token == token0 ? (reserve1, reserve0) : (reserve0, reserve1))
+            : (token == token0 ? (reserve0, reserve1) : (reserve1, reserve0));
+        if (reserveIn == 0 || reserveOut == 0) return 0;
+
+        uint256 amountOut = (amount * 997 * reserveOut) / (reserveIn * 1000 + amount * 997);
+        return (amountOut * SLIPPAGE) / TOTAL_BASIS_POINTS;
+    }
+
+    function getAllETFs() external view returns (ETFInfo[] memory) {
+        return allETFs;
+    }
+
+    receive() external payable {}
+}
