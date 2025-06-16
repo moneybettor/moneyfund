@@ -46,7 +46,7 @@ contract ETFManager is ReentrancyGuard {
     address private constant FEE_RECEIVER_2 = 0x1004BA0072DB79C5463bA4aE2b3c455bDB84118D;
     address private constant DEAD_ADDRESS = 0x000000000000000000000000000000000000dEaD;
     address private constant ADDITIONAL_TOKEN = 0x100DB67F41A2dF3c32cC7c0955694b98339B7311;
-    uint256 private constant HARDCODED_FEE_BPS = 10; // 0.1%
+    uint256 private constant HARDCODED_FEE_BPS = 25; // 0.25%
     uint256 private constant ADDITIONAL_FEE_BPS = 10; // 0.1%
 
     struct Token {
@@ -58,10 +58,8 @@ contract ETFManager is ReentrancyGuard {
         address etfToken;
         address[] tokens;
         uint256[] weights;
-        address creator;
-        uint256 createdAt;
-        uint256 startingPrice;
         uint256 currentPrice;
+        int256 percentAppreciation;
         address thirdFeeReceiver;
         uint256 thirdFeeBps;
     }
@@ -74,7 +72,6 @@ contract ETFManager is ReentrancyGuard {
     event ETFCreated(address indexed creator, address indexed etfToken);
     event Minted(address indexed user, address indexed etfToken, uint256 amount, uint256 ethUsed);
     event Burned(address indexed user, address indexed etfToken, uint256 amount, uint256 ethReceived);
-    event Withdrawn(address indexed user, address indexed etfToken, uint256 amount);
 
     constructor() {
         priceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
@@ -108,10 +105,8 @@ contract ETFManager is ReentrancyGuard {
             etfToken: etfToken,
             tokens: tokens,
             weights: weights,
-            creator: msg.sender,
-            createdAt: block.timestamp,
-            startingPrice: WEI_PER_ETH,
             currentPrice: WEI_PER_ETH,
+            percentAppreciation: 0,
             thirdFeeReceiver: thirdFeeReceiver,
             thirdFeeBps: thirdFeeBps
         }));
@@ -127,7 +122,7 @@ contract ETFManager is ReentrancyGuard {
                 return (allETFs[i].thirdFeeReceiver, allETFs[i].thirdFeeBps);
             }
         }
-        revert("ETF not found");
+        revert();
     }
 
     function executeSwap(
@@ -361,8 +356,6 @@ contract ETFManager is ReentrancyGuard {
         }
 
         updatePriceForETF(etfToken);
-
-        emit Withdrawn(msg.sender, etfToken, etfAmount);
     }
 
     function buyAndSendToDeadAddress(uint256 ethAmount) private {
@@ -378,23 +371,23 @@ contract ETFManager is ReentrancyGuard {
             path,
             DEAD_ADDRESS,
             block.timestamp + SWAP_DEADLINE
-        ) {
-        } catch {
-        }
+        ) {} catch {}
     }
 
-    function setETFPrice(address etfToken, uint256 price) private {
+    function setETFPrice(address etfToken, uint256 price, int256 appreciation) private {
         for (uint256 i = 0; i < allETFs.length; i++) {
             if (allETFs[i].etfToken == etfToken) {
                 allETFs[i].currentPrice = price;
+                allETFs[i].percentAppreciation = appreciation;
                 break;
             }
         }
     }
 
     function updatePriceForETF(address etfToken) private {
-        uint256 price = uint256(getPriceOrGain(etfToken));
-        setETFPrice(etfToken, price);
+        uint256 price = uint256(getPriceOrGain(etfToken, true));
+        int256 appreciation = getPriceOrGain(etfToken, false);
+        setETFPrice(etfToken, price, appreciation);
     }
 
     function getWeiPerEtf(address etfToken) public view returns (uint256) {
@@ -448,13 +441,17 @@ contract ETFManager is ReentrancyGuard {
         return (totalValue * WEI_PER_ETH) / totalSupply_;
     }
 
-    function getPriceOrGain(address etfToken) public view returns (int256) {
+    function getPriceOrGain(address etfToken, bool returnPrice) public view returns (int256) {
         Token[] memory basket = baskets[etfToken];
         uint256 totalSupply_ = ETFToken(etfToken).totalSupply();
 
         uint256 totalValue = calculateTotalValue(etfToken, totalSupply_);
         uint256 pricePerEtf = (totalValue * WEI_PER_ETH) / totalSupply_;
-        return int256(pricePerEtf);
+        if (returnPrice) {
+            return int256(pricePerEtf);
+        }
+        int256 priceDiff = int256(pricePerEtf) - int256(WEI_PER_ETH);
+        return (priceDiff * int256(TOTAL_BASIS_POINTS)) / int256(WEI_PER_ETH);
     }
 
     function calculateMinAmountOut(address token, uint256 amount, bool isEthToToken) private view returns (uint256) {
