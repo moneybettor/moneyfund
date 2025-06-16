@@ -1,305 +1,304 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "./StakingPool.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+/**
+ * @title StakingPoolFactory
+ * @notice Deploys StakingPool instances for arbitrary ERC-20 tokens.
+ * @dev Same interface; pool logic is now pull-based so no token registration is needed.
+ */
+contract StakingPoolFactory {
+    /* ───────────────────────────── events ───────────────────── */
+    event StakingPoolCreated(
+        address indexed poolAddress,
+        address indexed token,
+        uint256 hardLockDuration,
+        uint256 initialPenaltyPercent,
+        uint256 penaltyDecayPercentPerDay
+    );
+    event PoolInitializationFailed(address indexed token, string reason);
+
+    /* ───────────────────────────── errors ───────────────────── */
+    error InvalidToken();
+    error PoolExists();
+    error ParamOutOfRange();
+    error DecayTooFast();
+    error NotERC20();
+
+    /* ─────────────────────────── storage ───────────────────── */
+    mapping(address => address) public pools; // staking-token → pool
+
+    function createPool(
+        address token,
+        uint256 hardLockDuration,
+        uint256 initialPenaltyPercent,
+        uint256 penaltyDecayPercentPerDay
+    ) external returns (address poolAddr) {
+        if (token == address(0)) revert InvalidToken();
+        if (pools[token] != address(0)) revert PoolExists();
+        if (hardLockDuration == 0) revert ParamOutOfRange();
+        if (
+            initialPenaltyPercent == 0 ||
+            initialPenaltyPercent > 10_000 ||
+            penaltyDecayPercentPerDay == 0
+        ) revert ParamOutOfRange();
+        if (initialPenaltyPercent / penaltyDecayPercentPerDay > 365)
+            revert DecayTooFast();
+
+        // Light ERC-20 sanity check
+        try IERC20(token).balanceOf(address(0)) {} catch {
+            revert NotERC20();
+        }
+
+        try
+            new StakingPool(
+                address(this),
+                token,
+                hardLockDuration,
+                initialPenaltyPercent,
+                penaltyDecayPercentPerDay
+            )
+        returns (StakingPool newPool) {
+            poolAddr     = address(newPool);
+            pools[token] = poolAddr;
+
+            emit StakingPoolCreated(
+                poolAddr,
+                token,
+                hardLockDuration,
+                initialPenaltyPercent,
+                penaltyDecayPercentPerDay
+            );
+        } catch Error(string memory reason) {
+            emit PoolInitializationFailed(token, reason);
+            revert("Pool creation failed");
+        } catch {
+            emit PoolInitializationFailed(token, "Unknown error");
+            revert("Pool creation failed");
+        }
+    }
+
+    function getPool(address token) external view returns (address) {
+        return pools[token];
+    }
+}
+...// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+/**
+ * @title StakingPool
+ * @notice ERC-20 staking with ETH / any-token pull-based rewards (no
+ *         explicit registration).  Fixes reward-snapshot dilution.
+ */
 contract StakingPool is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    uint256 public immutable FEE_PERCENT = 50; // 0.5% = 50 / 10000
-    uint256 public immutable FEE_DENOMINATOR = 10000;
-    address public immutable FEE_RECIPIENT = 0x9759883ea07e2cA1E2d32E97f42d254841616AB5;
-    uint256 public immutable PENALTY_INITIAL_PERCENT = 3000; // 30% = 3000 / 10000
-    uint256 public immutable PENALTY_DURATION = 7 days;
-    uint256 public immutable PENALTY_DECREASE_PERIOD = 30 days;
-    address public immutable factoryAddress;
+    uint256 public constant FEE_PERCENT     = 50;
+    uint256 public constant FEE_DENOMINATOR = 10_000;
+    uint256 public constant MIN_STAKE       = 1;
 
-    IERC20 public token;
+    uint256 public immutable HARD_LOCK_DURATION;
+    uint256 public immutable INITIAL_PENALTY_PERCENT;
+    uint256 public immutable PENALTY_DECAY_PERCENT_PER_DAY;
+    address public immutable factoryAddress;
+    IERC20  public immutable token;
+
+    address public feeRecipient;
+
     uint256 public totalStaked;
-    uint256 public totalEthRewards;
-    uint256 public totalTokenRewards;
-    uint256 public rewardPerTokenStoredEth;
-    uint256 public rewardPerTokenStoredToken;
-    mapping(address => uint256) public rewardPerTokenStored;
-    mapping(address => StakeInfo) public stakes;
-    address[] public stakers;
-    mapping(address => uint256) public stakerIndex;
-    mapping(address => bool) public registeredTokens;
-    address[] public rewardTokens;
-    mapping(address => uint256) public tokenBalance;
-    uint256 public pendingEthRewards;
-    mapping(address => uint256) public pendingTokenRewards;
-    mapping(address => mapping(address => uint256)) public userRewardPerTokenPaid;
-    mapping(address => mapping(address => uint256)) public rewards;
+    uint256 private ethBalance;
 
     struct StakeInfo {
         uint256 amount;
-        uint256 userRewardPerTokenPaidEth;
-        uint256 userRewardPerTokenPaidToken;
-        uint256 rewardsEth;
-        uint256 rewardsToken;
         uint256 stakeTimestamp;
-        uint256 lastClaimTimestamp;
+    }
+    mapping(address => StakeInfo) public stakes;
+
+    mapping(address => uint256) public rewardPerTokenStored;
+    mapping(address => uint256) public tokenBalance;
+    mapping(address => mapping(address => uint256)) public userRewardPerTokenPaid;
+    mapping(address => mapping(address => uint256)) public rewards;
+
+    address[] public rewardTokens;
+    mapping(address => bool) private _tokenSeen;
+
+    event Staked(address indexed user, uint256 amt);
+    event Unstaked(address indexed user, uint256 amt, uint256 penalty);
+    event RewardsClaimed(address indexed user, address rewardTok, uint256 amt);
+    event FeeRecipientUpdated(address indexed oldRecip, address indexed newRecip);
+
+    error InvalidAmount();
+    error InvalidToken();
+    error NoStake();
+    error Locked();
+    error InsufficientBalance();
+
+    constructor(
+        address _factory,
+        address _token,
+        uint256 _hardLockDuration,
+        uint256 _initialPenaltyPercent,
+        uint256 _penaltyDecayPercentPerDay
+    ) Ownable(_factory) {
+        require(_factory != address(0), "Invalid factory");
+        require(_token   != address(0), "Invalid token");
+
+        factoryAddress                = _factory;
+        token                         = IERC20(_token);
+        HARD_LOCK_DURATION            = _hardLockDuration;
+        INITIAL_PENALTY_PERCENT       = _initialPenaltyPercent;
+        PENALTY_DECAY_PERCENT_PER_DAY = _penaltyDecayPercentPerDay;
+
+        feeRecipient = 0x9759883ea07e2cA1E2d32E97f42d254841616AB5;
     }
 
-    event Staked(address indexed token, address indexed user, uint256 amount);
-    event Unstaked(address indexed token, address indexed user, uint256 amount);
-    event RewardTokenAdded(address indexed poolToken, address indexed rewardToken);
-    event RewardsDistributed(address indexed poolToken, address indexed rewardToken, uint256 amount);
-    event RewardsClaimed(address indexed poolToken, address indexed user, address rewardToken, uint256 amount);
-
-    constructor(address _factory, address _token) Ownable(msg.sender) {
-        require(_factory != address(0), "Invalid factory address");
-        require(_token != address(0), "Invalid token address");
-        factoryAddress = _factory;
-        token = IERC20(_token);
+    function updateFeeRecipient(address newRecipient) external onlyOwner {
+        if (newRecipient == address(0)) revert InvalidToken();
+        emit FeeRecipientUpdated(feeRecipient, newRecipient);
+        feeRecipient = newRecipient;
     }
 
-    function stake(uint256 amount) external {
+    function stake(uint256 amount) external nonReentrant {
+        if (amount == 0) revert InvalidAmount();
         address user = msg.sender;
-        require(amount > 0, "Amount must be greater than 0");
 
-        StakeInfo storage stakeInfo = stakes[user];
-        updateReward(user);
-
-        if (stakeInfo.amount == 0) {
-            stakers.push(user);
-            stakerIndex[user] = stakers.length - 1;
+        _updateReward(user, address(0));
+        _updateReward(user, address(token));
+        for (uint256 i = 0; i < rewardTokens.length; ++i) {
+            _updateReward(user, rewardTokens[i]);
         }
 
-        stakeInfo.amount += amount;
-        stakeInfo.stakeTimestamp = block.timestamp;
-        totalStaked += amount;
+        StakeInfo storage s = stakes[user];
+        s.amount        += amount;
+        s.stakeTimestamp = block.timestamp;
+        totalStaked     += amount;
 
-        emit Staked(address(token), user, amount);
+        token.safeTransferFrom(user, address(this), amount);
+        emit Staked(user, amount);
     }
 
-    function rewardPerToken(address rewardToken) internal view returns (uint256) {
-        if (totalStaked == 0) {
-            return rewardToken == address(0)
-                ? rewardPerTokenStoredEth
-                : rewardPerTokenStored[rewardToken];
-        }
+    function claimReward(address rewardToken) public nonReentrant {
+        address user = msg.sender;
+        if (stakes[user].amount == 0) revert NoStake();
+
+        _sync(rewardToken); // ✅ ADDED: ensures new reward is pulled in
+        _updateReward(user, rewardToken);
+
+        uint256 reward = rewards[user][rewardToken];
+        if (reward == 0) return;
+
+        rewards[user][rewardToken] = 0;
+        uint256 fee = (reward * FEE_PERCENT) / FEE_DENOMINATOR;
+        uint256 pay = reward - fee;
 
         if (rewardToken == address(0)) {
-            return rewardPerTokenStoredEth + ((pendingEthRewards * 1e18) / totalStaked);
+            if (reward > ethBalance) revert InsufficientBalance();
+            ethBalance -= reward;
+            if (fee > 0) payable(feeRecipient).transfer(fee);
+            if (pay > 0) payable(user).transfer(pay);
         } else {
-            return
-                rewardPerTokenStored[rewardToken] +
-                (((IERC20(rewardToken).balanceOf(address(this)) - tokenBalance[rewardToken]) * 1e18) / totalStaked);
+            if (reward > tokenBalance[rewardToken]) revert InsufficientBalance();
+            tokenBalance[rewardToken] -= reward;
+            if (fee > 0) IERC20(rewardToken).safeTransfer(feeRecipient, fee);
+            if (pay > 0) IERC20(rewardToken).safeTransfer(user, pay);
         }
+
+        emit RewardsClaimed(user, rewardToken, pay);
     }
 
-    function updateReward(address user) internal {
-        StakeInfo storage stakeInfo = stakes[user];
-
-        rewardPerTokenStoredEth = rewardPerToken(address(0));
-        if (stakeInfo.amount > 0) {
-            stakeInfo.rewardsEth +=
-                (stakeInfo.amount *
-                    (rewardPerTokenStoredEth - stakeInfo.userRewardPerTokenPaidEth)) /
-                1e18;
+    function claimRewards(address[] calldata rewardTokens_) external {
+        for (uint256 i = 0; i < rewardTokens_.length; ++i) {
+            claimReward(rewardTokens_[i]);
         }
-        stakeInfo.userRewardPerTokenPaidEth = rewardPerTokenStoredEth;
-
-        rewardPerTokenStoredToken = rewardPerToken(address(token));
-        if (stakeInfo.amount > 0) {
-            stakeInfo.rewardsToken +=
-                (stakeInfo.amount *
-                    (rewardPerTokenStoredToken -
-                        stakeInfo.userRewardPerTokenPaidToken)) /
-                1e18;
-        }
-        stakeInfo.userRewardPerTokenPaidToken = rewardPerTokenStoredToken;
-
-        for (uint256 i = 0; i < rewardTokens.length; i++) {
-            address rewardToken = rewardTokens[i];
-            rewardPerTokenStored[rewardToken] = rewardPerToken(rewardToken);
-            if (stakeInfo.amount > 0) {
-                rewards[user][rewardToken] +=
-                    (stakeInfo.amount *
-                        (rewardPerTokenStored[rewardToken] -
-                            userRewardPerTokenPaid[user][rewardToken])) /
-                    1e18;
-            }
-            userRewardPerTokenPaid[user][rewardToken] = rewardPerTokenStored[rewardToken];
-        }
-
-        address[] memory tokensToCheck = new address[](rewardTokens.length + 1);
-        tokensToCheck[0] = address(token);
-        for (uint256 i = 0; i < rewardTokens.length; i++) {
-            tokensToCheck[i + 1] = rewardTokens[i];
-        }
-
-        for (uint256 i = 0; i < tokensToCheck.length; i++) {
-            address possible = tokensToCheck[i];
-            uint256 bal = IERC20(possible).balanceOf(address(this));
-            uint256 delta = bal - tokenBalance[possible];
-            if (delta > 0) {
-                pendingTokenRewards[possible] += delta;
-                tokenBalance[possible] = bal;
-            }
-            if (!registeredTokens[possible] && bal > 0) {
-                registeredTokens[possible] = true;
-                rewardTokens.push(possible);
-                tokenBalance[possible] = bal;
-                pendingTokenRewards[possible] += bal;
-                emit RewardTokenAdded(address(token), possible);
-            }
-        }
-    }
-
-    function claimRewards() external nonReentrant {
-        StakeInfo storage stakeInfo = stakes[msg.sender];
-        require(stakeInfo.amount > 0, "No stake to claim rewards");
-
-        updateReward(msg.sender);
-
-        uint256 ethReward = stakeInfo.rewardsEth;
-        if (ethReward > 0) {
-            uint256 fee = (ethReward * FEE_PERCENT) / FEE_DENOMINATOR;
-            uint256 ethRewardAfterFee = ethReward - fee;
-            stakeInfo.rewardsEth = 0;
-            uint256 availableBalance = address(this).balance;
-            if (ethRewardAfterFee > availableBalance) {
-                ethRewardAfterFee = availableBalance;
-            }
-            if (fee > ethRewardAfterFee) {
-                fee = ethRewardAfterFee;
-            }
-            if (fee > 0 && availableBalance >= fee) {
-                payable(FEE_RECIPIENT).transfer(fee);
-            }
-            if (ethRewardAfterFee > 0 && availableBalance >= ethRewardAfterFee) {
-                payable(msg.sender).transfer(ethRewardAfterFee);
-            }
-            pendingEthRewards -= (ethRewardAfterFee + fee);
-            emit RewardsClaimed(address(token), msg.sender, address(0), ethRewardAfterFee);
-        }
-
-        for (uint256 i = 0; i < rewardTokens.length; i++) {
-            address rewardToken = rewardTokens[i];
-            uint256 tokenReward = rewardToken == address(token)
-                ? stakeInfo.rewardsToken
-                : rewards[msg.sender][rewardToken];
-            if (tokenReward > 0) {
-                uint256 actualBalance = IERC20(rewardToken).balanceOf(address(this));
-                if (tokenReward > actualBalance) {
-                    tokenReward = actualBalance;
-                }
-                if (tokenReward > tokenBalance[rewardToken]) {
-                    tokenReward = tokenBalance[rewardToken];
-                }
-                uint256 fee = (tokenReward * FEE_PERCENT) / FEE_DENOMINATOR;
-                uint256 tokenRewardAfterFee = tokenReward - fee;
-                if (rewardToken == address(token)) {
-                    stakeInfo.rewardsToken = 0;
-                } else {
-                    rewards[msg.sender][rewardToken] = 0;
-                }
-                tokenBalance[rewardToken] -= tokenReward;
-                pendingTokenRewards[rewardToken] -= (tokenRewardAfterFee + fee);
-                if (fee > 0) {
-                    IERC20(rewardToken).safeTransfer(FEE_RECIPIENT, fee);
-                }
-                if (tokenRewardAfterFee > 0) {
-                    IERC20(rewardToken).safeTransfer(msg.sender, tokenRewardAfterFee);
-                }
-                emit RewardsClaimed(address(token), msg.sender, rewardToken, tokenRewardAfterFee);
-            }
-        }
-
-        stakeInfo.lastClaimTimestamp = block.timestamp;
     }
 
     function unstake() external nonReentrant {
-        StakeInfo storage stakeInfo = stakes[msg.sender];
-        require(stakeInfo.amount > 0, "No stake to withdraw");
-        require(block.timestamp >= stakeInfo.stakeTimestamp, "Invalid timestamp");
+        address user = msg.sender;
+        StakeInfo storage s = stakes[user];
+        if (s.amount == 0) revert NoStake();
+        if (block.timestamp < s.stakeTimestamp + HARD_LOCK_DURATION) revert Locked();
 
-        updateReward(msg.sender);
-
-        uint256 amount = stakeInfo.amount;
-        uint256 fee = (amount * FEE_PERCENT) / FEE_DENOMINATOR;
-        uint256 penalty = 0;
-
-        if (block.timestamp < stakeInfo.stakeTimestamp + PENALTY_DURATION) {
-            penalty = (amount * PENALTY_INITIAL_PERCENT) / FEE_DENOMINATOR;
-        } else if (block.timestamp < stakeInfo.stakeTimestamp + PENALTY_DECREASE_PERIOD) {
-            uint256 daysSinceLockup = (block.timestamp - stakeInfo.stakeTimestamp) / 1 days;
-            uint256 penaltyPercent = PENALTY_INITIAL_PERCENT - (daysSinceLockup * 100);
-            if (penaltyPercent > 0) {
-                penalty = (amount * penaltyPercent) / FEE_DENOMINATOR;
-            }
+        _updateReward(user, address(0));
+        _updateReward(user, address(token));
+        for (uint256 i = 0; i < rewardTokens.length; ++i) {
+            _updateReward(user, rewardTokens[i]);
         }
 
-        uint256 amountAfterFees = amount - fee - penalty;
+        uint256 amount  = s.amount;
+        uint256 fee     = (amount * FEE_PERCENT) / FEE_DENOMINATOR;
+
+        uint256 elapsed    = block.timestamp - s.stakeTimestamp;
+        uint256 penaltyBps = INITIAL_PENALTY_PERCENT;
+        if (elapsed >= HARD_LOCK_DURATION) {
+            uint256 decay = ((elapsed - HARD_LOCK_DURATION) * PENALTY_DECAY_PERCENT_PER_DAY) / 1 days;
+            penaltyBps = decay >= INITIAL_PENALTY_PERCENT ? 0 : INITIAL_PENALTY_PERCENT - decay;
+        }
+
+        uint256 penalty  = penaltyBps == 0 ? 0 : (amount * penaltyBps) / FEE_DENOMINATOR;
+        uint256 sendBack = amount - fee - penalty;
 
         totalStaked -= amount;
-        stakeInfo.amount = 0;
-        stakeInfo.stakeTimestamp = 0;
+        s.amount     = 0;
 
-        uint256 index = stakerIndex[msg.sender];
-        address lastStaker = stakers[stakers.length - 1];
-        stakers[index] = lastStaker;
-        stakerIndex[lastStaker] = index;
-        stakers.pop();
-        delete stakerIndex[msg.sender];
+        token.safeTransfer(user, sendBack);
+        if (fee     > 0) token.safeTransfer(feeRecipient, fee);
+        if (penalty > 0) token.safeTransfer(feeRecipient, penalty);
 
-        token.safeTransfer(msg.sender, amountAfterFees);
-        if (fee > 0) token.safeTransfer(FEE_RECIPIENT, fee);
-        if (penalty > 0) token.safeTransfer(FEE_RECIPIENT, penalty);
-
-        emit Unstaked(address(token), msg.sender, amountAfterFees);
+        emit Unstaked(user, sendBack, penalty);
     }
 
-    receive() external payable {
-        if (msg.value > 0) {
-            totalEthRewards += msg.value;
-            pendingEthRewards += msg.value;
-            emit RewardsDistributed(address(token), address(0), msg.value);
+    function _sync(address rewardToken) internal {
+        uint256 bal;
+        if (rewardToken == address(0)) {
+            bal = address(this).balance;
+        } else if (rewardToken == address(token)) {
+            bal = IERC20(rewardToken).balanceOf(address(this)) - totalStaked;
+        } else {
+            bal = IERC20(rewardToken).balanceOf(address(this));
         }
-    }
-}...// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
 
-import "./StakingPool.sol";
+        uint256 accounted = rewardToken == address(0) ? ethBalance : tokenBalance[rewardToken];
 
-contract StakingPoolFactory {
-    // Event emitted when a new staking pool is created
-    event StakingPoolCreated(address indexed poolAddress, address indexed token);
-    // Event emitted when pool initialization fails
-    event PoolInitializationFailed(address indexed token, bytes reason);
+        if (bal > accounted && totalStaked > 0) {
+            uint256 delta = bal - accounted;
+            rewardPerTokenStored[rewardToken] += (delta * 1e36) / totalStaked;
 
-    // Mapping to track created pools by token address
-    mapping(address => address) public pools;
+            if (rewardToken == address(0)) {
+                ethBalance = bal;
+            } else {
+                tokenBalance[rewardToken] = bal;
+            }
 
-    // Function to create a new staking pool
-    function createPool(address token) external returns (address) {
-        require(token != address(0), "Invalid token address");
-        require(pools[token] == address(0), "Pool already exists for this token");
-
-        // Deploy a new StakingPool contract with factory and token addresses
-        try new StakingPool(address(this), token) returns (StakingPool newPool) {
-            // Store the pool address in the mapping
-            pools[token] = address(newPool);
-
-            // Emit success event
-            emit StakingPoolCreated(address(newPool), token);
-
-            return address(newPool);
-        } catch (bytes memory reason) {
-            // Emit failure event with revert reason
-            emit PoolInitializationFailed(token, reason);
-            revert("Pool creation failed");
+            if (
+                rewardToken != address(0) &&
+                rewardToken != address(token) &&
+                !_tokenSeen[rewardToken]
+            ) {
+                _tokenSeen[rewardToken] = true;
+                rewardTokens.push(rewardToken);
+            }
         }
     }
 
-    // Function to get the pool address for a given token
-    function getPool(address token) external view returns (address) {
-        return pools[token];
+    function _updateReward(address user, address rewardToken) internal {
+        _sync(rewardToken);
+
+        uint256 rpt = rewardPerTokenStored[rewardToken];
+        uint256 paid = userRewardPerTokenPaid[user][rewardToken];
+
+        if (stakes[user].amount > 0) {
+            rewards[user][rewardToken] +=
+                (stakes[user].amount * (rpt - paid)) / 1e36;
+        }
+        userRewardPerTokenPaid[user][rewardToken] = rpt;
     }
-} 
+
+    receive() external payable {}
+}
