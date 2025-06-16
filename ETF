@@ -97,7 +97,7 @@
             margin: 5px;
         }
 
-        .mint-etf-button, .burn-etf-button {
+        .mint-etf-button, .burn-etf-button, .withdraw-etf-button {
             padding: 6px 10px;
             font-size: 0.85rem;
             margin: 0 3px;
@@ -333,7 +333,8 @@
         }
 
         .etf-card-actions .mint-etf-button,
-        .etf-card-actions .burn-etf-button {
+        .etf-card-actions .burn-etf-button,
+        .etf-card-actions .withdraw-etf-button {
             flex: 0 0 auto;
         }
 
@@ -486,7 +487,7 @@
             .action-cell {
                 flex-wrap: nowrap;
             }
-            .mint-etf-button, .burn-etf-button {
+            .mint-etf-button, .burn-etf-button, .withdraw-etf-button {
                 padding: 5px 8px;
                 font-size: 0.8rem;
             }
@@ -591,7 +592,7 @@
         ];
 
         // Contract address (Ethereum Mainnet)
-        const MANAGER_ADDRESS = "0xc24b308dbfc4aaf8c4d8530ed32e2c942313ab0f";
+        const MANAGER_ADDRESS = "0xa4a107c5b8de797c32ae701ffe2b306cb9044ba6";
 
         // Hardcoded RPC configuration for Ethereum Mainnet
         const RPC_ENDPOINTS = [
@@ -603,24 +604,6 @@
 
         // ABI for ETFManager
         const managerAbi = [
-            {
-                "inputs": [
-                    {
-                        "internalType": "address",
-                        "name": "etfToken",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "etfAmount",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "burn",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
             {
                 "inputs": [],
                 "stateMutability": "nonpayable",
@@ -661,50 +644,6 @@
                 ],
                 "name": "Burned",
                 "type": "event"
-            },
-            {
-                "inputs": [
-                    {
-                        "internalType": "string",
-                        "name": "name",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "symbol",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "address[]",
-                        "name": "tokens",
-                        "type": "address[]"
-                    },
-                    {
-                        "internalType": "uint256[]",
-                        "name": "weights",
-                        "type": "uint256[]"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "thirdFeeReceiver",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "thirdFeeBps",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "createETF",
-                "outputs": [
-                    {
-                        "internalType": "address",
-                        "name": "etfToken",
-                        "type": "address"
-                    }
-                ],
-                "stateMutability": "nonpayable",
-                "type": "function"
             },
             {
                 "anonymous": false,
@@ -769,14 +708,54 @@
                         "type": "uint256"
                     }
                 ],
-                "name": "mintWithEth",
+                "name": "burn",
                 "outputs": [],
-                "stateMutability": "payable",
+                "stateMutability": "nonpayable",
                 "type": "function"
             },
             {
-                "stateMutability": "payable",
-                "type": "receive"
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "symbol",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "address[]",
+                        "name": "tokens",
+                        "type": "address[]"
+                    },
+                    {
+                        "internalType": "uint256[]",
+                        "name": "weights",
+                        "type": "uint256[]"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "thirdFeeReceiver",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "thirdFeeBps",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "createETF",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "etfToken",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
             },
             {
                 "inputs": [],
@@ -785,166 +764,192 @@
                     {
                         "components": [
                             {
-                                "internalType": "address",
-                                "name": "etfToken",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "address[]",
-                                "name": "tokens",
-                                "type": "address[]"
-                            },
-                            {
-                                "internalType": "uint256[]",
-                                "name": "weights",
-                                "type": "uint256[]"
-                            },
-                            {
-                                "internalType": "address",
-                                "name": "creator",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "createdAt",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "startingPrice",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "currentPrice",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "int256",
-                                "name": "percentAppreciation",
-                                "type": "int256"
-                            },
-                            {
-                                "internalType": "address",
-                                "name": "thirdFeeReceiver",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "thirdFeeBps",
-                                "type": "uint256"
-                            }
-                        ],
-                        "internalType": "struct ETFManager.ETFInfo[]",
-                        "name": "",
-                        "type": "tuple[]"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {
+                                " 
                         "internalType": "address",
                         "name": "etfToken",
                         "type": "address"
                     },
                     {
-                        "internalType": "bool",
-                        "name": "returnPrice",
-                        "type": "bool"
-                    }
-                ],
-                "name": "getPriceOrGain",
-                "outputs": [
+                        "internalType": "address[]",
+                        "name": "tokens",
+                        "type": "address[]"
+                    },
+                    {
+                        "internalType": "uint256[]",
+                        "name": "weights",
+                        "type": "uint256[]"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "currentPrice",
+                        "type": "uint256"
+                    },
                     {
                         "internalType": "int256",
-                        "name": "",
+                        "name": "percentAppreciation",
                         "type": "int256"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [
+                    },
                     {
                         "internalType": "address",
-                        "name": "etfToken",
+                        "name": "thirdFeeReceiver",
                         "type": "address"
-                    }
-                ],
-                "name": "getPricePerEtf",
-                "outputs": [
+                    },
                     {
                         "internalType": "uint256",
-                        "name": "",
+                        "name": "thirdFeeBps",
                         "type": "uint256"
                     }
                 ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {
-                        "internalType": "address",
-                        "name": "etfToken",
-                        "type": "address"
-                    }
-                ],
-                "name": "getWeiPerEtf",
-                "outputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [],
-                "name": "priceFeed",
-                "outputs": [
-                    {
-                        "internalType": "contract AggregatorV3Interface",
-                        "name": "",
-                        "type": "address"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [],
-                "name": "uniswapRouter",
-                "outputs": [
-                    {
-                        "internalType": "address",
-                        "name": "",
-                        "type": "address"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [],
-                "name": "weth",
-                "outputs": [
-                    {
-                        "internalType": "address",
-                        "name": "",
-                        "type": "address"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
+                "internalType": "struct ETFManager.ETFInfo[]",
+                "name": "",
+                "type": "tuple[]"
             }
-        ];
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "etfToken",
+                "type": "address"
+            },
+            {
+                "internalType": "bool",
+                "name": "returnPrice",
+                "type": "bool"
+            }
+        ],
+        "name": "getPriceOrGain",
+        "outputs": [
+            {
+                "internalType": "int256",
+                "name": "",
+                "type": "int256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "etfToken",
+                "type": "address"
+            }
+        ],
+        "name": "getPricePerEtf",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "etfToken",
+                "type": "address"
+            }
+        ],
+        "name": "getWeiPerEtf",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "etfToken",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "etfAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "mintWithEth",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "priceFeed",
+        "outputs": [
+            {
+                "internalType": "contract AggregatorV3Interface",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "uniswapRouter",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "weth",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "etfToken",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "etfAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "receive"
+    }
+];
 
         // ABI for ETFToken
         const tokenAbi = [
@@ -1605,6 +1610,118 @@
             }
         }
 
+        async function withdrawETF(tokenAddress, amount) {
+            logMessage(`Attempting to withdraw ${amount} ETF tokens for ${tokenAddress}`);
+
+            if (!selectedWallet) {
+                logMessage("Please select a wallet.");
+                return { error: "Please select a wallet." };
+            }
+
+            if (!web3.utils.isAddress(tokenAddress)) {
+                logMessage(`Invalid ETF token address: ${tokenAddress}`);
+                return { error: "Invalid ETF token address." };
+            }
+
+            if (!amount || parseFloat(amount) <= 0) {
+                logMessage(`Invalid ETF amount: ${amount}`);
+                return { error: "Please enter a valid ETF amount." };
+            }
+
+            const etfAmountWei = web3.utils.toWei(amount.toString(), 'ether');
+
+            try {
+                const manager = new web3.eth.Contract(managerAbi, MANAGER_ADDRESS);
+                const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
+
+                const etfBalance = await withRetry(() => tokenContract.methods.balanceOf(userAccount).call());
+                if (web3.utils.toBN(etfBalance).lt(web3.utils.toBN(etfAmountWei))) {
+                    throw new Error(
+                        `Insufficient ETF balance: need ${amount} tokens, have ${web3.utils.fromWei(etfBalance, 'ether')} tokens`
+                    );
+                }
+
+                let approveGasEstimate;
+                try {
+                    approveGasEstimate = await withRetry(() =>
+                        tokenContract.methods.approve(MANAGER_ADDRESS, etfAmountWei).estimateGas({ from: userAccount })
+                    );
+                    approveGasEstimate = Math.ceil(Number(approveGasEstimate) * 1.2);
+                } catch (error) {
+                    approveGasEstimate = 100000;
+                    logMessage(`Approve gas estimation failed, using default ${approveGasEstimate}: ${error.message}`);
+                }
+
+                const gasPrice = await getGasPrice();
+                logMessage(`Gas price: ${web3.utils.fromWei(gasPrice, 'gwei')} Gwei`);
+
+                let approveTx;
+                if (selectedWallet.isMetaMask) {
+                    const tokenEthers = new ethers.Contract(tokenAddress, tokenAbi, signer);
+                    approveTx = await tokenEthers.approve(MANAGER_ADDRESS, etfAmountWei, {
+                        gasLimit: approveGasEstimate,
+                        gasPrice: gasPrice
+                    });
+                    await approveTx.wait();
+                } else {
+                    const approveTxData = tokenContract.methods.approve(MANAGER_ADDRESS, etfAmountWei).encodeABI();
+                    const approveNonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
+                    const approveTransactionObject = {
+                        from: userAccount,
+                        to: tokenAddress,
+                        data: approveTxData,
+                        gas: approveGasEstimate,
+                        gasPrice: gasPrice,
+                        nonce: approveNonce
+                    };
+                    const signedApproveTx = await web3.eth.accounts.signTransaction(approveTransactionObject, selectedWallet.privateKey);
+                    approveTx = await withRetry(() => web3.eth.sendSignedTransaction(signedApproveTx.rawTransaction));
+                }
+
+                let withdrawGasEstimate;
+                try {
+                    withdrawGasEstimate = await withRetry(() =>
+                        manager.methods.withdraw(tokenAddress, etfAmountWei).estimateGas({ from: userAccount })
+                    );
+                    withdrawGasEstimate = Math.ceil(Number(withdrawGasEstimate) * 1.2);
+                    logMessage(`Withdraw gas limit: ${withdrawGasEstimate}`);
+                } catch (error) {
+                    withdrawGasEstimate = 1500000;
+                    logMessage(`Withdraw gas estimation failed, using default ${withdrawGasEstimate}: ${error.message}`);
+                }
+
+                let tx;
+                if (selectedWallet.isMetaMask) {
+                    const managerEthers = new ethers.Contract(MANAGER_ADDRESS, managerAbi, signer);
+                    tx = await managerEthers.withdraw(tokenAddress, etfAmountWei, {
+                        gasLimit: withdrawGasEstimate,
+                        gasPrice: gasPrice
+                    });
+                    await tx.wait();
+                } else {
+                    const txData = manager.methods.withdraw(tokenAddress, etfAmountWei).encodeABI();
+                    const nonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
+                    const transactionObject = {
+                        from: userAccount,
+                        to: MANAGER_ADDRESS,
+                        data: txData,
+                        gas: withdrawGasEstimate,
+                        gasPrice: gasPrice,
+                        nonce: nonce
+                    };
+                    const signedTx = await web3.eth.accounts.signTransaction(transactionObject, selectedWallet.privateKey);
+                    tx = await withRetry(() => web3.eth.sendSignedTransaction(signedTx.rawTransaction));
+                }
+
+                logMessage(`Withdrawn ${amount} ETF tokens at Token: ${tokenAddress}: ${tx.transactionHash || tx.hash}`);
+                return { success: `Withdrawn ${amount} ETF tokens successfully! Tx: ${tx.transactionHash || tx.hash}` };
+            } catch (error) {
+                console.log("Withdraw error details:", error);
+                logMessage(`Withdraw failed: ${error.message}`);
+                return { error: `Withdraw failed: ${error.message}` };
+            }
+        }
+
         async function updateETFPrice(tokenAddress) {
             logMessage(`Attempting to update price for ${tokenAddress}`);
             try {
@@ -1657,7 +1774,6 @@
                         logMessage(`Failed to fetch name/symbol for ${etf.etfToken}: ${error.message}`);
                     }
 
-                    const createdAt = new Date(Number(etf.createdAt) * 1000).toLocaleDateString();
                     const thirdFeeBps = etf.thirdFeeBps;
 
                     // Use stored values if available, otherwise use placeholder
@@ -1722,10 +1838,6 @@
                                 <span id="appreciation-${etf.etfToken}">${appreciationDisplay}</span>
                             </div>
                             <div>
-                                <label>Created At</label>
-                                <span>${createdAt}</span>
-                            </div>
-                            <div>
                                 <label>Creator Fee (bps)</label>
                                 <span>${thirdFeeBps}</span>
                             </div>
@@ -1734,6 +1846,7 @@
                             <input type="number" class="etf-amount-input" id="amount-${etf.etfToken}" placeholder="Amount" min="0.01" step="0.01">
                             <button class="mint-etf-button" data-token="${etf.etfToken}">Mint</button>
                             <button class="burn-etf-button" data-token="${etf.etfToken}">Burn</button>
+                            <button class="withdraw-etf-button" data-token="${etf.etfToken}">Withdraw</button>
                             <p id="action-status-${etf.etfToken}" class="status-message"></p>
                             <p id="action-error-${etf.etfToken}" class="error-message"></p>
                         </div>
@@ -1864,6 +1977,36 @@
                         }
 
                         const result = await burnETF(token, amount);
+                        if (result.success) {
+                            status.innerText = result.success;
+                            // Refresh ETFs to update price
+                            await refreshETFs();
+                        } else {
+                            error.innerText = result.error;
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.withdraw-etf-button').forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const token = button.getAttribute('data-token');
+                        const amountInput = document.getElementById(`amount-${token}`);
+                        const amount = amountInput.value;
+                        const status = document.getElementById(`action-status-${token}`);
+                        const error = document.getElementById(`action-error-${token}`);
+                        status.innerText = "";
+                        error.innerText = "";
+
+                        logMessage(`Withdraw button clicked for token ${token} with amount ${amount}`);
+                        
+                                                // Validate amount before calling withdrawETF
+                        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+                            logMessage(`Invalid amount entered: ${amount}`);
+                            error.innerText = "Please enter a valid positive amount.";
+                            return;
+                        }
+
+                        const result = await withdrawETF(token, amount);
                         if (result.success) {
                             status.innerText = result.success;
                             // Refresh ETFs to update price
