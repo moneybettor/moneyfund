@@ -6,7 +6,7 @@
     <title>Shitcoin Launcher & Liquidity</title>
     <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
     <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,13 +15,25 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%);
-            color: #E2E8F0;
-            padding: 20px;
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0A0C1E, #1F2A44);
+            color: #E5E7EB;
+            padding: 24px;
             min-height: 100vh;
             line-height: 1.5;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E');
+            z-index: -1;
         }
 
         .flex-container {
@@ -40,24 +52,84 @@
             flex: 1;
             min-width: 0;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
             margin-bottom: 20px;
             z-index: 1;
+        }
+
+        .wallet-container {
+            display: flex;
+            gap: 16px;
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .wallet-container select,
+        .wallet-container button {
+            flex: 1;
+            min-width: 0;
+            padding: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            text-align: center;
+            transition: border 0.3s, box-shadow 0.3s, background 0.3s;
+        }
+
+        .wallet-container button {
+            background: #4B5EAA;
+            color: #F9FAFB;
+            cursor: pointer;
+            font-weight: 600;
+            border: none;
+        }
+
+        .wallet-container button:hover {
+            background: #3B4A8C;
+            transform: scale(1.02);
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .wallet-container select {
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .wallet-container select:hover {
+            background: rgba(17, 24, 39, 0.95);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .wallet-container select:focus {
+            border-color: #6366F1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+            outline: none;
         }
 
         .coin-list {
             max-height: 600px;
             overflow-y: auto;
             padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: rgba(31, 41, 55, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            scrollbar-width: thin;
+            scrollbar-color: #6366F1 rgba(31, 41, 55, 0.5);
+        }
+
+        .coin-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .coin-list::-webkit-scrollbar-thumb {
+            background: #6366F1;
+            border-radius: 2px;
+        }
+
+        .coin-list::-webkit-scrollbar-track {
+            background: rgba(31, 41, 55, 0.5);
         }
 
         .ticker-container {
@@ -65,14 +137,13 @@
             width: 100%;
             margin: 0 auto 20px auto;
             overflow: hidden;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
+            background: rgba(31, 41, 55, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
             height: 40px;
             display: flex;
             align-items: center;
             z-index: 1;
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .ticker-tape {
@@ -89,13 +160,13 @@
         .ticker-content span {
             padding: 0 20px;
             font-size: 1rem;
-            color: #E2E8F0;
+            color: #E5E7EB;
             cursor: pointer;
             transition: color 0.3s ease;
         }
 
         .ticker-content span:hover {
-            color: #10B981;
+            color: #6366F1;
         }
 
         @keyframes ticker {
@@ -108,38 +179,53 @@
         }
 
         button {
-            padding: 10px 15px;
-            cursor: pointer;
+            width: 100%;
+            padding: 14px;
+            margin: 12px 0;
             border: none;
-            border-radius: 8px;
-            background: #10B981;
-            color: #F1F5F9;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
             font-weight: 600;
-            transition: background 0.3s ease, transform 0.2s;
-            margin: 5px 0;
-            font-size: 1rem;
-            display: inline-block;
-            text-align: center;
-            max-width: 100%;
+            background: linear-gradient(90deg, #4F46E5, #A855F7);
+            color: #F9FAFB;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
         }
 
         button:hover {
-            background: #059669;
-            transform: scale(1.02);
+            background: linear-gradient(90deg, #4338CA, #9333EA);
+            transform: scale(1.03);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            transform: scale(1);
+            transition: transform 0.2s;
+        }
+
+        button:disabled {
+            background: rgba(75, 85, 99, 0.6);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         #launch-coin-button {
             display: block;
             margin-left: auto;
             margin-right: auto;
-            padding: 30px 70px;
+            padding: 14px;
             width: auto;
-            max-width: 90%;
-            background: #10B981;
-        }
-
-        #launch-coin-button:hover {
-            background: #059669;
+            max-width: 600px;
+            font-size: 1.1rem;
         }
 
         #toggle-liquidity-button {
@@ -147,33 +233,37 @@
             margin-left: auto;
             margin-right: auto;
             width: auto;
-            max-width: 90%;
-            background: #10B981;
-        }
-
-        #toggle-liquidity-button:hover {
-            background: #059669;
+            max-width: 600px;
         }
 
         input, input[type="file"], select {
             padding: 12px;
             margin: 5px 0;
             width: 100%;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.08);
-            color: #F1F5F9;
+            max-width: 600px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
             font-size: 1rem;
-            transition: background 0.3s ease, border-color 0.3s ease;
+            transition: border 0.3s, box-shadow 0.3s, background 0.3s;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.15);
         }
 
         input:hover, input[type="file"]:hover, select:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(17, 24, 39, 0.95);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+        }
+
+        input:focus, select:focus {
+            border-color: #6366F1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+            outline: none;
         }
 
         input::placeholder {
-            color: #A0AEC0;
+            color: #9CA3AF;
             opacity: 0.8;
         }
 
@@ -181,7 +271,7 @@
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23E2E8F0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23E5E7EB%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
             background-repeat: no-repeat;
             background-position: right 10px center;
             background-size: 10px auto;
@@ -192,6 +282,7 @@
             color: #FFFFFF;
             text-align: center;
             word-wrap: break-word;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         h2 { font-size: 1.8em; }
@@ -200,15 +291,17 @@
         .coin-block {
             margin-top: 10px;
             padding: 15px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(99, 102, 241, 0.2);
             margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             width: 100%;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
         }
 
         .coin-header {
@@ -217,7 +310,8 @@
             align-items: center;
             gap: 15px;
             padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            position: relative;
         }
 
         .coin-header-text {
@@ -234,7 +328,7 @@
         .coin-header .ticker {
             font-size: 1.4em;
             font-weight: 600;
-            color: #10B981;
+            color: #6366F1;
             margin-top: 2px;
         }
 
@@ -243,13 +337,12 @@
             max-width: 120px;
             max-height: 120px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .no-image-text {
             text-align: center;
             margin: 5px 0;
-            color: #A0AEC0;
+            color: #9CA3AF;
             font-style: italic;
             font-size: 0.9em;
         }
@@ -258,6 +351,8 @@
             display: grid;
             gap: 8px;
             padding: 10px 0;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .coin-info-item {
@@ -265,88 +360,107 @@
             flex-direction: column;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            max-width: 100%;
+            overflow: hidden;
+            padding-right: 0;
         }
 
         .coin-info-item.supply {
             background: rgba(16, 185, 129, 0.1);
-            padding: 6px 10px;
+            padding: 6px 6px;
             border-radius: 6px;
             color: #10B981;
             font-size: 1.2em;
             font-weight: 600;
+            box-sizing: border-box;
+            max-width: 100%;
+            width: 100%;
+            overflow: hidden;
         }
 
         .coin-info-item strong {
-            color: #A0AEC0;
+            color: #D1D5DB;
             font-weight: 500;
             font-size: 0.85em;
             margin-bottom: 2px;
         }
 
         .coin-info-item span {
-            color: #E2E8F0;
+            color: #E5E7EB;
             font-size: 0.85em;
             line-height: 1.4;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            white-space: normal;
+            overflow: hidden;
         }
 
         .coin-actions {
             padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
 
         .reaction {
-            display: flex;
-            gap: 12px;
-            font-size: 1.1em;
+            display: inline-flex;
+            gap: 6px;
+            position: absolute;
+            top: 2px;
+            right: 2px;
         }
 
         .comment-button, .like-button, .dislike-button {
             background: none;
             border: none;
-            font-size: 1.1em;
+            font-size: 0.8em;
             cursor: pointer;
             transition: color 0.3s ease;
-            padding: 5px;
-            color: #10B981;
+            padding: 2px;
+            color: #6366F1;
             line-height: 1;
-            font-family: 'Segoe UI Emoji', 'Segoe UI Symbol', 'Inter', sans-serif;
+            font-family: 'Segoe UI Emoji', 'Segoe UI Symbol', 'Manrope', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 26px;
+            height: 20px;
         }
 
         .comment-button:hover, .like-button:hover, .dislike-button:hover {
-            color: #059669;
+            color: #4F46E5;
         }
 
         .coin-block > button.comment-button {
             display: block;
             width: auto;
-            background: #10B981;
-            font-family: 'Inter', sans-serif;
+            background: linear-gradient(90deg, #4F46E5, #A855F7);
+            font-family: 'Manrope', sans-serif;
             padding: 10px;
             margin: 0;
+            color: #F9FAFB;
         }
 
         .coin-block > button.comment-button:hover {
-            background: #059669;
+            background: linear-gradient(90deg, #4338CA, #9333EA);
         }
 
         .comments-container {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(17, 24, 39, 0.85);
             padding: 8px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-top: 8px;
             display: none;
             flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.15);
         }
 
         .comment {
             font-size: 0.85em;
-            color: #E2E8F0;
+            color: #E5E7EB;
             padding: 4px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.15);
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
@@ -364,15 +478,21 @@
         .comment-input {
             margin-top: 8px;
             font-size: 0.85em;
+            padding: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
         }
 
         label {
-            color: #E2E8F0;
+            color: #D1D5DB;
             margin-top: 8px;
             margin-bottom: 3px;
             display: block;
-            font-weight: 600;
+            font-weight: 500;
             text-align: left;
+            font-size: 0.9rem;
         }
 
         .status-message, .error-message, .loading-message {
@@ -380,29 +500,30 @@
             font-size: 0.9em;
             text-align: center;
             padding: 8px;
-            border-radius: 5px;
+            border-radius: 10px;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(31, 41, 55, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
         }
 
         .status-message { color: #10B981; }
         .error-message { color: #F87171; }
-        .loading-message { color: #A0AEC0; }
+        .loading-message { color: #9CA3AF; }
 
         .liquidity-section {
             display: none;
             margin-top: 10px;
             padding: 10px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(99, 102, 241, 0.2);
         }
 
         #liquidity-section iframe {
             max-width: 100%;
             display: block;
-            border-radius: 5px;
+            border-radius: 10px;
         }
 
         #liquidity-section button {
@@ -410,23 +531,17 @@
             display: block;
             margin-left: auto;
             margin-right: auto;
-            background: #10B981;
-        }
-
-        #liquidity-section button:hover {
-            background: #059669;
+            max-width: 600px;
         }
 
         @media (max-width: 768px) {
             .flex-container {
                 flex-direction: column;
+                gap: 15px;
+                padding: 0 10px;
             }
             body {
                 padding: 10px;
-            }
-            .flex-container {
-                gap: 15px;
-                padding: 0 10px;
             }
             .ticker-container {
                 margin: 0 10px 15px 10px;
@@ -434,30 +549,37 @@
             .full-width-container {
                 padding: 15px;
             }
+            .wallet-container {
+                flex-direction: column;
+                gap: 12px;
+            }
             h2 { font-size: 1.4em; }
             h3 { font-size: 1.2em; }
             button { font-size: 0.95em; }
             input, select { font-size: 0.95em; padding: 7px; }
             #launch-coin-button {
-                padding: 15px 30px;
+                padding: 12px;
                 font-size: 1em;
             }
             #toggle-liquidity-button, #liquidity-section button {
                 max-width: 95%;
-                padding: 10px 20px;
+                padding: 12px;
             }
             .coin-header h4 { font-size: 1.6em; }
             .coin-header .ticker { font-size: 1.2em; }
             .coin-info-item.supply { font-size: 1.1em; }
             .coin-info-item strong { font-size: 0.8em; }
             .coin-info-item span { font-size: 0.8em; }
-            #walletAddress { font-size: 0.85em; }
             .coin-image {
                 max-width: 100px;
                 max-height: 100px;
             }
-            .reaction { gap: 10px; }
-            .comment-button, .like-button, .dislike-button { font-size: 1em; }
+            .reaction { gap: 4px; }
+            .comment-button, .like-button, .dislike-button { 
+                font-size: 0.7em; 
+                min-width: 24px; 
+                height: 18px; 
+            }
         }
 
         @media (min-width: 769px) {
@@ -480,30 +602,37 @@
             .full-width-container {
                 padding: 10px;
             }
+            .wallet-container {
+                flex-direction: column;
+                gap: 10px;
+            }
             h2 { font-size: 1.25em; }
             h3 { font-size: 1.1em; }
-            button { padding: 8px 12px; font-size: 0.9em; }
+            button { padding: 10px; font-size: 0.9em; }
             input, select { padding: 6px; font-size: 0.9em; }
             #launch-coin-button {
-                padding: 12px 20px;
+                padding: 10px;
                 font-size: 0.95em;
             }
             #toggle-liquidity-button, #liquidity-section button,
             .coin-block > button.comment-button {
-                padding: 9px 18px;
+                padding: 10px;
             }
             .coin-header h4 { font-size: 1.4em; }
             .coin-header .ticker { font-size: 1.1em; }
             .coin-info-item.supply { font-size: 1em; }
             .coin-info-item strong { font-size: 0.75em; }
             .coin-info-item span { font-size: 0.75em; }
-            #walletAddress { font-size: 0.8em; }
             .coin-image {
                 max-width: 80px;
                 max-height: 80px;
             }
-            .reaction { gap: 8px; }
-            .comment-button, .like-button, .dislike-button { font-size: 0.95em; }
+            .reaction { gap: 4px; }
+            .comment-button, .like-button, .dislike-button { 
+                font-size: 0.65em; 
+                min-width: 22px; 
+                height: 16px; 
+            }
             .ticker-content span {
                 font-size: 0.9em;
                 padding: 0 15px;
@@ -519,7 +648,7 @@
             }
             h2 { font-size: 1.6em; }
             h3 { font-size: 1.3em; }
-            #launch-coin-button { padding: 25px 50px; }
+            #launch-coin-button { padding: 14px; }
         }
     </style>
 </head>
@@ -531,12 +660,12 @@
     <div class="flex-container">
         <div class="full-width-container">
             <h2>MoneyFund Launchpad</h2>
-            <button onclick="connectWallet()">Connect Wallet</button>
-            <select id="wallet-selector" onchange="selectWallet(this.value)">
-                <option value="">-- Select Wallet --</option>
-            </select>
-            <p id="walletAddress">Wallet Address: Not connected</p>
-
+            <div class="wallet-container">
+                <button id="connectWalletBtn" onclick="connectWallet()">Connect Wallet</button>
+                <select id="wallet-selector" onchange="selectWallet(this.value)">
+                    <option value="">-- Select Wallet --</option>
+                </select>
+            </div>
             <h3>Launch a Coin</h3>
             <label for="token-name">Name:</label>
             <input id="token-name" type="text" placeholder="e.g., MoneyFund" />
@@ -548,7 +677,6 @@
             <input id="token-image" type="file" accept="image/*" />
             <button id="launch-coin-button" onclick="createToken()">Launch Coin</button>
             <p id="status-message" class="status-message"></p>
-
             <button id="toggle-liquidity-button" onclick="toggleLiquiditySection()">Add Liquidity</button>
             <div id="liquidity-section" class="liquidity-section">
                 <iframe src="https://moneyfund.com/dex/" width="100%" height="500px" style="border:none;" title="MoneyFund Liquidity"></iframe>
@@ -714,7 +842,6 @@
 
                 await window.ethereum.request({ method: "eth_requestAccounts" });
                 userAccount = (await web3.eth.getAccounts())[0];
-                document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
                 const statusMessage = document.getElementById("status-message");
                 statusMessage.innerText = "Wallet connected successfully!";
                 statusMessage.className = "status-message";
@@ -766,7 +893,6 @@
                 selectedWallet = wallets[selectedIndex];
                 walletSelector.value = selectedIndex;
                 userAccount = selectedWallet.address;
-                document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
                 if (selectedWallet.isMetaMask && window.ethereum) {
                     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
                     if (!accounts || accounts.length === 0 || accounts[0].toLowerCase() !== selectedWallet.address.toLowerCase()) {
@@ -784,8 +910,8 @@
             } else {
                 selectedWallet = null;
                 userAccount = null;
-                document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
                 walletSelector.value = "";
+                web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
             }
         }
 
@@ -797,7 +923,6 @@
                 selectedWallet = wallets[idx];
                 localStorage.setItem('selectedWalletIndex', idx);
                 userAccount = selectedWallet.address;
-                document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
 
                 if (selectedWallet.isMetaMask) {
                     if (window.ethereum) {
@@ -808,7 +933,6 @@
                         statusMessage.className = "error-message";
                         selectedWallet = null;
                         userAccount = null;
-                        document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
                         document.getElementById('wallet-selector').value = "";
                         localStorage.removeItem('selectedWalletIndex');
                     }
@@ -823,7 +947,6 @@
                 userAccount = null;
                 signer = null;
                 localStorage.removeItem('selectedWalletIndex');
-                document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
                 web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
             }
         }
@@ -991,6 +1114,10 @@
                                 <h4>${name}</h4>
                                 <span class="ticker">${symbol}</span>
                             </div>
+                            <div class="reaction">
+                                <button class="like-button" onclick="likeToken('${tokenAddress}')">🚀 0</button>
+                                <button class="dislike-button" onclick="dislikeToken('${tokenAddress}')">🌈 0</button>
+                            </div>
                         </div>
                         <div class="coin-details">
                             <div class="coin-info-item supply">
@@ -1015,11 +1142,7 @@
                             </div>
                         </div>
                         <div class="coin-actions">
-                            <div class="reaction">
-                                <button class="like-button" onclick="likeToken('${tokenAddress}')">ðŸš€ 0</button>
-                                <button class="dislike-button" onclick="dislikeToken('${tokenAddress}')">ðŸŒˆ 0</button>
-                            </div>
-                            <button class="comment-button" onclick="toggleComments('${tokenAddress}')">ðŸ’¬ View Comments</button>
+                            <button class="comment-button" onclick="toggleComments('${tokenAddress}')">💬 View Comments</button>
                             <div id="comments-${tokenAddress}" class="comments-container" style="display: none;">
                                 <input type="text" class="comment-input" placeholder="Add a comment..." onkeydown="submitComment(event, '${tokenAddress}')"/>
                             </div>
@@ -1179,6 +1302,10 @@
                                 <h4>${coin.name || 'N/A'}</h4>
                                 <span class="ticker">${coin.symbol || 'N/A'}</span>
                             </div>
+                            <div class="reaction">
+                                <button class="like-button" onclick="likeToken('${coin.tokenAddress}')">🚀 ${storedLikes}</button>
+                                <button class="dislike-button" onclick="dislikeToken('${coin.tokenAddress}')">🌈 ${storedDislikes}</button>
+                            </div>
                         </div>
                         <div class="coin-details">
                             <div class="coin-info-item supply">
@@ -1203,11 +1330,7 @@
                             </div>
                         </div>
                         <div class="coin-actions">
-                            <div class="reaction">
-                                <button class="like-button" onclick="likeToken('${coin.tokenAddress}')">ðŸš€ ${storedLikes}</button>
-                                <button class="dislike-button" onclick="dislikeToken('${coin.tokenAddress}')">ðŸŒˆ ${storedDislikes}</button>
-                            </div>
-                            <button class="comment-button" onclick="toggleComments('${coin.tokenAddress}')">ðŸ’¬ View Comments</button>
+                            <button class="comment-button" onclick="toggleComments('${coin.tokenAddress}')">💬 View Comments</button>
                             <div id="comments-${coin.tokenAddress}" class="comments-container" style="display: none;">
                                 ${storedComments.map(comment => `
                                     <div class="comment">
@@ -1296,14 +1419,14 @@
             const likes = (JSON.parse(localStorage.getItem(`likes_${tokenAddress}`)) || 0) + 1;
             localStorage.setItem(`likes_${tokenAddress}`, JSON.stringify(likes));
             const button = document.querySelector(`#coin-${tokenAddress} .like-button`);
-            if (button) button.textContent = `ðŸš€ ${likes}`;
+            if (button) button.textContent = `🚀 ${likes}`;
         }
 
         function dislikeToken(tokenAddress) {
             const dislikes = (JSON.parse(localStorage.getItem(`dislikes_${tokenAddress}`)) || 0) + 1;
             localStorage.setItem(`dislikes_${tokenAddress}`, JSON.stringify(dislikes));
             const button = document.querySelector(`#coin-${tokenAddress} .dislike-button`);
-            if (button) button.textContent = `ðŸŒˆ ${dislikes}`;
+            if (button) button.textContent = `🌈 ${dislikes}`;
         }
 
         async function addLiquidity() {
