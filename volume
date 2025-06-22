@@ -5,328 +5,239 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MoneyFund Volume Bot</title>
     <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: #E8ECEF;
+        * {
             margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: linear-gradient(135deg, #0A0C1E, #1F2A44);
+            color: #E5E7EB;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: clamp(12px, 2vw, 24px);
             position: relative;
             overflow-x: hidden;
-            background: transparent;
         }
-        #backgroundCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-        }
-        .interface-wrapper {
-            width: 100%;
+
+        .main-panel {
+            background: rgba(17, 24, 39, 0.95);
+            border-radius: 16px;
+            padding: clamp(12px, 2vw, 24px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
             max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 auto;
-        }
-        .container {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 30px;
-            border-radius: 12px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.1);
             width: 100%;
-            max-width: 600px;
-            z-index: 1;
         }
+
         h1 {
-            text-align: center;
             color: #FFFFFF;
-            margin-bottom: 20px;
-            font-size: 24px;
-            font-weight: 600;
+            font-size: clamp(1.5rem, 4vw, 1.8rem);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 24px;
+            line-height: 1.5;
         }
-        label {
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
             display: block;
-            margin: 10px 0 5px;
+            color: #A5F3FC;
+            font-size: 14px;
             font-weight: 500;
-            color: #E8ECEF;
+            margin-bottom: 4px;
+            line-height: 1.5;
         }
+
         input, select {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
+            padding: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
             font-size: 16px;
-            color: #E8ECEF;
-            background: rgba(255, 255, 255, 0.1);
-            transition: border-color 0.3s ease, background 0.3s ease;
+            font-weight: 400;
+            line-height: 1.5;
+            transition: border 0.3s, box-shadow 0.3s;
         }
-        select:hover, input:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
+
+        input:hover, select:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 6px rgba(99, 102, 241, 0.3);
         }
+
+        input:focus, select:focus {
+            border-color: #6366F1;
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+            outline: none;
+        }
+
         input::placeholder {
-            color: #A3BFFA;
-            opacity: 0.7;
+            color: #9CA3AF;
+            font-weight: 400;
+            opacity: 1;
         }
+
+        select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23E5E7EB%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 10px;
+            padding-right: 32px;
+        }
+
         button {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
+            margin: 12px 0;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(90deg, #4F46E5, #A855F7);
+            color: #F9FAFB;
+            transition: background 0.3s, transform 0.2s;
+            line-height: 1.5;
+            min-height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
-        #startAutoBuyBtn, #stopAutoBuyBtn {
-            background: #3B82F6;
-            color: #FFFFFF;
+
+        button:hover {
+            background: linear-gradient(90deg, #4338CA, #9333EA);
+            transform: scale(1.02);
         }
-        #startAutoBuyBtn:hover, #stopAutoBuyBtn:hover {
-            background: #2563EB;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
+
         button:disabled {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(75, 85, 99, 0.6);
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
         }
+
         #walletAddress {
             margin: 10px 0;
             font-size: 14px;
-            color: #E8ECEF;
+            color: #E5E7EB;
             text-align: center;
+            line-height: 1.5;
         }
+
         #status {
             margin-top: 20px;
             font-weight: 500;
             text-align: center;
-            color: #E8ECEF;
+            color: #E5E7EB;
+            font-size: 16px;
+            line-height: 1.5;
         }
+
         #log {
             margin-top: 20px;
             max-height: 200px;
             overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.2);
             padding: 10px;
             font-size: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            color: #E8ECEF;
-            border-radius: 6px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        #log::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #log::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .main-panel {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: clamp(1.2rem, 4vw, 1.5rem);
+            }
+
+            input, select, button {
+                padding: 10px;
+                font-size: clamp(14px, 4vw, 16px);
+            }
+
+            .input-group {
+                margin-bottom: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            input, select, button {
+                padding: 8px;
+                font-size: clamp(12px, 3.5vw, 14px);
+            }
+
+            .input-group {
+                margin-bottom: 10px;
+            }
+
+            button {
+                min-height: 40px;
+            }
         }
     </style>
 </head>
 <body>
-    <canvas id="backgroundCanvas"></canvas>
-    <div class="interface-wrapper">
-        <div class="container">
-            <h1>MoneyFund Volume Bot</h1>
-            <label for="walletSelector">Select Wallet:</label>
+    <div class="main-panel">
+        <h1>MoneyFund Volume Bot</h1>
+        <div class="input-group">
+            <label for="walletSelector">Select Wallet</label>
             <select id="walletSelector" onchange="autoBuyInterface.selectWallet(this.value)">
                 <option value="">-- Select Wallet --</option>
             </select>
-            <p id="walletAddress">Not Connected</p>
-            <label for="tokenAddress">Contract Address to Pump:</label>
-            <input type="text" id="tokenAddress" value="0x100DB67F41A2dF3c32cC7c0955694b98339B7311">
-            <label for="totalEth">ETH Spending Limit:</label>
-            <input type="number" id="totalEth" placeholder="e.g., 1" step="0.001" min="0">
-            <label for="ethPerTx">ETH per Transaction:</label>
-            <input type="number" id="ethPerTx" placeholder="e.g., 0.1" step="0.001" min="0">
-            <button id="startAutoBuyBtn">Start Volume</button>
-            <button id="stopAutoBuyBtn" disabled>Stop Volume</button>
-            <div id="status">Status: Not started</div>
-            <div id="log"></div>
         </div>
+        <p id="walletAddress">Not Connected</p>
+        <div class="input-group">
+            <label for="tokenAddress">Contract Address to Pump</label>
+            <input type="text" id="tokenAddress" value="0x100DB67F41A2dF3c32cC7c0955694b98339B7311" placeholder="Enter token address">
+        </div>
+        <div class="input-group">
+            <label for="totalEth">ETH Spending Limit</label>
+            <input type="number" id="totalEth" placeholder="e.g., 1" step="0.001" min="0">
+        </div>
+        <div class="input-group">
+            <label for="ethPerTx">ETH per Transaction</label>
+            <input type="number" id="ethPerTx" placeholder="e.g., 0.1" step="0.001" min="0">
+        </div>
+        <button id="startAutoBuyBtn">Start Volume</button>
+        <button id="stopAutoBuyBtn" disabled>Stop Volume</button>
+        <div id="status">Status: Not started</div>
+        <div id="log"></div>
     </div>
 
     <script>
-        // Background 3D Space with Green Particles and Random Behaviors
-        const canvas = document.getElementById('backgroundCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        const particles = [];
-        const numParticles = 300;
-        const maxZ = 1000;
-        const focalLength = 500;
-
-        const greenShades = [
-            '#006400', '#228B22', '#32CD32', '#3CB371', '#2E8B57',
-            '#9ACD32', '#66CDAA', '#00FF7F', '#7CFC00', '#ADFF2F',
-            '#00FA9A', '#90EE90', '#98FB98', '#8FBC8F'
-        ];
-
-        class Particle {
-            constructor(isExplosionParticle = false, lifespan = Infinity) {
-                this.x = (Math.random() - 0.5) * canvas.width * 2;
-                this.y = (Math.random() - 0.5) * canvas.height * 2;
-                this.z = Math.random() * maxZ;
-                this.vx = isExplosionParticle ? (Math.random() - 0.5) * 5 : (Math.random() - 0.5) * 2;
-                this.vy = isExplosionParticle ? (Math.random() - 0.5) * 5 : (Math.random() - 0.5) * 2;
-                this.vz = isExplosionParticle ? (Math.random() - 0.5) * 2 : (Math.random() - 0.5) * 1;
-                this.size = isExplosionParticle ? 1 : 2;
-                this.color = greenShades[Math.floor(Math.random() * greenShades.length)];
-                this.isShooting = false;
-                this.isExploding = false;
-                this.lifespan = lifespan;
-                this.age = 0;
-                this.behaviorEndTime = 0;
-            }
-
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.z += this.vz;
-
-                if (this.x < -canvas.width) this.x = canvas.width;
-                if (this.x > canvas.width) this.x = -canvas.width;
-                if (this.y < -canvas.height) this.y = canvas.height;
-                if (this.y > canvas.height) this.y = -canvas.height;
-
-                if (this.z < 1) this.z = maxZ;
-                if (this.z > maxZ) this.z = 1;
-
-                if (this.lifespan !== Infinity) {
-                    this.age++;
-                }
-            }
-
-            draw() {
-                const scale = focalLength / (focalLength + this.z);
-                const x2d = (this.x * scale) + canvas.width / 2;
-                const y2d = (this.y * scale) + canvas.height / 2;
-                const scaledSize = this.size * scale;
-
-                const container = document.querySelector('.container');
-                const rect = container ? container.getBoundingClientRect() : { left: 0, right: 0, top: 0, bottom: 0 };
-
-                const isInsideBox = x2d >= rect.left && x2d <= rect.right && y2d >= rect.top && y2d <= rect.bottom;
-
-                if (!isInsideBox && this.age < this.lifespan) {
-                    const opacity = this.lifespan === Infinity ? (1 - this.z / maxZ) : (1 - this.age / this.lifespan);
-                    ctx.save();
-                    ctx.fillStyle = this.color;
-                    ctx.globalAlpha = opacity;
-                    ctx.beginPath();
-                    ctx.arc(x2d, y2d, scaledSize, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                }
-            }
-        }
-
-        for (let i = 0; i < numParticles; i++) {
-            particles.push(new Particle());
-        }
-
-        function createBackgroundGradient() {
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#1C2526');
-            gradient.addColorStop(1, '#2E1A47');
-            return gradient;
-        }
-
-        const activeBehaviorParticles = new Set();
-        const maxBehaviors = 2;
-
-        function applyRandomBehavior() {
-            const now = Date.now();
-
-            for (let particle of activeBehaviorParticles) {
-                if (now >= particle.behaviorEndTime) {
-                    particle.isShooting = false;
-                    particle.isExploding = false;
-                    particle.vx = (Math.random() - 0.5) * 2;
-                    particle.vy = (Math.random() - 0.5) * 2;
-                    activeBehaviorParticles.delete(particle);
-                }
-            }
-
-            while (activeBehaviorParticles.size < maxBehaviors) {
-                const availableParticles = particles.filter(p => !activeBehaviorParticles.has(p) && p.lifespan === Infinity);
-                if (availableParticles.length === 0) break;
-
-                const particle = availableParticles[Math.floor(Math.random() * availableParticles.length)];
-                const behavior = Math.random() < 0.5 ? 'shoot' : 'explode';
-
-                if (behavior === 'shoot') {
-                    particle.isShooting = true;
-                    particle.vx = (Math.random() - 0.5) * 20;
-                    particle.vy = (Math.random() - 0.5) * 20;
-                    particle.behaviorEndTime = now + 1000;
-                    activeBehaviorParticles.add(particle);
-                } else {
-                    particle.isExploding = true;
-                    const numExplosionParticles = 5;
-                    for (let i = 0; i < numExplosionParticles; i++) {
-                        const explosionParticle = new Particle(true, 60);
-                        explosionParticle.x = particle.x;
-                        explosionParticle.y = particle.y;
-                        explosionParticle.z = particle.z;
-                        particles.push(explosionParticle);
-                    }
-                    particle.lifespan = 1;
-                    particle.age = 0;
-                    particle.behaviorEndTime = now + 1000;
-                    activeBehaviorParticles.add(particle);
-                }
-            }
-        }
-
-        let lastFrameTime = Date.now();
-        const targetFrameInterval = 1000 / 60;
-
-        function animateSpace() {
-            const now = Date.now();
-            const deltaTime = now - lastFrameTime;
-
-            if (deltaTime < targetFrameInterval) {
-                requestAnimationFrame(animateSpace);
-                return;
-            }
-            lastFrameTime = now;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = createBackgroundGradient();
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            particles.forEach((particle, index) => {
-                particle.update();
-                particle.draw();
-                if (particle.age >= particle.lifespan) {
-                    particles.splice(index, 1);
-                }
-            });
-
-            applyRandomBehavior();
-            requestAnimationFrame(animateSpace);
-        }
-
-        animateSpace();
-
         let selectedWallet = null;
 
         function logMessage(message) {
