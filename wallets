@@ -5,451 +5,263 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MoneyFund Wallets</title>
     <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%);
-            color: #F1F5F9;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Manrope', sans-serif;
+            background: linear-gradient(135deg, #0A0C1E, #1F2A44);
+            color: #E5E7EB;
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: clamp(12px, 2vw, 24px);
+            position: relative;
             overflow-x: hidden;
-            padding: 20px;
         }
 
-        .section {
-            width: 90%;
-            max-width: 900px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 1;
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E');
+            z-index: -1;
         }
 
-        .section-header {
+        .main-panel {
+            background: rgba(17, 24, 39, 0.95);
+            border-radius: 16px;
+            padding: clamp(12px, 2vw, 24px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
         }
 
-        h1, h2, h3 {
+        h1 {
             color: #FFFFFF;
-            margin-bottom: 10px;
-            font-size: clamp(1.5rem, 5vw, 2rem);
+            font-size: clamp(1.5rem, 4vw, 1.8rem);
+            font-weight: 700;
+            line-height: 1.5;
         }
 
-        .button {
-            width: 100%;
-            padding: 12px 20px;
-            font-size: clamp(16px, 4vw, 18px);
+        h3 {
             color: #FFFFFF;
-            background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
+            font-weight: 600;
+            margin-bottom: 16px;
+            line-height: 1.5;
         }
 
-        .button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
-        }
-
-        button:not(.button) {
-            background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
-            color: #FFFFFF;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            font-size: clamp(14px, 3.5vw, 16px);
-        }
-
-        button:hover:not(.button) {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
-        }
-
-        #transferFundsBtn {
-            background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
-        }
-
-        #transferFundsBtn:hover {
-            background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
-            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
-        }
-
-        #wallet-interface {
-            padding: 15px;
-        }
-
-        #wallet-interface input,
-        #wallet-interface button,
-        #wallet-interface select {
-            padding: 10px;
-            margin: 5px;
-            font-size: clamp(14px, 3.5vw, 16px);
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.1);
-            color: #F1F5F9;
-            transition: background 0.3s ease, border-color 0.3s ease;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        #wallet-interface input:hover,
-        #wallet-interface select:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        #wallet-interface input::placeholder,
-        #wallet-interface select option {
-            color: #A5F3FC;
-            opacity: 0.7;
-        }
-
-        #walletInfo,
-        #wallet-interface .function-section {
-            margin-top: 20px;
-            display: none;
-        }
-
-        #statusDisplay,
-        #swapStatus {
-            margin-top: 20px;
-            font-weight: bold;
-            color: #F1F5F9;
-            font-size: clamp(14px, 3.5vw, 16px);
-        }
-
-        #walletSelector {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            color: #F1F5F9;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            margin-top: 15px;
-            margin-bottom: 20px;
-            padding: 10px;
-            font-size: clamp(14px, 3.5vw, 16px);
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            transition: background 0.3s ease, border-color 0.3s ease;
-        }
-
-        #walletSelector:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            margin: 20px 0;
-            width: 100%;
-        }
-
-        .menu-btn {
-            background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
-            color: #FFFFFF;
-            border: none;
-            border-radius: 6px;
-            padding: 6px;
-            width: 60px;
-            height: 60px;
+        .tab-nav {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: clamp(10px, 2vw, 12px);
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-            aspect-ratio: 1 / 1;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            overflow-x: auto;
+            scrollbar-width: none;
         }
 
-        .menu-btn span.emoji {
-            font-size: clamp(12px, 2vw, 16px);
-            margin-bottom: 8px;
-        }
-
-        .menu-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 3px 8px rgba(6, 182, 212, 0.4);
-        }
-
-        .mobile-dropdown {
+        .tab-nav::-webkit-scrollbar {
             display: none;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            color: #F1F5F9;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            margin: 20px 0;
-            padding: 10px;
-            font-size: clamp(14px, 3.5vw, 16px);
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
-        .mobile-dropdown:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        #sendTypeSelect {
-            display: block;
-            margin-bottom: 10px;
-            padding: 10px;
-        }
-
-        #swapSettings,
-        #moneySettings {
-            margin-top: 10px;
-        }
-
-        #transactionLog {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            border-radius: 8px;
+        .tab {
+            padding: 10px 16px;
             background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            color: #A5F3FC;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 80px;
+            line-height: 1.5;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab.active {
+            background: linear-gradient(90deg, #4F46E5, #A855F7);
+            color: #F9FAFB;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 16px;
+            background: rgba(17, 24, 39, 0.9);
+            border-radius: 12px;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        button, .button {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #4F46E5, #A855F7);
+            color: #F9FAFB;
+            transition: background 0.3s, transform 0.2s;
+            line-height: 1.5;
+            min-height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        button:hover, .button:hover {
+            background: linear-gradient(90deg, #4338CA, #9333EA);
+            transform: scale(1.02);
+        }
+
+        button:disabled {
+            background: rgba(75, 85, 99, 0.6);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-group-top {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .button-group-top button, .button-group-top .button {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            min-height: 44px;
         }
 
         .input-group {
-            display: none;
-            margin-bottom: 10px;
+            margin-bottom: 16px;
         }
 
-        .active {
+        .input-group label {
             display: block;
+            color: #A5F3FC;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            line-height: 1.5;
         }
 
-        .top-buttons-container {
-            margin: 0;
-            padding: 0;
+        input, select {
             width: 100%;
-        }
-
-        .top-button {
-            width: 100%;
-            padding: 12px 20px;
-            font-size: clamp(16px, 4vw, 18px);
-            color: #FFFFFF;
-            background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: center;
-            margin: 0;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .top-button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
-        }
-
-        #swapDirectionSelect,
-        #moneyActionSelect,
-        #gasPriceOption,
-        #slippageTolerance,
-        #gasLimit,
-        #moneySlippageTolerance,
-        #moneyGasLimit,
-        #action {
-            padding: 10px;
-        }
-
-        .wallet-address span:first-child {
-            color: #F1F5F9;
-        }
-
-        .preview-window {
-            width: 100%;
-            height: 450px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 10px;
-            overflow: hidden;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        #walletInfo {
-            text-align: center;
-        }
-
-        #connectedWalletAddress {
-            text-align: center;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            font-size: clamp(8px, 2.5vw, 8.5px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-
-        #copyAddressBtn {
-            background: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
-            color: #FFFFFF;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            font-size: clamp(10px, 3vw, 12px);
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        #copyAddressBtn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
-        }
-
-        #status-box {
-            width: 100%;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), 0 3px 8px rgba(0, 0, 0, 0.15);
-            color: #F1F5F9;
-            z-index: 1;
-        }
-
-        #status-box h3 {
-            margin: 0 0 10px;
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-            color: #FFFFFF;
-            border-bottom: 2px solid #14B8A6;
-            padding-bottom: 5px;
-            display: inline-block;
-        }
-
-        #status-list {
-            list-style: none;
-            padding: 0;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        #status-list li {
-            display: flex;
-            align-items: center;
             padding: 12px;
-            font-size: clamp(0.9rem, 3.5vw, 1.1rem);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 8px;
-            margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.02);
-            transition: transform 0.2s ease, background 0.3s ease;
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.5;
+            transition: border 0.3s, box-shadow 0.3s;
         }
 
-        #status-list li:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.05);
+        input:hover, select:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 6px rgba(99, 102, 241, 0.3);
         }
 
-        #status-list li:last-child {
-            border-bottom: none;
+        input:focus, select:focus {
+            border-color: #6366F1;
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+            outline: none;
         }
 
-        #status-list li::before {
-            content: '';
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            margin-right: 10px;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
+        input::placeholder {
+            color: #9CA3AF;
+            font-weight: 400;
+            opacity: 1;
         }
 
-        #status-list li.pending::before {
-            background: #F59E0B;
+        select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23E5E7EB%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 10px;
+            padding-right: 32px;
         }
 
-        #status-list li.success::before {
-            background: #14B8A6;
+        .balance-box {
+            background: rgba(17, 24, 39, 0.9);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid rgba(99, 102, 241, 0.2);
         }
 
-        #status-list li.error::before {
-            background: #F28B82;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        #status-list li a {
-            color: #14B8A6;
-            text-decoration: none;
-        }
-
-        #status-list li a:hover {
-            text-decoration: underline;
-        }
-
-        #backupSection {
-            margin-top: 20px;
+        .balance-box p {
+            margin: 8px 0;
+            font-size: 16px;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
+            line-height: 1.5;
         }
 
-        #backupSection button {
-            width: 100%;
-            max-width: 300px;
+        .balance-box p strong {
+            color: #FFFFFF;
+            font-weight: 500;
         }
 
-        #importWalletFile {
-            display: none;
+        .balance-box p span {
+            color: #A5F3FC;
+            font-weight: 400;
         }
 
         .toggle-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .toggle-label {
-            font-size: clamp(12px, 3vw, 14px);
+            font-size: 14px;
             color: #F1F5F9;
+            line-height: 1.5;
         }
 
         .toggle-switch {
             position: relative;
-            width: 50px;
+            width: 48px;
             height: 24px;
         }
 
@@ -484,39 +296,179 @@
         }
 
         input:checked + .toggle-slider {
-            background: #14B8A6;
+            background: #10B981;
         }
 
         input:checked + .toggle-slider:before {
-            transform: translateX(26px);
+            transform: translateX(24px);
         }
 
-        .balance-box {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 15px;
-            margin: 15px 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            text-align: left;
-        }
-
-        .balance-box p {
-            margin: 8px 0;
-            font-size: clamp(14px, 3.5vw, 16px);
+        #connectedWalletAddress {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-        }
-
-        .balance-box p strong {
-            color: #FFFFFF;
-            font-weight: 500;
-        }
-
-        .balance-box p span {
-            color: #A5F3FC;
+            gap: 6px;
+            margin: 12px 0;
+            font-size: 14px;
             font-weight: 400;
+            line-height: 1.5;
+            flex-wrap: nowrap;
+        }
+
+        #copyAddressBtn {
+            background: linear-gradient(90deg, #4F46E5, #A855F7);
+            color: #F9FAFB;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            line-height: 1.5;
+            min-height: 24px;
+            width: 50px;
+        }
+
+        #copyAddressBtn:hover {
+            background: linear-gradient(90deg, #4338CA, #9333EA);
+            transform: scale(1.02);
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .menu-tile {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            height: 100px;
+        }
+
+        .menu-tile:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-tile .icon {
+            font-size: 24px;
+            color: #6366F1;
+            margin-bottom: 8px;
+        }
+
+        .menu-tile .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #FFFFFF;
+            line-height: 1.5;
+        }
+
+        .status-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .status-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .status-list::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 3px;
+        }
+
+        .status-list li {
+            position: relative;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #F1F5F9;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.3s ease;
+            line-height: 1.5;
+        }
+
+        .status-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+
+        .status-list li.pending::before { background: #F59E0B; }
+        .status-list li.success::before { background: #10B981; }
+        .status-list li.error::before { background: #F87171; }
+
+        .status-list li:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-list li a {
+            color: #6366F1;
+            text-decoration: none;
+        }
+
+        .status-list li a:hover {
+            text-decoration: underline;
+        }
+
+        .preview-window {
+            width: 100%;
+            height: clamp(300px, 50vh, 400px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            margin: 16px 0;
+            background: rgba(17, 24, 39, 0.9);
+        }
+
+        #importWalletFile {
+            display: none;
+        }
+
+        #log {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 10px;
+            font-size: 14px;
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
+            border-radius: 8px;
+        }
+
+        #walletFunction {
+            display: none;
+            width: 100%;
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 10px;
+            font-size: 16px;
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+
+        #walletFunction:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 6px rgba(99, 102, 241, 0.3);
         }
 
         @media (max-width: 768px) {
@@ -524,12 +476,12 @@
                 padding: 10px;
             }
 
-            .section {
+            .main-panel {
                 width: 100%;
                 padding: 15px;
             }
 
-            .section-header {
+            .header {
                 flex-direction: column;
                 align-items: flex-start;
             }
@@ -538,16 +490,40 @@
                 margin-top: 10px;
             }
 
-            .button, .top-button {
+            .tab-nav {
+                display: none;
+            }
+
+            #walletFunction {
+                display: block;
+            }
+
+            .button, .button-group-top button, .button-group-top .button {
                 padding: 10px;
                 font-size: clamp(14px, 4vw, 16px);
             }
 
-            #wallet-interface {
+            .button-group-top {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+
+            .button-group-top button, .button-group-top .button {
+                flex: 1;
+                padding: 8px;
+                font-size: 14px;
+                min-height: 36px;
+                white-space: nowrap;
+            }
+
+            .tab-content {
                 padding: 10px;
             }
 
-            #status-box {
+            .status-list {
                 padding: 10px;
             }
 
@@ -561,29 +537,38 @@
             }
 
             #connectedWalletAddress {
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 gap: 8px;
+                font-size: clamp(8px, 2.5vw, 8.5px);
+            }
+
+            #connectedAddressText {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 150px;
             }
 
             .menu-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 5px;
+                display: none; /* Hidden on mobile, using dropdown instead */
             }
 
-            .menu-btn {
+            .menu-tile {
                 width: 48px;
                 height: 48px;
                 border-radius: 5px;
                 padding: 5px;
             }
 
-            .menu-btn span.emoji {
+            .menu-tile .icon {
                 font-size: clamp(10px, 2vw, 14px);
                 margin-bottom: 6px;
             }
 
-            .mobile-dropdown {
-                display: block;
+            .menu-tile .title {
+                font-size: clamp(8px, 2vw, 10px);
             }
 
             .preview-window {
@@ -592,171 +577,298 @@
         }
 
         @media (max-width: 480px) {
-            h1, h2, h3 {
+            h1, h3 {
                 font-size: clamp(1.2rem, 5vw, 1.5rem);
             }
 
-            #wallet-interface input,
-            #wallet-interface button,
-            #wallet-interface select {
+            input, select, button, .button {
                 margin: 3px;
                 padding: 8px;
+                font-size: clamp(12px, 3.5vw, 14px);
             }
 
-            #status-list li {
+            .button-group-top {
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+
+            .button-group-top button, .button-group-top .button {
+                padding: 6px;
+                font-size: 12px;
+                min-height: 32px;
+            }
+
+            .status-list li {
                 padding: 8px;
                 font-size: clamp(0.8rem, 3.5vw, 1rem);
-            }
-
-            .menu-grid {
-                display: none;
-            }
-
-            .menu-btn {
-                width: 30px;
-                height: 30px;
-                border-radius: 3px;
-                padding: 3px;
-                font-size: clamp(8px, 2vw, 10px);
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-            }
-
-            .menu-btn span.emoji {
-                font-size: clamp(8px, 2vw, 12px);
-                margin-bottom: 4px;
             }
 
             .preview-window {
                 height: 350px;
             }
+
+            #connectedAddressText {
+                max-width: 120px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="section">
-        <div class="section-header">
+    <div class="main-panel">
+        <div class="header">
             <h1>MoneyFund Wallets</h1>
             <div class="toggle-container">
                 <span class="toggle-label">0x100 Mode</span>
                 <label class="toggle-switch">
-                    <input type="checkbox" id="vanityModeToggle">
+                    <input type="checkbox" id="vanityModeToggle" aria-label="Toggle 0x100 Mode">
                     <span class="toggle-slider"></span>
                 </label>
             </div>
         </div>
-        <div class="top-buttons-container">
-            <button class="top-button" id="createMoneyFundBtn">Create MoneyFund Wallet</button>
+        <div class="tab-nav">
+            <div class="tab active" data-tab="home" aria-selected="true">Home</div>
+            <div class="tab" data-tab="transactions" aria-selected="false">Send</div>
+            <div class="tab" data-tab="swap" aria-selected="false">Swap</div>
+            <div class="tab" data-tab="getMoney" aria-selected="false">Get $Money</div>
+            <div class="tab" data-tab="myCoins" aria-selected="false">My Coins</div>
+            <div class="tab" data-tab="volume" aria-selected="false">Volume</div>
+            <div class="tab" data-tab="status" aria-selected="false">Status</div>
         </div>
-        <select id="walletSelector" onchange="walletInterface.selectWallet(this.value)">
-            <option value="">-- Select Wallet --</option>
+        <select id="walletFunction" class="mobile-dropdown" onchange="walletInterface.handleWalletFunction(this.value)">
+            <option value="">-- Main Menu --</option>
+            <option value="home">🏠 Home</option>
+            <option value="transactions">✈️ Send</option>
+            <option value="swap">🔄 Swap</option>
+            <option value="getMoney">💰 Get $Money</option>
+            <option value="myCoins">📖 My Coins</option>
+            <option value="volume">🤖 Volume</option>
+            <option value="status">📋 Status</option>
+            <option value="explorer">🔍 Explorer</option>
+            <option value="fiatSwap">📎 Create Pair</option>
+            <option value="getFund">🚀 Launch Fund</option>
+            <option value="createCoin">🪙 Launch Coin</option>
+            <option value="getEth">🌐 Get .eth</option>
+            <option value="airdrop">🎁 Airdrop</option>
+            <option value="launchStaking">🥩 Launch Staking</option>
+            <option value="dividends">📈 Dividends</option>
+            <option value="vote">📊 Vote</option>
+            <option value="manageLiquidity">🃏 Blackjack</option>
+            <option value="dm">✉️ DMs</option>
+            <option value="chat">💬 Chat</option>
+            <option value="import">📥 Import Wallets</option>
+            <option value="export">📤 Export Wallets</option>
         </select>
-        <div id="connectedWalletAddress" style="display: none;">
-            <span><strong></strong> <span id="connectedAddressText"></span></span>
-            <button id="copyAddressBtn">Copy</button>
-        </div>
-        <div id="wallet-interface">
-            <select id="walletFunction" class="mobile-dropdown" onchange="walletInterface.handleWalletFunction(this.value)">
-                <option value="">-- Main Menu --</option>
-                <option value="getMoney">💰 Get MONEY</option>
-                <option value="fiatSwap">📎 Create Pair</option>
-                <option value="getFund">🚀 Launch a Fund</option>
-                <option value="createCoin">🪙 Launch a Coin</option>
-                <option value="getEth">🌐 Get .eth</option>
-                <option value="airdrop">🎁 Airdrop</option>
-                <option value="swap">🔄 Swap Coins</option>
-                <option value="send">✈️ Send Coins</option>
-                <option value="myCoins">📖 My Coins</option>
-                <option value="volumeBot">🤖 Volume Bot</option>
-                <option value="dividends">📈 Dividends</option>
-                <option value="vote">📊 Vote</option>
-                <option value="manageLiquidity">🃏 Play Blackjack</option>
-                <option value="dm">✉️ DMs</option>
-                <option value="chat">💬 Chat</option>
-                <option value="explorer">🔍 Block Explorer</option>
-            </select>
+        <div class="tab-content active" id="home">
+            <div class="button-group-top">
+                <button id="createMoneyFundBtn">Create New Wallet</button>
+                <label for="importWalletFile" class="button">Import Wallets</label>
+                <input type="file" id="importWalletFile" accept=".json" style="display: none;">
+                <button id="exportWalletsBtn">Export Wallets</button>
+            </div>
+            <div class="input-group">
+                <label for="walletSelector">Select Wallet</label>
+                <select id="walletSelector" aria-label="Select Wallet">
+                    <option value="">-- Select Wallet --</option>
+                </select>
+            </div>
+            <div id="connectedWalletAddress" style="display: none;">
+                <span id="connectedAddressText"></span>
+                <button id="copyAddressBtn" aria-label="Copy Wallet Address">Copy</button>
+            </div>
+            <div class="balance-box">
+                <p><strong>Money Balance:</strong> <span id="myMoney">0 MONEY</span></p>
+                <p><strong>Ethereum Balance:</strong> <span id="balanceDisplay">0 ETH</span></p>
+                <p><strong>USDM Balance:</strong> <span id="usdmBalance">0 USDM</span></p>
+            </div>
+            <p id="generationInfo"></p>
             <div class="menu-grid">
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('getMoney')"><span class="emoji">💰</span>Get MONEY</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('fiatSwap')"><span class="emoji">📎</span>Create Pair</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('getFund')"><span class="emoji">🚀</span>Launch Fund</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('createCoin')"><span class="emoji">🪙</span>Launch Coin</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('getEth')"><span class="emoji">🌐</span>Get .eth</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('airdrop')"><span class="emoji">🎁</span>Airdrop</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('swap')"><span class="emoji">🔄</span>Swap Coins</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('send')"><span class="emoji">✈️</span>Send Coins</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('myCoins')"><span class="emoji">📖</span>My Coins</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('volumeBot')"><span class="emoji">🤖</span>Volume Bot</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('dividends')"><span class="emoji">📈</span>Dividends</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('vote')"><span class="emoji">📊</span>Vote</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('manageLiquidity')"><span class="emoji">🃏</span>Blackjack</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('dm')"><span class="emoji">✉️</span>DMs</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('chat')"><span class="emoji">💬</span>Chat</button>
-                <button class="menu-btn" onclick="walletInterface.handleWalletFunction('explorer')"><span class="emoji">🔍</span> Block Explorer</button>
-            </div>
-            <div id="walletInfo" style="display: block;">
-                <div class="balance-box">
-                    <p><strong>Money Balance:</strong> <span id="myMoney">0 MONEY</span></p>
-                    <p><strong>Ethereum Balance:</strong> <span id="balanceDisplay">0 ETH</span></p>
-                    <p><strong>USDM Balance:</strong> <span id="usdmBalance">0 USDM</span></p>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('explorer')">
+                    <span class="icon">🔍</span>
+                    <div class="title">Explorer</div>
                 </div>
-                <p id="generationInfo"></p>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('fiatSwap')">
+                    <span class="icon">📎</span>
+                    <div class="title">Create Pair</div>
+                </div>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('getFund')">
+                    <span class="icon">🚀</span>
+                    <div class="title">Launch Fund</div>
+                </div>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('createCoin')">
+                    <span class="icon">🪙</span>
+                    <div class="title">Launch Coin</div>
+                </div>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('getEth')">
+                    <span class="icon">🌐</span>
+                    <div class="title">Get .eth</div>
+                </div>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('airdrop')">
+                    <span class="icon">🎁</span>
+                    <div class="title">Airdrop</div>
+                </div>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('launchStaking')">
+                    <span class="icon">🥩</span>
+                    <div class="title">Launch Staking</div>
+                </div>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('dividends')">
+                    <span class="icon">📈</span>
+                    <div class="title">Dividends</div>
+                </div>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('vote')">
+                    <span class="icon">📊</span>
+                    <div class="title">Vote</div>
+                </div>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('manageLiquidity')">
+                    <span class="icon">🃏</span>
+                    <div class="title">Blackjack</div>
+                </div>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('dm')">
+                    <span class="icon">✉️</span>
+                    <div class="title">DMs</div>
+                </div>
+                <div class="menu-tile" onclick="walletInterface.handleWalletFunction('chat')">
+                    <span class="icon">💬</span>
+                    <div class="title">Chat</div>
+                </div>
             </div>
-            <div id="transactionSection" class="function-section">
-                <h3>Send ETH or Coins</h3>
-                <select id="sendTypeSelect" onchange="walletInterface.toggleSendType()">
+        </div>
+        <div class="tab-content" id="transactions">
+            <h3>Send ETH or Coins</h3>
+            <div class="input-group">
+                <label for="sendTypeSelect">Transfer Type</label>
+                <select id="sendTypeSelect" aria-label="Transfer Type">
                     <option value="ETH">Send ETH</option>
                     <option value="Token">Send Coin</option>
                 </select>
-                <input type="text" id="recipientAddress" placeholder="Recipient Address or ENS">
-                <input type="number" id="amount" placeholder="Amount to Transfer" step="0.0001">
-                <div id="tokenDetails" style="display: none;">
-                    <input type="text" id="tokenAddress" placeholder="Token Address">
-                </div>
-                <div>
-                    <label for="gasPriceOption">Gas Price Option:</label>
-                    <select id="gasPriceOption" onchange="walletInterface.toggleGasPriceInput()">
-                        <option value="manual">Manual</option>
-                        <option value="auto">Auto Estimate</option>
-                    </select>
-                </div>
-                <div id="gasPriceInput" style="display: none;">
-                    <input type="number" id="gasPrice" placeholder="Gas Price (Gwei, optional)">
-                </div>
-                <button id="transferFundsBtn">Transfer Funds</button>
-                <div id="statusDisplay">Status: Ready</div>
             </div>
-            <div id="swapSection" class="function-section">
-                <h3>Swap Coins</h3>
-                <select id="swapDirectionSelect">
+            <div class="input-group">
+                <label for="recipientAddress">Recipient Address or ENS</label>
+                <input type="text" id="recipientAddress" placeholder="Enter address or ENS" aria-label="Recipient Address">
+            </div>
+            <div class="input-group">
+                <label for="amount">Amount to Transfer</label>
+                <input type="number" id="amount" placeholder="Enter amount" step="0.0001" aria-label="Amount to Transfer">
+            </div>
+            <div id="tokenDetails" style="display: none;">
+                <div class="input-group">
+                    <label for="tokenAddress">Token Address</label>
+                    <input type="text" id="tokenAddress" placeholder="Enter token address" aria-label="Token Address">
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="gasPriceOption">Gas Price Option</label>
+                <select id="gasPriceOption" aria-label="Gas Price Option">
+                    <option value="manual">Manual</option>
+                    <option value="auto">Auto Estimate</option>
+                </select>
+            </div>
+            <div id="gasPriceInput" style="display: none;">
+                <div class="input-group">
+                    <label for="gasPrice">Gas Price (Gwei)</label>
+                    <input type="number" id="gasPrice" placeholder="Enter gas price" aria-label="Gas Price">
+                </div>
+            </div>
+            <button id="transferFundsBtn">Transfer Funds</button>
+            <div id="statusDisplay">Status: Ready</div>
+        </div>
+        <div class="tab-content" id="swap">
+            <h3>Swap Coins</h3>
+            <div class="input-group">
+                <label for="swapDirectionSelect">Swap Direction</label>
+                <select id="swapDirectionSelect" aria-label="Swap Direction">
                     <option value="ethToToken">ETH to Coin</option>
                     <option value="tokenToEth">Coin to ETH</option>
                 </select>
-                <input type="text" id="swapTokenAddress" placeholder="Coin CA">
-                <input type="number" id="swapAmount" placeholder="Amount to Swap" step="0.0001">
-                <div id="swapSettings">
-                    <label for="slippageTolerance">Slippage Tolerance (%):</label>
-                    <select id="slippageTolerance" onchange="walletInterface.updateSlippage()">
-                        <option value="0.1">0.1%</option>
-                        <option value="0.5">0.5%</option>
-                        <option value="1" selected>1%</option>
-                        <option value="3">3%</option>
-                        <option value="5">5%</option>
-                        <option value="10">10%</option>
-                    </select>
-                    <label for="gasLimit">Gas Limit:</label>
-                    <select id="gasLimit" onchange="walletInterface.updateGasLimit()">
-                        <option value="200000">200,000</option>
-                        <option value="300000">300,000</option>
-                        <option value="400000">400,000</option>
-                        <option value="500000" selected>500,000</option>
-                    </select>
-                </div>
-                <button id="swapBtn">Swap</button>
-                <div id="swapStatus"></div>
             </div>
-            <div id="explorerSection" class="function-section">
-                <h3>Block Explorer</h3>
-                <label for="action">Select Action:</label>
-                <select id="action" onchange="walletInterface.toggleInputs()">
+            <div class="input-group">
+                <label for="swapTokenAddress">Coin Contract Address</label>
+                <input type="text" id="swapTokenAddress" placeholder="Enter coin CA" aria-label="Coin Contract Address">
+            </div>
+            <div class="input-group">
+                <label for="swapAmount">Amount to Swap</label>
+                <input type="number" id="swapAmount" placeholder="Enter amount" step="0.0001" aria-label="Amount to Swap">
+            </div>
+            <div class="input-group">
+                <label for="slippageTolerance">Slippage Tolerance</label>
+                <select id="slippageTolerance" aria-label="Slippage Tolerance">
+                    <option value="0.1">0.1%</option>
+                    <option value="0.5">0.5%</option>
+                    <option value="1" selected>1%</option>
+                    <option value="3">3%</option>
+                    <option value="5">5%</option>
+                    <option value="10">10%</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="gasLimit">Gas Limit</label>
+                <select id="gasLimit" aria-label="Gas Limit">
+                    <option value="200000">200,000</option>
+                    <option value="300000">300,000</option>
+                    <option value="400000">400,000</option>
+                    <option value="500000" selected>500,000</option>
+                </select>
+            </div>
+            <button id="swapBtn">Swap</button>
+            <div id="swapStatus"></div>
+        </div>
+        <div class="tab-content" id="getMoney">
+            <h3>Get $Money</h3>
+            <div class="input-group">
+                <label for="moneyActionSelect">Action</label>
+                <select id="moneyActionSelect" aria-label="Action">
+                    <option value="buy">Buy $Money</option>
+                    <option value="sell">Sell $Money</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="moneyAmount">Amount of ETH</label>
+                <input type="number" id="moneyAmount" placeholder="Enter amount" step="0.0001" aria-label="Amount of ETH">
+            </div>
+            <div class="input-group">
+                <label for="moneySlippageTolerance">Slippage Tolerance</label>
+                <select id="moneySlippageTolerance" aria-label="Slippage Tolerance">
+                    <option value="0.1">0.1%</option>
+                    <option value="0.5">0.5%</option>
+                    <option value="1" selected>1%</option>
+                    <option value="3">3%</option>
+                    <option value="5">5%</option>
+                    <option value="10">10%</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="moneyGasLimit">Gas Limit</label>
+                <select id="moneyGasLimit" aria-label="Gas Limit">
+                    <option value="200000">200,000</option>
+                    <option value="300000">300,000</option>
+                    <option value="400000">400,000</option>
+                    <option value="500000" selected>500,000</option>
+                </select>
+            </div>
+            <button id="executeMoneyBtn">Execute</button>
+        </div>
+        <div class="tab-content" id="myCoins">
+            <h3>My Coins</h3>
+            <div class="input-group">
+                <label for="coinContractAddress">Token Contract Address</label>
+                <input type="text" id="coinContractAddress" placeholder="Enter token address" aria-label="Token Contract Address">
+            </div>
+            <button id="importCoinBtn">Import Coin</button>
+            <div id="coinList">No coins imported yet.</div>
+        </div>
+        <div class="tab-content" id="volume">
+            <h3>Volume Bot</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/volume"></iframe>
+            <button id="volumeBotBtn">Volume Bot</button>
+        </div>
+        <div class="tab-content" id="status">
+            <h3>Status</h3>
+            <ul class="status-list" id="status-list"></ul>
+        </div>
+        <div class="tab-content" id="explorer">
+            <h3>Block Explorer</h3>
+            <div class="input-group">
+                <label for="action">Select Action</label>
+                <select id="action" aria-label="Select Action">
                     <option value="">-- Choose an action --</option>
                     <option value="balance">Get ETH Balance</option>
                     <option value="txlist">List Transactions</option>
@@ -773,119 +885,88 @@
                     <option value="ethprice">Get ETH Price</option>
                     <option value="getlogs">Get Event Logs</option>
                 </select>
-                <div id="addressInput" class="input-group">
-                    <label for="address">Address:</label>
-                    <input type="text" id="address" placeholder="e.g., 0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae">
-                </div>
-                <div id="txHashInput" class="input-group">
-                    <label for="txHash">Transaction Hash:</label>
-                    <input type="text" id="txHash" placeholder="e.g., 0x...">
-                </div>
-                <div id="blockTimeInput" class="input-group">
-                    <label for="blockTime">Timestamp (UNIX):</label>
-                    <input type="number" id="blockTime" placeholder="e.g., 1677654321">
-                </div>
-                <div id="contractAddressInput" class="input-group">
-                    <label for="contractAddress">Contract Address:</label>
-                    <input type="text" id="contractAddress" placeholder="e.g., 0xdac17f958d2ee523a2206206994597c13d831ec7">
-                </div>
-                <div id="logInputs" class="input-group">
-                    <label for="logAddress">Contract Address:</label>
-                    <input type="text" id="logAddress" placeholder="e.g., 0xdac17f958d2ee523a2206206994597c13d831ec7">
-                    <label for="fromBlock">From Block:</label>
-                    <input type="number" id="fromBlock" placeholder="e.g., 0">
-                    <label for="toBlock">To Block:</label>
-                    <input type="number" id="toBlock" placeholder="e.g., 99999999">
-                </div>
-                <button id="explorerButton">Search</button>
-                <div id="result">Results will appear here...</div>
             </div>
-            <div id="getMoneySection" class="function-section">
-                <h3>Get $Money</h3>
-                <select id="moneyActionSelect">
-                    <option value="buy">Buy $Money</option>
-                    <option value="sell">Sell $Money</option>
-                </select>
-                <input type="number" id="moneyAmount" placeholder="Amount of Eth" step="0.0001">
-                <div id="moneySettings">
-                    <label for="moneySlippageTolerance">Slippage Tolerance (%):</label>
-                    <select id="moneySlippageTolerance" onchange="walletInterface.updateMoneySlippage()">
-                        <option value="0.1">0.1%</option>
-                        <option value="0.5">0.5%</option>
-                        <option value="1" selected>1%</option>
-                        <option value="3">3%</option>
-                        <option value="5">5%</option>
-                        <option value="10">10%</option>
-                    </select>
-                    <label for="moneyGasLimit">Gas Limit:</label>
-                    <select id="moneyGasLimit" onchange="walletInterface.updateMoneyGasLimit()">
-                        <option value="200000">200,000</option>
-                        <option value="300000">300,000</option>
-                        <option value="400000">400,000</option>
-                        <option value="500000" selected>500,000</option>
-                    </select>
-                </div>
-                <button id="executeMoneyBtn">Execute</button>
+            <div id="addressInput" class="input-group" style="display: none;">
+                <label for="address">Address</label>
+                <input type="text" id="address" placeholder="e.g., 0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae">
             </div>
-            <div id="myCoinsSection" class="function-section">
-                <h3>My Coins</h3>
-                <input type="text" id="coinContractAddress" placeholder="Enter Token Contract Address">
-                <button id="importCoinBtn">Import Coin</button>
-                <div id="coinList">No coins imported yet.</div>
+            <div id="txHashInput" class="input-group" style="display: none;">
+                <label for="txHash">Transaction Hash</label>
+                <input type="text" id="txHash" placeholder="e.g., 0x...">
             </div>
-            <div id="fiatSwapSection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/dex/"></iframe>
-                <button class="button" id="fiatSwapBtn">Create a Pair</button>
+            <div id="blockTimeInput" class="input-group" style="display: none;">
+                <label for="blockTime">Timestamp (UNIX)</label>
+                <input type="number" id="blockTime" placeholder="e.g., 1677654321">
             </div>
-            <div id="getFundSection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/launcher/"></iframe>
-                <button class="button" id="getFundBtn">Launch a Fund</button>
+            <div id="contractAddressInput" class="input-group" style="display: none;">
+                <label for="contractAddress">Contract Address</label>
+                <input type="text" id="contractAddress" placeholder="e.g., 0xdac17f958d2ee523a2206206994597c13d831ec7">
             </div>
-            <div id="createCoinSection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/deploy/"></iframe>
-                <button class="button" id="createCoinBtn">Launch a Coin</button>
+            <div id="logInputs" class="input-group" style="display: none;">
+                <label for="logAddress">Contract Address</label>
+                <input type="text" id="logAddress" placeholder="e.g., 0xdac17f958d2ee523a2206206994597c13d831ec7">
+                <label for="fromBlock">From Block</label>
+                <input type="number" id="fromBlock" placeholder="e.g., 0">
+                <label for="toBlock">To Block</label>
+                <input type="number" id="toBlock" placeholder="e.g., 99999999">
             </div>
-            <div id="getEthSection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/etf/"></iframe>
-                <button class="button" id="getEthBtn">Get .eth</button>
-            </div>
-            <div id="airdropSection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/airdrop"></iframe>
-                <button class="button" id="airdropBtn">Airdrop</button>
-            </div>
-            <div id="volumeBotSection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/volume"></iframe>
-                <button class="button" id="volumeBotBtn">Volume Bot</button>
-            </div>
-            <div id="dividendsSection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/dividends"></iframe>
-                <button class="button" id="dividendsBtn">Dividends</button>
-            </div>
-            <div id="voteSection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/vote/"></iframe>
-                <button class="button" id="voteBtn">Vote</button>
-            </div>
-            <div id="manageLiquiditySection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/blackjack"></iframe>
-                <button class="button" id="manageLiquidityBtn">Play</button>
-            </div>
-            <div id="dmSection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/dm"></iframe>
-                <button class="button" id="dmBtn">Visit My DMs</button>
-            </div>
-            <div id="chatSection" class="function-section">
-                <iframe class="preview-window" src="https://moneyfund.com/chat"></iframe>
-                <button class="button" id="chatBtn">Chat</button>
-            </div>
-            <div id="backupSection">
-                <button id="exportWalletsBtn">Export Wallets as JSON</button>
-                <label for="importWalletFile" class="button">Import Wallets from JSON</label>
-                <input type="file" id="importWalletFile" accept=".json">
-            </div>
+            <button id="explorerButton">Search</button>
+            <div id="result">Results will appear here...</div>
         </div>
-        <div id="status-box">
-            <h3>Status</h3>
-            <ul id="status-list"></ul>
+        <div class="tab-content" id="fiatSwap">
+            <h3>Create Pair</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/dex/"></iframe>
+            <button id="fiatSwapBtn">Create a Pair</button>
+        </div>
+        <div class="tab-content" id="getFund">
+            <h3>Launch Fund</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/launcher/"></iframe>
+            <button id="getFundBtn">Launch a Fund</button>
+        </div>
+        <div class="tab-content" id="createCoin">
+            <h3>Launch Coin</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/deploy/"></iframe>
+            <button id="createCoinBtn">Launch a Coin</button>
+        </div>
+        <div class="tab-content" id="getEth">
+            <h3>Get .eth</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/etf/"></iframe>
+            <button id="getEthBtn">Get .eth</button>
+        </div>
+        <div class="tab-content" id="airdrop">
+            <h3>Airdrop</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/airdrop"></iframe>
+            <button id="airdropBtn">Airdrop</button>
+        </div>
+        <div class="tab-content" id="launchStaking">
+            <h3>Launch Staking</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/staking"></iframe>
+            <button id="launchStakingBtn">Launch Staking</button>
+        </div>
+        <div class="tab-content" id="dividends">
+            <h3>Dividends</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/dividends"></iframe>
+            <button id="dividendsBtn">Dividends</button>
+        </div>
+        <div class="tab-content" id="vote">
+            <h3>Vote</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/vote/"></iframe>
+            <button id="voteBtn">Vote</button>
+        </div>
+        <div class="tab-content" id="manageLiquidity">
+            <h3>Blackjack</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/blackjack"></iframe>
+            <button id="manageLiquidityBtn">Play</button>
+        </div>
+        <div class="tab-content" id="dm">
+            <h3>DMs</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/dm"></iframe>
+            <button id="dmBtn">Visit My DMs</button>
+        </div>
+        <div class="tab-content" id="chat">
+            <h3>Chat</h3>
+            <iframe class="preview-window" src="https://moneyfund.com/chat"></iframe>
+            <button id="chatBtn">Chat</button>
         </div>
     </div>
 
@@ -1006,6 +1087,32 @@
                 this.attachEventListeners();
                 this.loadCoinsFromStorage();
                 loadStatusesFromStorage();
+                this.setupTabNavigation();
+            }
+
+            setupTabNavigation() {
+                const tabs = document.querySelectorAll('.tab');
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        tabs.forEach(t => {
+                            t.classList.remove('active');
+                            t.setAttribute('aria-selected', 'false');
+                        });
+                        tab.classList.add('active');
+                        tab.setAttribute('aria-selected', 'true');
+                        const tabId = tab.getAttribute('data-tab');
+                        document.querySelectorAll('.tab-content').forEach(content => {
+                            content.classList.remove('active');
+                            content.style.display = 'none';
+                        });
+                        const content = document.getElementById(tabId);
+                        if (content) {
+                            content.classList.add('active');
+                            content.style.display = 'block';
+                        }
+                        document.getElementById('walletFunction').value = tabId;
+                    });
+                });
             }
 
             attachEventListeners() {
@@ -1016,7 +1123,7 @@
                 document.getElementById('executeMoneyBtn').addEventListener('click', () => this.executeMoneyAction());
                 document.getElementById('importCoinBtn').addEventListener('click', () => this.importCoin());
                 document.getElementById('fiatSwapBtn').addEventListener('click', () => {
-                    window.open('https://moneyfund.com/dollar/', '_blank');
+                    window.open('https://moneyfund.com/dex/', '_blank');
                 });
                 document.getElementById('getFundBtn').addEventListener('click', () => {
                     window.open('https://moneyfund.com/launcher/', '_blank');
@@ -1037,7 +1144,7 @@
                     window.open('https://moneyfund.com/dividends', '_blank');
                 });
                 document.getElementById('voteBtn').addEventListener('click', () => {
-                    window.open('https://moneyfund.com/DAO/', '_blank');
+                    window.open('https://moneyfund.com/vote/', '_blank');
                 });
                 document.getElementById('manageLiquidityBtn').addEventListener('click', () => {
                     window.open('https://moneyfund.com/blackjack', '_blank');
@@ -1047,6 +1154,9 @@
                 });
                 document.getElementById('chatBtn').addEventListener('click', () => {
                     window.open('https://moneyfund.com/chat', '_blank');
+                });
+                document.getElementById('launchStakingBtn').addEventListener('click', () => {
+                    window.open('https://moneyfund.com/staking', '_blank');
                 });
                 document.getElementById('copyAddressBtn').addEventListener('click', () => this.copyWalletAddress());
                 document.getElementById('recipientAddress').addEventListener('input', this.debounce(this.resolveENS.bind(this), 500));
@@ -1059,6 +1169,7 @@
                         status: 'success'
                     });
                 });
+                document.getElementById('walletSelector').addEventListener('change', (e) => this.selectWallet(e.target.value));
 
                 const inputs = ['address', 'txHash', 'blockTime', 'contractAddress', 'logAddress', 'fromBlock', 'toBlock'];
                 inputs.forEach(id => {
@@ -1174,14 +1285,23 @@
             }
 
             handleWalletFunction(value) {
-                const sections = ['walletInfo', 'transactionSection', 'swapSection', 'explorerSection', 'getMoneySection', 'myCoinsSection', 'fiatSwapSection', 'getFundSection', 'createCoinSection', 'getEthSection', 'airdropSection', 'volumeBotSection', 'dividendsSection', 'voteSection', 'manageLiquiditySection', 'dmSection', 'chatSection'];
+                const sections = [
+                    'home', 'transactions', 'swap', 'getMoney', 'myCoins', 'volume', 'status',
+                    'explorer', 'fiatSwap', 'getFund', 'createCoin', 'getEth', 'airdrop',
+                    'launchStaking', 'dividends', 'vote', 'manageLiquidity', 'dm', 'chat'
+                ];
                 sections.forEach(section => {
                     const element = document.getElementById(section);
                     if (element) {
-                        element.style.display = section === `${value}Section` || (value === 'send' && section === 'transactionSection') ? 'block' : 'none';
+                        element.style.display = section === value ? 'block' : 'none';
+                        element.classList.toggle('active', section === value);
                     }
                 });
-                if (value === 'send') {
+                if (value === 'import') {
+                    document.getElementById('importWalletFile').click();
+                } else if (value === 'export') {
+                    this.exportWallets();
+                } else if (value === 'transactions') {
                     document.getElementById('statusDisplay').textContent = 'Status: Ready';
                 } else if (value === 'swap') {
                     document.getElementById('swapStatus').textContent = '';
@@ -1190,6 +1310,12 @@
                 } else if (value === 'myCoins') {
                     this.displayCoinList();
                 }
+                const tabs = document.querySelectorAll('.tab');
+                tabs.forEach(tab => {
+                    const tabId = tab.getAttribute('data-tab');
+                    tab.classList.toggle('active', tabId === value);
+                    tab.setAttribute('aria-selected', tabId === value ? 'true' : 'false');
+                });
             }
 
             manageWallets() {
@@ -1296,7 +1422,7 @@
                 if (index < 0 || index >= this.wallets.length) return;
                 const wallet = this.wallets[index];
                 document.getElementById('generationInfo').textContent = '';
-                document.getElementById('walletInfo').style.display = 'block';
+                document.getElementById('home').style.display = 'block';
                 await this.fetchBalance();
                 const selectedFunction = document.getElementById('walletFunction').value;
                 if (selectedFunction === 'getMoney') {
@@ -1533,231 +1659,231 @@
                                 });
                             });
                     } else if (direction === 'tokenToEth') {
-                        const tokenContract = new this.web3.eth.Contract(this.erc20ABI, tokenAddress);
-                        const approveTx = {
-                            from: selectedWallet.address,
-                            to: tokenAddress,
-                            data: tokenContract.methods.approve(this.uniswapRouterAddress, amount).encodeABI(),
-                            gas: 50000,
-                            gasPrice: gasPrice
-                        };
-                        const signedApproveTx = await this.web3.eth.accounts.signTransaction(approveTx, selectedWallet.privateKey);
-                        await this.web3.eth.sendSignedTransaction(signedApproveTx.rawTransaction);
-                        const path = [tokenAddress, "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"];
-                        const amounts = await this.uniswapRouter.methods.getAmountsOut(amount, path).call();
-                        if (!amounts || amounts.length < 2) {
-                            updateStatusBox({
-                                message: 'Invalid token or insufficient liquidity.',
-                                status: 'error'
-                            });
-                            return;
-                        }
-                        const expectedOutput = amounts[1];
-                        const slippage = 1 - (this.slippageTolerance / 100);
-                        const amountOutMin = BN(expectedOutput).muln(slippage * 1000).divn(1000).toString();
-                        const tx = {
-                            from: selectedWallet.address,
-                            to: this.uniswapRouterAddress,
-                            data: this.uniswapRouter.methods.swapExactTokensForETH(amount, amountOutMin, path, selectedWallet.address, Math.floor(Date.now() / 1000) + 120).encodeABI(),
-                            gas: this.gasLimit,
-                            gasPrice: gasPrice
-                        };
-                        const initialBalanceWei = BN(await this.web3.eth.getBalance(selectedWallet.address));
-                        const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
-                        this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-                            .on('transactionHash', (hash) => {
-                                updateStatusBox({
-                                    message: 'Swap transaction sent...',
-                                    status: 'pending',
-                                    txHash: hash,
-                                    direction: directionText
-                                });
-                            })
-                            .on('receipt', async (receipt) => {
-                                const finalBalanceWei = BN(await this.web3.eth.getBalance(selectedWallet.address));
-                                const ethReceivedWei = finalBalanceWei.sub(initialBalanceWei);
-                                const ethReceivedEther = this.web3.utils.fromWei(ethReceivedWei.toString(), 'ether');
-                                updateStatusBox({
-                                    message: `Swapped successfully! Received ${ethReceivedEther} ETH`,
-                                    status: 'success',
-                                    quantity: ethReceivedEther,
-                                    txHash: receipt.transactionHash,
-                                    direction: directionText
-                                });
-                                this.fetchBalance();
-                            })
-                            .on('error', (err) => {
-                                updateStatusBox({
-                                    message: 'Swap failed: ' + err.message,
-                                    status: 'error'
-                                });
-                            });
-                    }
-                } catch (error) {
-                    console.error('Swap error:', error);
-                    updateStatusBox({
-                        message: 'Swap failed: ' + error.message,
-                        status: 'error'
-                    });
-                }
-            }
-
-            toggleInputs() {
-                const action = document.getElementById("action").value;
-                const inputs = ['addressInput', 'txHashInput', 'blockTimeInput', 'contractAddressInput', 'logInputs'];
-                inputs.forEach(id => document.getElementById(id).classList.remove('active'));
-
-                switch (action) {
-                    case 'balance':
-                    case 'txlist':
-                    case 'tokentx':
-                    case 'tokennfttx':
-                    case 'txlistinternal':
-                        document.getElementById('addressInput').classList.add('active');
-                        if (action === 'tokentx' || action === 'tokenbalance') {
-                            document.getElementById('contractAddressInput').classList.add('active');
-                        }
-                        break;
-                    case 'gettxreceiptstatus':
-                        document.getElementById('txHashInput').classList.add('active');
-                        break;
-                    case 'getblockbytime':
-                        document.getElementById('blockTimeInput').classList.add('active');
-                        break;
-                    case 'getabi':
-                    case 'tokensupply':
-                        document.getElementById('contractAddressInput').classList.add('active');
-                        break;
-                    case 'tokenbalance':
-                        document.getElementById('addressInput').classList.add('active');
-                        document.getElementById('contractAddressInput').classList.add('active');
-                        break;
-                    case 'getlogs':
-                        document.getElementById('logInputs').classList.add('active');
-                        break;
-                }
-            }
-
-            async searchExplorer() {
-                const action = document.getElementById("action").value;
-                if (!action) {
-                    updateStatusBox({ message: 'Please select an action!', status: 'error' });
-                    return;
-                }
-                const resultDiv = document.getElementById("result");
-                resultDiv.textContent = "Fetching...";
-                updateStatusBox({ message: 'Fetching explorer data...', status: 'pending' });
-                let url;
-                try {
-                    switch (action) {
-    case "balance":
-        url = `${this.BASE_URL}?module=account&action=balance&address=${document.getElementById("address").value}&tag=latest&apikey=${this.API_KEY}`;
-        break;
-    case "txlist":
-        url = `${this.BASE_URL}?module=account&action=txlist&address=${document.getElementById("address").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
-        break;
-    case "tokentx":
-        url = `${this.BASE_URL}?module=account&action=tokentx&address=${document.getElementById("address").value}&contractaddress=${document.getElementById("contractAddress").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
-        break;
-    case "tokennfttx":
-        url = `${this.BASE_URL}?module=account&action=tokennfttx&address=${document.getElementById("address").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
-        break;
-    case "txlistinternal":
-        url = `${this.BASE_URL}?module=account&action=txlistinternal&address=${document.getElementById("address").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
-        break;
-    case "gettxreceiptstatus":
-        url = `${this.BASE_URL}?module=transaction&action=gettxreceiptstatus&txhash=${document.getElementById("txHash").value}&apikey=${this.API_KEY}`;
-        break;
-    case "getblockbytime":
-        url = `${this.BASE_URL}?module=block&action=getblocknobytimestamp=${document.getElementById("blockTime").value}&closest=before&apikey=${this.API_KEY}`;
-        break;
-    case "getabi":
-        url = `${this.BASE_URL}?module=contract&action=getabi&address=${document.getElementById("contractAddress").value}&apikey=${this.API_KEY}`;
-        break;
-    case "tokensupply":
-        url = `${this.BASE_URL}?module=stats&action=tokensupply&contractaddress=${document.getElementById("contractAddress").value}&apikey=${this.API_KEY}`;
-        break;
-    case "tokenbalance":
-        url = `${this.BASE_URL}?module=account&action=tokenbalance&contractaddress=${document.getElementById("contractAddress").value}&address=${document.getElementById("address").value}&tag=latest&apikey=${this.API_KEY}`;
-        break;
-    case "gasoracle":
-        url = `${this.BASE_URL}?module=gastracker&action=gasoracle&apikey=${this.API_KEY}`;
-        break;
-    case "ethsupply":
-        url = `${this.BASE_URL}?module=stats&action=ethsupply&apikey=${this.API_KEY}`;
-        break;
-    case "ethprice":
-        url = `${this.BASE_URL}?module=stats&action=ethprice&apikey=${this.API_KEY}`;
-        break;
-    case "getlogs":
-        url = `${this.BASE_URL}?module=logs&action=getLogs&address=${document.getElementById("logAddress").value}&fromBlock=${document.getElementById("fromBlock").value}&toBlock=${document.getElementById("toBlock").value}&apikey=${this.API_KEY}`;
-        break;
-    default:
-        throw new Error("Invalid action");
+    const tokenContract = new this.web3.eth.Contract(this.erc20ABI, tokenAddress);
+    const approveTx = {
+        from: selectedWallet.address,
+        to: tokenAddress,
+        data: tokenContract.methods.approve(this.uniswapRouterAddress, amount).encodeABI(),
+        gas: 50000,
+        gasPrice: gasPrice
+    };
+    const signedApproveTx = await this.web3.eth.accounts.signTransaction(approveTx, selectedWallet.privateKey);
+    await this.web3.eth.sendSignedTransaction(signedApproveTx.rawTransaction);
+    const path = [tokenAddress, "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"];
+    const amounts = await this.uniswapRouter.methods.getAmountsOut(amount, path).call();
+    if (!amounts || amounts.length < 2) {
+        updateStatusBox({
+            message: 'Invalid token or insufficient liquidity.',
+            status: 'error'
+        });
+        return;
+    }
+    const expectedOutput = amounts[1];
+    const slippage = 1 - (this.slippageTolerance / 100);
+    const amountOutMin = BN(expectedOutput).muln(slippage * 1000).divn(1000).toString();
+    const tx = {
+        from: selectedWallet.address,
+        to: this.uniswapRouterAddress,
+        data: this.uniswapRouter.methods.swapExactTokensForETH(amount, amountOutMin, path, selectedWallet.address, Math.floor(Date.now() / 1000) + 120).encodeABI(),
+        gas: this.gasLimit,
+        gasPrice: gasPrice
+    };
+    const initialBalanceWei = BN(await this.web3.eth.getBalance(selectedWallet.address));
+    const signedTx = await this.web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+    this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+        .on('transactionHash', (hash) => {
+            updateStatusBox({
+                message: 'Swap transaction sent...',
+                status: 'pending',
+                txHash: hash,
+                direction: directionText
+            });
+        })
+        .on('receipt', async (receipt) => {
+            const finalBalanceWei = BN(await this.web3.eth.getBalance(selectedWallet.address));
+            const ethReceivedWei = finalBalanceWei.sub(initialBalanceWei);
+            const ethReceivedEther = this.web3.utils.fromWei(ethReceivedWei.toString(), 'ether');
+            updateStatusBox({
+                message: `Swapped successfully! Received ${ethReceivedEther} ETH`,
+                status: 'success',
+                quantity: ethReceivedEther,
+                txHash: receipt.transactionHash,
+                direction: directionText
+            });
+            this.fetchBalance();
+        })
+        .on('error', (err) => {
+            updateStatusBox({
+                message: 'Swap failed: ' + err.message,
+                status: 'error'
+            });
+        });
 }
-const response = await fetch(url);
-if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-const data = await response.json();
-let formattedResult;
-if (data.status === "1" || action === "getabi") {
+} catch (error) {
+console.error('Swap error:', error);
+updateStatusBox({
+    message: 'Swap failed: ' + error.message,
+    status: 'error'
+});
+}
+}
+
+toggleInputs() {
+const action = document.getElementById("action").value;
+const inputs = ['addressInput', 'txHashInput', 'blockTimeInput', 'contractAddressInput', 'logInputs'];
+inputs.forEach(id => document.getElementById(id).classList.remove('active'));
+
+switch (action) {
+    case 'balance':
+    case 'txlist':
+    case 'tokentx':
+    case 'tokennfttx':
+    case 'txlistinternal':
+        document.getElementById('addressInput').classList.add('active');
+        if (action === 'tokentx' || action === 'tokenbalance') {
+            document.getElementById('contractAddressInput').classList.add('active');
+        }
+        break;
+    case 'gettxreceiptstatus':
+        document.getElementById('txHashInput').classList.add('active');
+        break;
+    case 'getblockbytime':
+        document.getElementById('blockTimeInput').classList.add('active');
+        break;
+    case 'getabi':
+    case 'tokensupply':
+        document.getElementById('contractAddressInput').classList.add('active');
+        break;
+    case 'tokenbalance':
+        document.getElementById('addressInput').classList.add('active');
+        document.getElementById('contractAddressInput').classList.add('active');
+        break;
+    case 'getlogs':
+        document.getElementById('logInputs').classList.add('active');
+        break;
+}
+}
+
+async searchExplorer() {
+const action = document.getElementById("action").value;
+if (!action) {
+    updateStatusBox({ message: 'Please select an action!', status: 'error' });
+    return;
+}
+const resultDiv = document.getElementById("result");
+resultDiv.textContent = "Fetching...";
+updateStatusBox({ message: 'Fetching explorer data...', status: 'pending' });
+let url;
+try {
     switch (action) {
         case "balance":
-            formattedResult = `ETH Balance: ${(parseInt(data.result) / 1e18).toFixed(6)} ETH`;
+            url = `${this.BASE_URL}?module=account&action=balance&address=${document.getElementById("address").value}&tag=latest&apikey=${this.API_KEY}`;
             break;
         case "txlist":
+            url = `${this.BASE_URL}?module=account&action=txlist&address=${document.getElementById("address").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
+            break;
         case "tokentx":
+            url = `${this.BASE_URL}?module=account&action=tokentx&address=${document.getElementById("address").value}&contractaddress=${document.getElementById("contractAddress").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
+            break;
         case "tokennfttx":
+            url = `${this.BASE_URL}?module=account&action=tokennfttx&address=${document.getElementById("address").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
+            break;
         case "txlistinternal":
-            formattedResult = "Recent Transactions:\n";
-            data.result.slice(0, 5).forEach((tx, i) => {
-                formattedResult += `${i + 1}. Hash: ${tx.hash}\n   Value: ${(parseInt(tx.value) / 1e18).toFixed(6)} ETH\n   Block: ${tx.blockNumber}\n\n`;
-            });
-            if (data.result.length > 5) formattedResult += `...and ${data.result.length - 5} more`;
+            url = `${this.BASE_URL}?module=account&action=txlistinternal&address=${document.getElementById("address").value}&startblock=0&endblock=99999999&sort=desc&apikey=${this.API_KEY}`;
             break;
         case "gettxreceiptstatus":
-            formattedResult = `Transaction Status: ${data.result.status === "1" ? "Success" : "Failed"}`;
+            url = `${this.BASE_URL}?module=transaction&action=gettxreceiptstatus&txhash=${document.getElementById("txHash").value}&apikey=${this.API_KEY}`;
             break;
         case "getblockbytime":
-            formattedResult = `Block Number: ${data.result}`;
+            url = `${this.BASE_URL}?module=block&action=getblocknobytimestamp=${document.getElementById("blockTime").value}&closest=before&apikey=${this.API_KEY}`;
             break;
         case "getabi":
-            formattedResult = `Contract ABI:\n${data.result.substring(0, 100)}... (truncated)`;
+            url = `${this.BASE_URL}?module=contract&action=getabi&address=${document.getElementById("contractAddress").value}&apikey=${this.API_KEY}`;
             break;
         case "tokensupply":
-            formattedResult = `Token Supply: ${(parseInt(data.result) / 1e18).toFixed(6)}`;
+            url = `${this.BASE_URL}?module=stats&action=tokensupply&contractaddress=${document.getElementById("contractAddress").value}&apikey=${this.API_KEY}`;
             break;
         case "tokenbalance":
-            formattedResult = `Token Balance: ${(parseInt(data.result) / 1e18).toFixed(6)}`;
+            url = `${this.BASE_URL}?module=account&action=tokenbalance&contractaddress=${document.getElementById("contractAddress").value}&address=${document.getElementById("address").value}&tag=latest&apikey=${this.API_KEY}`;
             break;
         case "gasoracle":
-            formattedResult = `Gas Prices:\n- SafeLow: ${data.result.SafeGasPrice} Gwei\n- Propose: ${data.result.ProposeGasPrice} Gwei\n- Fast: ${data.result.FastGasPrice} Gwei`;
+            url = `${this.BASE_URL}?module=gastracker&action=gasoracle&apikey=${this.API_KEY}`;
             break;
         case "ethsupply":
-            formattedResult = `Total ETH Supply: ${(parseInt(data.result) / 1e18).toFixed(2)} ETH`;
+            url = `${this.BASE_URL}?module=stats&action=ethsupply&apikey=${this.API_KEY}`;
             break;
         case "ethprice":
-            formattedResult = `ETH Price: $${data.result.ethusd} USD`;
+            url = `${this.BASE_URL}?module=stats&action=ethprice&apikey=${this.API_KEY}`;
             break;
         case "getlogs":
-            formattedResult = "Event Logs:\n";
-            data.result.slice(0, 5).forEach((log, i) => {
-                formattedResult += `${i + 1}. Block: ${log.blockNumber}\n   Data: ${log.data.substring(0, 20)}...\n\n`;
-            });
-            if (data.result.length > 5) formattedResult += `...and ${data.result.length - 5} more`;
+            url = `${this.BASE_URL}?module=logs&action=getLogs&address=${document.getElementById("logAddress").value}&fromBlock=${document.getElementById("fromBlock").value}&toBlock=${document.getElementById("toBlock").value}&apikey=${this.API_KEY}`;
             break;
+        default:
+            throw new Error("Invalid action");
     }
-    updateStatusBox({ message: 'Explorer data fetched successfully', status: 'success' });
-} else {
-    formattedResult = `Error from Etherscan: ${data.message || "No data returned"}`;
-    updateStatusBox({
-        message: `Etherscan error: ${data.message || "No data returned"}`,
-        status: 'error'
-    });
-}
-resultDiv.textContent = formattedResult || "No result data available";
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    const data = await response.json();
+    let formattedResult;
+    if (data.status === "1" || action === "getabi") {
+        switch (action) {
+            case "balance":
+                formattedResult = `ETH Balance: ${(parseInt(data.result) / 1e18).toFixed(6)} ETH`;
+                break;
+            case "txlist":
+            case "tokentx":
+            case "tokennfttx":
+            case "txlistinternal":
+                formattedResult = "Recent Transactions:\n";
+                data.result.slice(0, 5).forEach((tx, i) => {
+                    formattedResult += `${i + 1}. Hash: ${tx.hash}\n   Value: ${(parseInt(tx.value) / 1e18).toFixed(6)} ETH\n   Block: ${tx.blockNumber}\n\n`;
+                });
+                if (data.result.length > 5) formattedResult += `...and ${data.result.length - 5} more`;
+                break;
+            case "gettxreceiptstatus":
+                formattedResult = `Transaction Status: ${data.result.status === "1" ? "Success" : "Failed"}`;
+                break;
+            case "getblockbytime":
+                formattedResult = `Block Number: ${data.result}`;
+                break;
+            case "getabi":
+                formattedResult = `Contract ABI:\n${data.result.substring(0, 100)}... (truncated)`;
+                break;
+            case "tokensupply":
+                formattedResult = `Token Supply: ${(parseInt(data.result) / 1e18).toFixed(6)}`;
+                break;
+            case "tokenbalance":
+                formattedResult = `Token Balance: ${(parseInt(data.result) / 1e18).toFixed(6)}`;
+                break;
+            case "gasoracle":
+                formattedResult = `Gas Prices:\n- SafeLow: ${data.result.SafeGasPrice} Gwei\n- Propose: ${data.result.ProposeGasPrice} Gwei\n- Fast: ${data.result.FastGasPrice} Gwei`;
+                break;
+            case "ethsupply":
+                formattedResult = `Total ETH Supply: ${(parseInt(data.result) / 1e18).toFixed(2)} ETH`;
+                break;
+            case "ethprice":
+                formattedResult = `ETH Price: $${data.result.ethusd} USD`;
+                break;
+            case "getlogs":
+                formattedResult = "Event Logs:\n";
+                data.result.slice(0, 5).forEach((log, i) => {
+                    formattedResult += `${i + 1}. Block: ${log.blockNumber}\n   Data: ${log.data.substring(0, 20)}...\n\n`;
+                });
+                if (data.result.length > 5) formattedResult += `...and ${data.result.length - 5} more`;
+                break;
+        }
+        updateStatusBox({ message: 'Explorer data fetched successfully', status: 'success' });
+    } else {
+        formattedResult = `Error from Etherscan: ${data.message || "No data returned"}`;
+        updateStatusBox({
+            message: `Etherscan error: ${data.message || "No data returned"}`,
+            status: 'error'
+        });
+    }
+    resultDiv.textContent = formattedResult || "No result data available";
 } catch (error) {
-resultDiv.textContent = `Error: ${error.message}`;
-updateStatusBox({ message: `Explorer error: ${error.message}`, status: 'error' });
+    resultDiv.textContent = `Error: ${error.message}`;
+    updateStatusBox({ message: `Explorer error: ${error.message}`, status: 'error' });
 }
 }
 
@@ -2090,5 +2216,3 @@ reader.readAsText(file);
 const walletInterface = new WalletInterface();
 walletInterface.init();
 </script>
-</body>
-</html>
