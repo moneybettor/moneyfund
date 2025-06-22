@@ -218,7 +218,7 @@
                 <option value="">-- Select Wallet --</option>
             </select>
         </div>
-        <p id="walletAddress">Not Connected</p>
+        <p id="walletAddress"></p>
         <div class="input-group">
             <label for="tokenAddress">Contract Address to Pump</label>
             <input type="text" id="tokenAddress" value="0x100DB67F41A2dF3c32cC7c0955694b98339B7311" placeholder="Enter token address">
@@ -341,14 +341,12 @@
                     this.updateWalletDisplay();
                 } else {
                     selectedWallet = null;
-                    document.getElementById('walletAddress').textContent = 'Not Connected';
+                    document.getElementById('walletAddress').textContent = '';
                 }
             }
 
             updateWalletDisplay() {
-                if (selectedWallet) {
-                    document.getElementById('walletAddress').textContent = `Connected: ${selectedWallet.address}`;
-                }
+                // Do nothing to prevent displaying the wallet address
             }
 
             async waitForReceipt(txHash) {
