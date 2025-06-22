@@ -9,9 +9,18 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #0d1117, #161b22);
+            background: linear-gradient(135deg, #0A0C1E, #1F2A44); /* Matches MoneyFund body background */
             color: #c9d1d9;
             margin: 0;
             padding: 20px;
@@ -19,177 +28,223 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
         }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E'); /* Matches MoneyFund noise overlay */
+            z-index: -1;
+        }
+
         #chat-container {
             width: 100%;
             max-width: 800px;
             padding: 25px;
-            background: #21262d;
+            background: rgba(17, 24, 39, 0.95); /* Matches MoneyFund panel background */
             border-radius: 12px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); /* Matches MoneyFund panel shadow */
             color: #c9d1d9;
             position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund panel border */
         }
+
         #stats {
             text-align: center;
             margin-bottom: 20px;
             font-size: 16px;
-            color: #58a6ff;
+            color: #A5F3FC; /* Matches MoneyFund accent color */
             font-weight: 500;
         }
+
         #wallet-container {
             text-align: center;
             margin-bottom: 20px;
         }
+
         #wallet-selector, #connectMetaMaskBtn {
             padding: 12px;
             margin: 5px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
-            background: #30363d;
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund input background */
             color: #c9d1d9;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: background 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund input border */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         #wallet-selector:focus, #connectMetaMaskBtn:focus {
-            box-shadow: 0 0 6px rgba(88, 166, 255, 0.3);
+            border-color: #6366F1; /* Matches MoneyFund input focus */
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.5); /* Matches MoneyFund input focus */
+            outline: none;
         }
+
         #connectMetaMaskBtn {
-            background: linear-gradient(90deg, #2f81f7, #58a6ff);
-            color: #ffffff;
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Matches MoneyFund button background */
+            color: #F9FAFB; /* Matches MoneyFund button text color */
             cursor: pointer;
             padding: 6px 12px;
             font-size: 7px;
         }
+
         #connectMetaMaskBtn:hover {
-            background: linear-gradient(90deg, #3b8aff, #6ab0ff);
-            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
-            transform: translateY(-1px);
+            background: linear-gradient(90deg, #4338CA, #9333EA); /* Matches MoneyFund button hover */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Matches MoneyFund hover shadow */
+            transform: scale(1.02); /* Matches MoneyFund button hover */
         }
+
         h1 {
-            color: #58a6ff;
+            color: #FFFFFF; /* Matches MoneyFund heading color */
             text-align: center;
             margin-bottom: 15px;
             font-weight: 700;
             font-size: 24px;
-            text-shadow: 0 0 4px rgba(88, 166, 255, 0.2);
+            text-shadow: none; /* Removed text-shadow to match MoneyFund */
         }
+
         #message-area {
             max-height: 400px;
             overflow-y: auto;
             padding: 15px;
-            background: #161b22;
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
             border-radius: 10px;
             margin-top: 20px;
             font-size: 14px;
             scrollbar-width: thin;
-            scrollbar-color: #2f81f7 #161b22;
+            scrollbar-color: #6366F1 rgba(17, 24, 39, 0.9); /* Matches MoneyFund accent color */
         }
+
         #message-area::-webkit-scrollbar {
             width: 8px;
         }
+
         #message-area::-webkit-scrollbar-track {
-            background: #161b22;
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
         }
+
         #message-area::-webkit-scrollbar-thumb {
-            background: #2f81f7;
+            background: #6366F1; /* Matches MoneyFund accent color */
             border-radius: 4px;
         }
+
         .message {
-            background: linear-gradient(145deg, #30363d, #21262d);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
             padding: 12px;
             margin: 10px 0;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            border-left: 3px solid #2f81f7;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Matches MoneyFund shadow */
+            border-left: 3px solid #6366F1; /* Matches MoneyFund accent color */
             animation: slideIn 0.3s ease-out;
         }
+
         .message .username {
             font-weight: 700;
-            color: #58a6ff;
+            color: #A5F3FC; /* Matches MoneyFund accent color */
             font-size: 14px;
         }
+
         .message .timestamp {
             font-size: 11px;
-            color: #8b949e;
+            color: #9CA3AF; /* Matches MoneyFund placeholder color */
             margin-left: 10px;
         }
+
         .message .text {
             margin: 8px 0;
             color: #c9d1d9;
             font-size: 14px;
         }
+
         .message .image {
             max-width: 100%;
             border-radius: 8px;
             margin-top: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
+
         .emoji {
             cursor: pointer;
             margin-right: 10px;
             font-size: 16px;
             transition: transform 0.2s;
         }
+
         .emoji:hover {
             transform: scale(1.2);
         }
+
         .emoji.like {
-            color: #2ea043; /* Muted green for likes */
+            color: #10B981; /* Matches MoneyFund success status color */
         }
+
         .emoji.dislike {
-            color: #d73a4a; /* Muted red for dislikes */
+            color: #F87171; /* Matches MoneyFund error status color */
         }
+
         #input-area {
             margin: 20px 0;
             text-align: center;
         }
+
         #message-input {
             padding: 12px;
             font-size: 14px;
             margin: 0 10px 10px 10px;
             border-radius: 8px;
-            background: #30363d;
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund input background */
             color: #c9d1d9;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund input border */
             width: calc(100% - 40px);
             outline: none;
-            transition: box-shadow 0.2s;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         #message-input:focus {
-            box-shadow: 0 0 6px rgba(88, 166, 255, 0.3);
+            border-color: #6366F1; /* Matches MoneyFund input focus */
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.5); /* Matches MoneyFund input focus */
         }
+
         #send-button, .photo-upload-label {
             padding: 12px 20px;
             margin: 0 10px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            background: linear-gradient(90deg, #2f81f7, #58a6ff);
-            color: #ffffff;
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Matches MoneyFund button background */
+            color: #F9FAFB; /* Matches MoneyFund button text color */
             border: none;
             border-radius: 8px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
         }
+
         #send-button:hover, .photo-upload-label:hover {
-            background: linear-gradient(90deg, #3b8aff, #6ab0ff);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+            background: linear-gradient(90deg, #4338CA, #9333EA); /* Matches MoneyFund button hover */
+            transform: scale(1.02); /* Matches MoneyFund button hover */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Matches MoneyFund hover shadow */
         }
+
         #upload-photo {
             display: none;
         }
+
         .photo-upload-label {
-            background: linear-gradient(90deg, #2f81f7, #58a6ff);
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Matches MoneyFund button background */
         }
+
         #message {
             font-size: 20px;
             text-align: center;
             margin: 20px 0;
-            color: #58a6ff;
+            color: #A5F3FC; /* Matches MoneyFund accent color */
         }
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -200,31 +255,39 @@
                 transform: translateY(0);
             }
         }
+
         @media (max-width: 600px) {
             #chat-container {
                 padding: 15px;
             }
+
             #stats {
                 font-size: 14px;
             }
+
             #wallet-selector, #connectMetaMaskBtn {
                 font-size: 12px;
                 padding: 10px;
             }
+
             #connectMetaMaskBtn {
                 padding: 5px 10px;
                 font-size: 6px;
             }
+
             h1 {
                 font-size: 20px;
             }
+
             #message-input {
                 font-size: 12px;
             }
+
             #send-button, .photo-upload-label {
                 font-size: 12px;
                 padding: 10px 15px;
             }
+
             #message {
                 font-size: 18px;
             }
@@ -482,11 +545,11 @@
 
                     const like = document.createElement('span');
                     like.className = 'emoji like';
-                    like.innerHTML = `🚀 ${msg.likes}`;
+                    like.innerHTML = `ðŸš€ ${msg.likes}`;
                     like.onclick = () => this.handleLikeDislike(this.allMessages.length - 1 - index, 'like');
                     const dislike = document.createElement('span');
                     dislike.className = 'emoji dislike';
-                    dislike.innerHTML = `🌈 ${msg.dislikes}`;
+                    dislike.innerHTML = `ðŸŒˆ ${msg.dislikes}`;
                     dislike.onclick = () => this.handleLikeDislike(this.allMessages.length - 1 - index, 'dislike');
 
                     messageDiv.appendChild(document.createElement('br'));
