@@ -4,22 +4,39 @@
     <meta charset="UTF-8">
     <title>Direct Messaging</title>
     <style>
-        body {
+        * {
             margin: 0;
-            padding: 20px;
-            height: 100vh;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0A0C1E, #1F2A44); /* Matches MoneyFund body background */
             color: #E8ECEF;
             display: flex;
             flex-direction: column;
             justify-content: center;
             min-height: 100vh;
+            padding: 20px;
             position: relative;
             overflow-x: hidden;
-            background: radial-gradient(circle at center, #1F2A44 0%, #0D1321 100%);
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAJElEQVQYV2Ncvn37fwY0gFJQUFBgYGBgYGAYBihgYmBgYGBgAH/hBRm+0rguAAAAAElFTkSuQmCC');
-            background-blend-mode: overlay;
         }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E'); /* Matches MoneyFund noise overlay */
+            z-index: -1;
+        }
+
         .flex-container {
             display: flex;
             height: 100%;
@@ -32,16 +49,15 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
         #username-header {
             width: 100%;
             max-width: 1200px;
             padding: 12px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(17, 24, 39, 0.95); /* Matches MoneyFund panel background */
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund panel border */
             border-radius: 8px 8px 0 0;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); /* Matches MoneyFund panel shadow */
             color: #FFFFFF;
             font-weight: 600;
             font-size: 1.1em;
@@ -52,30 +68,31 @@
             gap: 10px;
             z-index: 1;
         }
+
         #wallet-selector {
             padding: 8px;
             font-size: 1em;
             border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund input border */
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund input background */
             color: #E8ECEF;
             text-align: center;
-            transition: border-color 0.3s ease, background 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         #wallet-selector:hover, #wallet-selector:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(99, 102, 241, 0.4); /* Matches MoneyFund input hover */
+            box-shadow: 0 0 6px rgba(99, 102, 241, 0.3); /* Matches MoneyFund input hover */
             outline: none;
         }
+
         #toggle-container {
             width: 100%;
             max-width: 1200px;
             padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(17, 24, 39, 0.95); /* Matches MoneyFund panel background */
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund panel border */
             border-radius: 6px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
             text-align: center;
             margin-bottom: 10px;
             display: flex;
@@ -84,46 +101,53 @@
             gap: 10px;
             z-index: 1;
         }
+
         #toggle-view {
             padding: 8px;
             border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund button border */
             font-size: 0.95em;
             cursor: pointer;
-            background: rgba(255, 255, 255, 0.1);
-            color: #E8ECEF;
-            transition: border-color 0.3s ease, background 0.3s ease;
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Matches MoneyFund button background */
+            color: #F9FAFB; /* Matches MoneyFund button text color */
+            transition: background 0.3s ease, transform 0.2s ease;
         }
+
         #toggle-view:hover, #toggle-view:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
+            background: linear-gradient(90deg, #4338CA, #9333EA); /* Matches MoneyFund button hover */
+            transform: scale(1.02);
             outline: none;
         }
+
         .search-container {
             position: relative;
             display: flex;
             align-items: center;
         }
+
         #search-bar {
             padding: 8px;
             border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund input border */
             font-size: 0.95em;
             box-sizing: border-box;
             width: 200px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund input background */
             color: #E8ECEF;
-            transition: border-color 0.3s ease, background 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         #search-bar:hover, #search-bar:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(99, 102, 241, 0.4); /* Matches MoneyFund input hover */
+            box-shadow: 0 0 6px rgba(99, 102, 241, 0.3); /* Matches MoneyFund input hover */
             outline: none;
         }
+
         #search-bar::placeholder {
-            color: #A3BFFA;
-            opacity: 0.7;
+            color: #9CA3AF; /* Matches MoneyFund placeholder color */
+            opacity: 1;
         }
+
         #clear-search {
             position: absolute;
             right: 8px;
@@ -134,61 +158,67 @@
             color: #A3BFFA;
             display: none;
         }
+
         #clear-search:hover {
             color: #E8ECEF;
         }
+
         #dm-container {
             width: 100%;
             max-width: 1200px;
             height: 800px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(17, 24, 39, 0.95); /* Matches MoneyFund panel background */
             border-radius: 0 0 8px 8px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); /* Matches MoneyFund panel shadow */
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund panel border */
             display: flex;
             overflow: hidden;
             z-index: 1;
         }
+
         #conversations-list {
             width: 30%;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
             padding: 20px;
             overflow-y: auto;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund border */
         }
+
         #conversations-header {
             font-weight: 600;
             font-size: 1em;
             margin-bottom: 10px;
             color: #FFFFFF;
         }
+
         #chat-area {
             width: 70%;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
         }
+
         #chat-header {
             font-weight: 600;
             font-size: 1.1em;
             color: #FFFFFF;
             padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund border */
             margin-bottom: 10px;
         }
+
         #messages {
             flex-grow: 1;
             overflow-y: auto;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
             border-radius: 8px;
             margin-bottom: 15px;
             display: flex;
             flex-direction: column;
         }
+
         .message {
             margin: 10px 0;
             padding: 12px 16px;
@@ -199,39 +229,46 @@
             flex-direction: column;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
+
         .message.sent {
-            background: #3B82F6;
-            color: #FFFFFF;
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Matches MoneyFund button background */
+            color: #F9FAFB; /* Matches MoneyFund button text color */
             align-self: flex-end;
         }
+
         .message.received {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
             color: #E8ECEF;
             align-self: flex-start;
         }
+
         .message img {
             max-width: 100%;
             border-radius: 8px;
             margin-top: 5px;
         }
+
         .message .sender-id {
             font-size: 0.7em;
             color: #A3BFFA;
             margin-bottom: 4px;
         }
+
         .message .timestamp {
             font-size: 0.7em;
             color: #A3BFFA;
             align-self: flex-end;
             margin-top: 4px;
         }
+
         .message .reactions {
             margin-top: 5px;
             display: flex;
             gap: 5px;
         }
+
         .reaction {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
             padding: 2px 6px;
             border-radius: 10px;
             font-size: 0.8em;
@@ -239,96 +276,107 @@
             color: #E8ECEF;
             transition: background 0.3s ease;
         }
+
         .reaction:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1); /* Matches MoneyFund hover */
         }
+
         #message-input {
             display: flex;
             gap: 10px;
             align-items: center;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(17, 24, 39, 0.95); /* Matches MoneyFund panel background */
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund border */
         }
+
         input[type="text"] {
             flex-grow: 1;
             padding: 12px;
             border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund input border */
             font-size: 1em;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund input background */
             color: #E8ECEF;
-            transition: border-color 0.3s ease, background 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         input[type="text"]:hover, input[type="text"]:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(99, 102, 241, 0.4); /* Matches MoneyFund input hover */
+            box-shadow: 0 0 6px rgba(99, 102, 241, 0.3); /* Matches MoneyFund input hover */
             outline: none;
         }
+
         input[type="text"]::placeholder {
-            color: #A3BFFA;
-            opacity: 0.7;
+            color: #9CA3AF; /* Matches MoneyFund placeholder color */
+            opacity: 1;
         }
+
         input[type="file"] {
             display: none;
         }
+
         .upload-btn {
             padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Matches MoneyFund button background */
+            border: none; /* Removed border to match MoneyFund button */
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.9em;
-            color: #E8ECEF;
-            transition: background 0.3s ease, border-color 0.3s ease;
+            color: #F9FAFB; /* Matches MoneyFund button text color */
+            transition: background 0.3s ease, transform 0.2s ease;
         }
+
         .upload-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
+            background: linear-gradient(90deg, #4338CA, #9333EA); /* Matches MoneyFund button hover */
+            transform: scale(1.02);
         }
+
         button {
             padding: 12px 20px;
-            background: #3B82F6;
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Matches MoneyFund button background */
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            color: #FFFFFF;
+            color: #F9FAFB; /* Matches MoneyFund button text color */
             font-weight: 500;
             font-size: 1em;
             transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
+
         button:hover {
-            background: #2563EB;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            background: linear-gradient(90deg, #4338CA, #9333EA); /* Matches MoneyFund button hover */
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Adjusted to match MoneyFund hover shadow */
         }
+
         button:disabled {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(75, 85, 99, 0.6); /* Matches MoneyFund disabled button */
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
+
         .typing-indicator {
             color: #A3BFFA;
             font-style: italic;
             font-size: 0.9em;
             margin-bottom: 5px;
         }
+
         .group-chat-modal {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(17, 24, 39, 0.95); /* Matches MoneyFund panel background */
             padding: 20px;
             border-radius: 8px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); /* Matches MoneyFund panel shadow */
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund panel border */
             z-index: 1000;
             width: 90%;
             max-width: 500px;
@@ -337,54 +385,63 @@
             flex-direction: column;
             color: #E8ECEF;
         }
+
         .group-chat-modal .user-list {
             max-height: 200px;
             overflow-y: auto;
             margin: 10px 0;
             padding: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund border */
             border-radius: 6px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
         }
+
         .group-chat-modal .user-list label {
             display: block;
             margin: 5px 0;
             color: #E8ECEF;
         }
+
         .group-chat-modal button {
             margin-top: 10px;
             margin-right: 10px;
         }
+
         .group-chat-modal .button-container {
             display: flex;
             justify-content: flex-end;
         }
+
         .group-chat-modal .search-container {
             position: relative;
             display: flex;
             align-items: center;
             margin-bottom: 10px;
         }
+
         .group-chat-modal #group-search-bar {
             padding: 8px;
             border-radius: 6px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund input border */
             font-size: 0.95em;
             box-sizing: border-box;
             width: 100%;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund input background */
             color: #E8ECEF;
-            transition: border-color 0.3s ease, background 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         .group-chat-modal #group-search-bar:hover, .group-chat-modal #group-search-bar:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
+            border-color: rgba(99, 102, 241, 0.4); /* Matches MoneyFund input hover */
+            box-shadow: 0 0 6px rgba(99, 102, 241, 0.3); /* Matches MoneyFund input hover */
             outline: none;
         }
+
         .group-chat-modal #group-search-bar::placeholder {
-            color: #A3BFFA;
-            opacity: 0.7;
+            color: #9CA3AF; /* Matches MoneyFund placeholder color */
+            opacity: 1;
         }
+
         .group-chat-modal #clear-group-search {
             position: absolute;
             right: 8px;
@@ -395,27 +452,31 @@
             color: #A3BFFA;
             display: none;
         }
+
         .group-chat-modal #clear-group-search:hover {
             color: #E8ECEF;
         }
+
         .conversation-item {
             padding: 12px 15px;
             margin: 8px 0;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
             border-radius: 8px;
             box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund border */
             cursor: pointer;
             transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
             display: flex;
             align-items: center;
             color: #E8ECEF;
         }
+
         .conversation-item:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.1); /* Matches MoneyFund hover */
+            transform: scale(1.05); /* Matches MoneyFund tile hover */
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2); /* Matches MoneyFund tile hover */
         }
+
         .conversation-item .avatar {
             width: 36px;
             height: 36px;
@@ -424,103 +485,124 @@
             align-items: center;
             justify-content: center;
             margin-right: 12px;
-            color: #FFFFFF;
+            color: #F9FAFB; /* Matches MoneyFund button text color */
             font-weight: 600;
             font-size: 0.9em;
-            background: #3B82F6;
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Matches MoneyFund button background */
         }
+
         .conversation-item .contact-name {
             flex-grow: 1;
             font-size: 1em;
             font-weight: 500;
         }
+
         .conversation-item .unread {
-            background: #3B82F6;
-            color: #FFFFFF;
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Matches MoneyFund button background */
+            color: #F9FAFB; /* Matches MoneyFund button text color */
             padding: 3px 8px;
             border-radius: 12px;
             font-size: 0.8em;
         }
+
         .conversation-item .group-indicator {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(17, 24, 39, 0.9); /* Matches MoneyFund panel background */
             color: #E8ECEF;
             padding: 3px 8px;
             border-radius: 12px;
             font-size: 0.8em;
             margin-right: 8px;
         }
+
         .conversation-item .edit-contact {
             margin-left: 8px;
             padding: 4px 8px;
-            background: #3B82F6;
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Matches MoneyFund button background */
             border-radius: 4px;
             font-size: 0.8em;
             cursor: pointer;
+            color: #F9FAFB; /* Matches MoneyFund button text color */
             transition: background 0.3s ease, transform 0.2s ease;
         }
+
         .conversation-item .edit-contact:hover {
-            background: #2563EB;
-            transform: translateY(-1px);
+            background: linear-gradient(90deg, #4338CA, #9333EA); /* Matches MoneyFund button hover */
+            transform: scale(1.02);
         }
+
         @media (max-width: 767px) {
             body {
                 padding: 10px;
             }
+
             #dm-container {
                 height: 600px;
                 flex-direction: column;
             }
+
             #conversations-list {
                 width: 100%;
                 height: 30%;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                border-bottom: 1px solid rgba(99, 102, 241, 0.2); /* Matches MoneyFund border */
                 border-right: none;
             }
+
             #chat-area {
                 width: 100%;
                 height: 70%;
             }
+
             #chat-header {
                 font-size: 0.95em;
                 padding-bottom: 8px;
             }
+
             .conversation-item {
                 padding: 10px;
                 margin: 8px 0;
                 font-size: 0.9em;
             }
+
             .conversation-item .avatar {
                 width: 30px;
                 height: 30px;
                 font-size: 0.8em;
             }
+
             .conversation-item .unread {
                 padding: 2px 6px;
                 font-size: 0.7em;
             }
+
             #messages {
                 padding: 10px;
                 font-size: 0.9em;
             }
+
             .message {
                 padding: 8px;
                 max-width: 80%;
             }
+
             input[type="text"] {
                 padding: 10px;
                 font-size: 0.9em;
             }
+
             button {
                 padding: 10px 16px;
                 font-size: 0.9em;
             }
+
             #search-bar {
                 width: 100%;
             }
+
             .group-chat-modal {
                 width: 95%;
                 max-height: 70vh;
             }
+
             .group-chat-modal .user-list {
                 max-height: 150px;
             }
