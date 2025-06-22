@@ -940,7 +940,7 @@
         </div>
         <div class="tab-content" id="launchStaking">
             <h3>Launch Staking</h3>
-            <iframe class="preview-window" src="https://moneyfund.com/staking"></iframe>
+            <iframe class="preview-window" src="https://moneyfund.com/stake"></iframe>
             <button id="launchStakingBtn">Launch Staking</button>
         </div>
         <div class="tab-content" id="dividends">
