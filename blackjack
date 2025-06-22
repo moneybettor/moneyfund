@@ -11,6 +11,9 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         body {
@@ -23,20 +26,32 @@
             padding: 20px;
             position: relative;
             overflow-x: hidden;
-            background: #0D1321;
+            background: linear-gradient(135deg, #0A0C1E, #1F2A44); /* Wallets background */
             color: #F8FAFC;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E');
+            z-index: -1;
         }
 
         #game-container {
             width: 100%;
             max-width: 800px;
             padding: 20px;
-            background: rgba(30, 41, 59, 0.85);
+            background: rgba(17, 24, 39, 0.95); /* Wallets container background */
             border-radius: 10px;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Wallets border */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); /* Wallets shadow */
+            color: #F8FAFC;
             position: relative;
             z-index: 1;
             margin-bottom: 20px;
@@ -46,12 +61,13 @@
             width: 100%;
             max-width: 800px;
             padding: 20px;
-            background: rgba(30, 41, 59, 0.85);
+            background: rgba(17, 24, 39, 0.95); /* Wallets container background */
             border-radius: 10px;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Wallets border */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); /* Wallets shadow */
+            color: #F8FAFC;
             position: relative;
             z-index: 1;
         }
@@ -69,31 +85,39 @@
             z-index: 1;
         }
 
-        #wallet-selector, #connectMetaMaskBtn {
+        #wallet-selector, #leaderboard-selector {
             padding: 10px;
             margin: 5px;
             border-radius: 5px;
             font-size: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05); /* Wallets tab background */
+            color: #F8FAFC;
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Wallets border */
+            transition: all 0.3s ease;
+        }
+
+        #wallet-selector:hover, #leaderboard-selector:hover {
+            background: rgba(255, 255, 255, 0.1); /* Wallets tab hover */
         }
 
         #connectMetaMaskBtn {
-            background-color: #4B5EAA;
-            color: white;
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Wallets button gradient */
+            color: #F8FAFB;
             border: none;
             cursor: pointer;
             padding: 5px 10px;
             font-size: 8px;
+            border-radius: 5px;
+            transition: background 0.3s, transform 0.2s;
         }
 
         #connectMetaMaskBtn:hover {
-            background-color: #334C8C;
+            background: linear-gradient(90deg, #4338CA, #9333EA); /* Wallets button hover */
+            transform: scale(1.02);
         }
 
         h1, h2 {
-            color: white;
+            color: #FFFFFF;
             text-align: center;
             margin-bottom: 10px;
             z-index: 1;
@@ -138,16 +162,23 @@
             margin: 0 10px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #1976d2;
-            color: white;
+            background: linear-gradient(90deg, #4F46E5, #A855F7); /* Wallets button gradient */
+            color: #F8FAFB;
             border: none;
             border-radius: 5px;
             z-index: 1;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #4338CA, #9333EA); /* Wallets button hover */
+            transform: scale(1.02);
         }
 
         button:disabled {
-            background-color: #666;
+            background: rgba(75, 85, 99, 0.6); /* Wallets disabled button */
             cursor: not-allowed;
+            transform: none;
         }
 
         input[type="number"] {
@@ -155,10 +186,22 @@
             font-size: 16px;
             margin: 0 10px;
             border-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Wallets border */
+            background: rgba(17, 24, 39, 0.9); /* Wallets input background */
+            color: #F8FAFC;
             z-index: 1;
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="number"]:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 6px rgba(99, 102, 241, 0.3);
+        }
+
+        input[type="number"]:focus {
+            border-color: #6366F1;
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+            outline: none;
         }
 
         #message {
@@ -176,21 +219,23 @@
             margin-top: 20px;
             font-size: 14px;
             z-index: 1;
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Wallets border */
+            background: rgba(17, 24, 39, 0.9); /* Wallets background */
         }
 
         .log-entry {
             padding: 8px;
             margin: 5px 0;
             border-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Wallets border */
         }
 
         .log-entry.win {
-            color: #00ff00;
+            color: #10B981; /* Wallets success color */
         }
 
         .log-entry.loss {
-            color: #ff0000;
+            color: #F87171; /* Wallets error color */
         }
 
         #leaderboards {
@@ -200,19 +245,9 @@
             z-index: 1;
         }
 
-        #leaderboard-selector {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            margin-bottom: 10px;
-        }
-
         #leaderboard-table {
             width: 100%;
-            color: white;
+            color: #F8FAFC;
             font-size: 14px;
             border-collapse: collapse;
         }
@@ -220,15 +255,15 @@
         #leaderboard-table th, #leaderboard-table td {
             padding: 8px;
             text-align: left;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.2); /* Wallets border */
         }
 
         #leaderboard-table th {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05); /* Wallets tab background */
         }
 
         #leaderboard-table tr:nth-child(even) {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.05); /* Wallets table row background */
         }
     </style>
 </head>
