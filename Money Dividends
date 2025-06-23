@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+    <title>MoneyFund Dividends</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0A0C1E, #1F2A44);
+            color: #E5E7EB;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 24px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E');
+            z-index: -1;
+        }
+
+        h1 {
+            color: #FFFFFF;
+            margin-bottom: 24px;
+            font-size: 2.4rem;
+            font-weight: 700;
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .wallet-container {
+            display: flex;
+            gap: 16px;
+            max-width: 900px;
+            width: 100%;
+            margin-bottom: 24px;
+        }
+
+        .wallet-container select,
+        .wallet-container button {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .section {
+            background: rgba(31, 41, 55, 0.6);
+            padding: 32.29px;
+            margin-bottom: 21.53px;
+            border-radius: 14.35px;
+            backdrop-filter: blur(14.35px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 5.382px 17.94px rgba(0, 0, 0, 0.2);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .section h2 {
+            margin: 0 auto 14.35px;
+            color: #FFFFFF;
+            font-size: 1.6164rem;
+            border-bottom: 2px solid #6366F1;
+            padding-bottom: 7.18px;
+            display: inline-block;
+        }
+
+        button {
+            padding: 10.76px 12.56px;
+            margin: 3.588px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.8611rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, #4F46E5, #A855F7);
+            color: #F9FAFB;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #4338CA, #9333EA);
+            transform: scale(1.03);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        button:disabled {
+            background: rgba(75, 85, 99, 0.6);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button i {
+            margin-right: 3.588px;
+        }
+
+        #connectMetaMaskBtn {
+            font-size: 0.95rem;
+            padding: 12px;
+            background: #4B5EAA;
+        }
+
+        #connectMetaMaskBtn:hover {
+            background: #3B4A8C;
+            transform: scale(1.02);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 5.382px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
+            font-size: 0.8611rem;
+            text-align: center;
+            transition: border 0.3s, box-shadow 0.3s, background 0.3s;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        input:hover, select:hover {
+            background: rgba(17, 24, 39, 0.95);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+        }
+
+        input:focus, select:focus, button:focus {
+            border-color: #6366F1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.0);
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #9CA3;
+            opacity: 0.8;
+        }
+
+        .info-container {
+            display: flex;
+            justify-content: center;
+            gap: 32.29px;
+            margin-top: 14.35px;
+        }
+
+        .info-half {
+            flex: 1;
+            background: rgba(17, 24, 39, 0.9);
+            padding: 21.53px;
+            border-radius: 5.382px;
+            font-size: 0.9688rem;
+            line-height: 1.5;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            text-align: center;
+            max-width: 900px;
+        }
+
+        .info-half hr {
+            border: 0;
+            border-top: 1px solid rgba(99, 102, 241, 0.15);
+            margin: 7.18px auto;
+            width: 80%;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8.97px;
+            flex-wrap: nowrap;
+            justify-content: center;
+            margin: 14.35px 0;
+        }
+
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            gap: 14.35px;
+            justify-content: center;
+            align-items: center;
+            background: rgba(17, 24, 39, 0.9);
+            padding: 14.35px;
+            border-radius: 8.97px;
+        }
+
+        #connectionPopup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(16px);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.25);
+            display: none;
+            z-index: 1001;
+            color: #E5E7EB;
+            width: 90%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        #connectionPopup h3 {
+            margin: 12px 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #FFFFFF;
+        }
+
+        #connectionPopup p {
+            margin: 8px 0;
+            font-size: 0.9rem;
+            color: #D1D5DB;
+        }
+
+        #connectionPopup .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(99, 102, 241, 0.2);
+            border-top: 4px solid #6366F1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        #connectionPopup .checkmark {
+            display: none;
+            width: 48px;
+            height: 48px;
+            background: #10B981;
+            border-radius: 50%;
+            color: #FFFFFF;
+            font-size: 28px;
+            line-height: 48px;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #connectionPopup .close-btn {
+            display: none;
+            margin-top: 16px;
+            padding: 12px;
+            background: linear-gradient(90deg, #4F46E5, #A855F7);
+            border: none;
+            border-radius: 10px;
+            color: #F9FAFB;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        #connectionPopup .close-btn:hover {
+            background: linear-gradient(90deg, #4338CA, #9333EA);
+            transform: scale(1.02);
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                padding: 16px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            .wallet-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .section {
+                padding: 21.53px;
+            }
+            button, input, select {
+                padding: 10.76px;
+                font-size: 0.8611rem;
+            }
+            .info-container {
+                flex-direction: column;
+                gap: 14.35px;
+            }
+            #connectionPopup {
+                width: 90%;
+                font-size: 0.8rem;
+                padding: 16px;
+            }
+            .button-group {
+                flex-wrap: wrap;
+                gap: 7.18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>MoneyFund Dividends</h1>
+    <div class="wallet-container">
+        <button id="connectMetaMaskBtn"><i class="fas fa-wallet"></i> Connect MetaMask</button>
+        <select id="walletSelector" onchange="selectWallet(this.value)" aria-label="Select wallet">
+            <option value="">-- Select Wallet --</option>
+        </select>
+    </div>
+    <div id="connectionPopup">
+        <div class="spinner" id="connectionSpinner"></div>
+        <div class="checkmark" id="connectionCheckmark">✓</div>
+        <h3 id="connectionStatusMessage">Processing...</h3>
+        <p id="connectionAddress" style="display: none;"></p>
+        <button class="close-btn" id="closeConnectionPopupBtn">Close</button>
+    </div>
+    <div id="overlay"></div>
+    <div class="section">
+        <h2>Actions</h2>
+        <div class="action-group">
+            <input type="number" id="stakeAmount" placeholder="Amount to stake (MONEY)" step="0.000000000000000001" aria-label="Amount to stake">
+            <div class="button-group">
+                <button id="stakeButton"><i class="fas fa-plus-circle"></i> Stake</button>
+                <button id="unstakeButton"><i class="fas fa-minus-circle"></i> Unstake</button>
+                <button id="claimRewardsButton"><i class="fas fa-coins"></i> Claim</button>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Information</h2>
+        <div class="info-container">
+            <div class="info-half" id="stakeInfo">Connect wallet to see your info.</div>
+            <div class="info-half" id="poolInfo">Connect wallet to see pool info.</div>
+        </div>
+    </div>
+
+    <script>
+        function loadEthers() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js";
+                script.async = true;
+                script.onload = () => resolve(window.ethers);
+                script.onerror = () => {
+                    const fallback = document.createElement("script");
+                    fallback.src = "https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js";
+                    fallback.async = true;
+                    fallback.onload = () => resolve(window.ethers);
+                    fallback.onerror = () => reject(new Error("Both CDNs failed to load ethers.js"));
+                    document.head.appendChild(fallback);
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        (async () => {
+            const ethers = await loadEthers();
+            if (!ethers) throw new Error("ethers.js not loaded");
+
+            const CONTRACT_ADDRESS = "0x9759883ea07e2ca1e2d32e97f42d254841616ab5";
+            const MONEY_ADDRESS = "0x100DB67F41A2dF3c32cC7c0955694b98339B7311";
+            const ABI = [
+                {
+                    "inputs": [{"internalType": "address", "name": "token", "type": "address"}],
+                    "name": "addTokenToList",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "claimRewards",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {"internalType": "address", "name": "token", "type": "address"},
+                        {"internalType": "uint256", "name": "amount", "type": "uint256"}
+                    ],
+                    "name": "depositERC20",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "address[]", "name": "tokens", "type": "address[]"}],
+                    "name": "receiveMultipleTokens",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {"indexed": true, "internalType": "address", "name": "sender", "type": "address"},
+                        {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"}
+                    ],
+                    "name": "EthDeposited",
+                    "type": "event"
+                },
+                {
+                    "inputs": [{"internalType": "address", "name": "token", "type": "address"}],
+                    "name": "receiveTokens",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+                        {"indexed": false, "internalType": "uint256", "name": "ethAmount", "type": "uint256"},
+                        {"indexed": false, "internalType": "address[]", "name": "tokens", "type": "address[]"},
+                        {"indexed": false, "internalType": "uint256[]", "name": "amounts", "type": "uint256[]"}
+                    ],
+                    "name": "RewardsClaimed",
+                    "type": "event"
+                },
+                {
+                    "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
+                    "name": "stake",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+                        {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"}
+                    ],
+                    "name": "Staked",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [{"indexed": false, "internalType": "address[]", "name": "tokens", "type": "address[]"}],
+                    "name": "TokenListUpdated",
+                    "type": "event"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {"indexed": true, "internalType": "address", "name": "token", "type": "address"},
+                        {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"}
+                    ],
+                    "name": "TokensDeposited",
+                    "type": "event"
+                },
+                {
+                    "inputs": [],
+                    "name": "unstake",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "anonymous": false,
+                    "inputs": [
+                        {"indexed": true, "internalType": "address", "name": "user", "type": "address"},
+                        {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"},
+                        {"indexed": false, "internalType": "uint256", "name": "penalty", "type": "uint256"}
+                    ],
+                    "name": "Unstaked",
+                    "type": "event"
+                },
+                {
+                    "stateMutability": "payable",
+                    "type": "receive"
+                },
+                {
+                    "inputs": [],
+                    "name": "CLAIM_COOLDOWN",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "EARLY_WITHDRAWAL_PENALTY",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {"internalType": "address", "name": "user", "type": "address"},
+                        {"internalType": "address", "name": "token", "type": "address"}
+                    ],
+                    "name": "getAccumulatedTokenReward",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+                    "name": "getNextClaimTime",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "getPoolEthBalance",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "address", "name": "token", "type": "address"}],
+                    "name": "getPoolTokenBalance",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+                    "name": "getStakeInfo",
+                    "outputs": [
+                        {"internalType": "uint256", "name": "amount", "type": "uint256"},
+                        {"internalType": "uint256", "name": "stakeTime", "type": "uint256"},
+                        {"internalType": "uint256", "name": "accumulatedEth", "type": "uint256"}
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "getStakers",
+                    "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "getTokenList",
+                    "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+                    "name": "isTokenTracked",
+                    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+                    "name": "lastClaimTime",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "lastUpdateTime",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "MIN_STAKE_PERIOD",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "MONEY",
+                    "outputs": [{"internalType": "contract IERC20", "name": "", "type": "address"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+                    "name": "stakerIndex",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "name": "stakers",
+                    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+                    "name": "stakes",
+                    "outputs": [
+                        {"internalType": "uint256", "name": "amount", "type": "uint256"},
+                        {"internalType": "uint256", "name": "stakeTime", "type": "uint256"},
+                        {"internalType": "uint256", "name": "accumulatedEth", "type": "uint256"}
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "name": "tokenList",
+                    "outputs": [{"internalType": "address", "name": "", "type": "address"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "TOTAL_SUPPLY",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "totalEthDistributed",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "totalStaked",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                }
+            ];
+
+            const ERC20_ABI = [
+                {
+                    "inputs": [
+                        {"internalType": "address", "name": "spender", "type": "address"},
+                        {"internalType": "uint256", "name": "amount", "type": "uint256"}
+                    ],
+                    "name": "approve",
+                    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+                    "name": "balanceOf",
+                    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "decimals",
+                    "outputs": [{"name": "", "type": "uint8"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [
+                        {"name": "owner", "type": "address"},
+                        {"name": "spender", "type": "address"}
+                    ],
+                    "name": "allowance",
+                    "outputs": [{"name": "", "type": "uint256"}],
+                    "stateMutability": "view",
+                    "type": "function"
+                }
+            ];
+
+            let provider, signer, contract, moneyContract, web3, userAccount;
+            let wallets = [];
+            let selectedWallet = null;
+
+            function showConnectionPopup(message) {
+                const popup = document.getElementById("connectionPopup");
+                const spinner = document.getElementById("connectionSpinner");
+                const checkmark = document.getElementById("connectionCheckmark");
+                const statusMessage = document.getElementById("connectionStatusMessage");
+                const addressDisplay = document.getElementById("connectionAddress");
+                const closeBtn = document.getElementById("closeConnectionPopupBtn");
+
+                spinner.style.display = "block";
+                checkmark.style.display = "none";
+                closeBtn.style.display = "none";
+                addressDisplay.style.display = "none";
+                statusMessage.textContent = message;
+
+                popup.style.display = "block";
+                document.getElementById("overlay").style.display = "block";
+            }
+
+            function updateConnectionPopup({ message, address, success = false }) {
+                const spinner = document.getElementById("connectionSpinner");
+                const checkmark = document.getElementById("connectionCheckmark");
+                const statusMessage = document.getElementById("connectionStatusMessage");
+                const addressDisplay = document.getElementById("connectionAddress");
+                const closeBtn = document.getElementById("closeConnectionPopupBtn");
+
+                statusMessage.textContent = message;
+                if (address) {
+                    addressDisplay.textContent = `Address: ${address.slice(0, 6)}...${address.slice(-4)}`;
+                    addressDisplay.style.display = "block";
+                }
+                if (success) {
+                    spinner.style.display = "none";
+                    checkmark.style.display = "block";
+                    closeBtn.style.display = "block";
+                    setTimeout(() => {
+                        popup.style.opacity = "0";
+                        setTimeout(() => {
+                            popup.style.display = "none";
+                            document.getElementById("overlay").style.display = "none";
+                        }, 300);
+                    }, 3000);
+                }
+            }
+
+            function hideConnectionPopup() {
+                const popup = document.getElementById("connectionPopup");
+                popup.style.opacity = "0";
+                setTimeout(() => {
+                    popup.style.display = "none";
+                    document.getElementById("overlay").style.display = "none";
+                }, 300);
+            }
+
+            async function initializeWallets() {
+                web3 = new Web3(web3 ? web3.currentProvider : "https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+
+                if (window.ethereum && userAccount) {
+                    const metamaskWallet = { address: userAccount, type: 'MetaMask', isMetaMask: true };
+                    if (!wallets.some(w => w.address === metamaskWallet.address)) {
+                        wallets.push(metamaskWallet);
+                    }
+                }
+
+                wallets = wallets.map(wallet => {
+                    if (wallet.type === 'moneyfund' && wallet.privateKey) {
+                        return { ...wallet, isMetaMask: false };
+                    }
+                    return wallet;
+                });
+
+                localStorage.setItem('wallets', JSON.stringify(wallets));
+
+                const walletSelector = document.getElementById('walletSelector');
+                walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+                wallets.forEach((wallet, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${wallet.type}: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+                    walletSelector.appendChild(option);
+                });
+
+                const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex')) || 0;
+                if (wallets.length > 0 && selectedIndex >= 0 && selectedIndex < wallets.length) {
+                    selectedWallet = wallets[selectedIndex];
+                    walletSelector.value = selectedIndex;
+                    userAccount = selectedWallet.address;
+                    await selectWallet(selectedIndex);
+                    updateStatus();
+                } else if (wallets.length > 0) {
+                    selectedWallet = wallets[0];
+                    localStorage.setItem('selectedWalletIndex', 0);
+                    walletSelector.value = 0;
+                    userAccount = selectedWallet.address;
+                    await selectWallet(0);
+                    updateStatus();
+                } else {
+                    // Auto-generate MoneyFund wallet if none exists
+                    await createMoneyFundWallet();
+                }
+            }
+
+            async function selectWallet(index) {
+                const idx = parseInt(index);
+                if (idx >= 0 && idx < wallets.length) {
+                    selectedWallet = wallets[idx];
+                    localStorage.setItem('selectedWalletIndex', idx);
+                    userAccount = selectedWallet.address;
+                    updateStatus();
+                    if (selectedWallet.isMetaMask && window.ethereum) {
+                        provider = new ethers.providers.Web3Provider(window.ethereum);
+                        signer = provider.getSigner();
+                        contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+                        moneyContract = new ethers.Contract(MONEY_ADDRESS, ERC20_ABI, signer);
+                    } else {
+                        provider = new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                        const wallet = new ethers.Wallet(selectedWallet.privateKey, provider);
+                        signer = wallet;
+                        contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, wallet);
+                        moneyContract = new ethers.Contract(MONEY_ADDRESS, ERC20_ABI, wallet);
+                    }
+                    updateInfo();
+                    updatePoolInfo();
+                } else {
+                    selectedWallet = null;
+                    userAccount = null;
+                    contract = null;
+                    moneyContract = null;
+                    updateStatus();
+                }
+            }
+
+            async function connectMetaMask() {
+                if (!window.ethereum) {
+                    showConnectionPopup("Please install MetaMask!");
+                    return;
+                }
+                showConnectionPopup("Connecting MetaMask...");
+                try {
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await window.ethereum.request({ method: "eth_requestAccounts" });
+                    const chainId = await provider.getNetwork().then(net => net.chainId);
+                    if (chainId !== 1) throw new Error("Please switch to Ethereum Mainnet (Chain ID: 1)");
+                    signer = provider.getSigner();
+                    userAccount = await signer.getAddress();
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+                    moneyContract = new ethers.Contract(MONEY_ADDRESS, ERC20_ABI, signer);
+                    await initializeWallets();
+                    updateConnectionPopup({ message: "MetaMask connected successfully", address: userAccount, success: true });
+                } catch (error) {
+                    updateConnectionPopup({ message: `Failed to connect: ${error.message}`, success: false });
+                }
+            }
+
+            async function createMoneyFundWallet() {
+                showConnectionPopup("Creating MoneyFund Wallet...");
+                try {
+                    web3 = new Web3("https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73");
+                    let wallet;
+                    let attempts = 0;
+                    while (true) {
+                        attempts++;
+                        wallet = web3.eth.accounts.create();
+                        if (wallet.address.startsWith('0x100')) break;
+                        if (attempts > 10000) throw new Error("Failed to generate vanity address after 10000 attempts");
+                    }
+                    const newWallet = { address: wallet.address, privateKey: wallet.privateKey, type: 'moneyfund', isMetaMask: false };
+                    wallets.push(newWallet);
+                    localStorage.setItem('wallets', JSON.stringify(wallets));
+                    selectedWallet = newWallet;
+                    userAccount = selectedWallet.address;
+                    await initializeWallets();
+                    updateConnectionPopup({ message: "MoneyFund Wallet created successfully", address: userAccount, success: true });
+                } catch (error) {
+                    updateConnectionPopup({ message: `Failed to create wallet: ${error.message}`, success: false });
+                }
+            }
+
+            function updateStatus() {
+                if (userAccount) {
+                    document.getElementById("connectMetaMaskBtn").innerHTML = selectedWallet.isMetaMask ? "MetaMask Connected" : "Connect MetaMask";
+                } else {
+                    document.getElementById("connectMetaMaskBtn").innerHTML = "Connect MetaMask";
+                }
+            }
+
+            async function executeTransaction(method, args = [], value = "0") {
+                if (!contract || !userAccount) {
+                    showConnectionPopup("Connect wallet first!");
+                    return;
+                }
+                try {
+                    const gasLimit = await contract.estimateGas[method](...args, { value });
+                    const gasPrice = await provider.getGasPrice();
+                    const txOptions = { gasLimit: gasLimit.mul(115).div(100), gasPrice, value };
+
+                    if (selectedWallet.isMetaMask) {
+                        const tx = await contract.connect(signer)[method](...args, txOptions);
+                        await tx.wait();
+                        return tx.hash;
+                    } else {
+                        const web3Contract = new web3.eth.Contract(ABI, CONTRACT_ADDRESS);
+                        const ethBalance = await web3.eth.getBalance(userAccount);
+                        if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
+                            throw new Error("Insufficient ETH for gas (need at least 0.0001 ETH)");
+                        }
+                        const txData = web3Contract.methods[method](...args).encodeABI();
+                        const tx = {
+                            from: userAccount,
+                            to: CONTRACT_ADDRESS,
+                            data: txData,
+                            gas: txOptions.gasLimit.toString(),
+                            gasPrice: txOptions.gasPrice.toString(),
+                            value: ethers.utils.hexlify(ethers.BigNumber.from(value))
+                        };
+                        const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+                        return receipt.transactionHash;
+                    }
+                } catch (error) {
+                    throw error;
+                }
+            }
+
+            async function approveAndExecute(method, tokenAddress, amountWei, args = [], value = "0") {
+                if (!contract) {
+                    showConnectionPopup("Connect wallet first!");
+                    return;
+                }
+                const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, selectedWallet.isMetaMask ? signer : new ethers.Wallet(selectedWallet.privateKey, provider));
+                const web3TokenContract = new web3.eth.Contract(ERC20_ABI, tokenAddress);
+                const allowance = await tokenContract.allowance(userAccount, CONTRACT_ADDRESS);
+
+                if (BigInt(allowance.toString()) < BigInt(amountWei.toString()) && !selectedWallet.isMetaMask) {
+                    const amountWithBuffer = amountWei.mul(110).div(100).toString();
+                    const ethBalance = await web3.eth.getBalance(userAccount);
+                    if (BigInt(ethBalance) < BigInt(web3.utils.toWei("0.0001", "ether"))) {
+                        throw new Error("Insufficient ETH for gas (need at least 0.0001 ETH)");
+                    }
+                    const txData = web3TokenContract.methods.approve(CONTRACT_ADDRESS, amountWithBuffer).encodeABI();
+                    const gasLimit = await web3TokenContract.methods.approve(CONTRACT_ADDRESS, amountWithBuffer).estimateGas({ from: userAccount });
+                    const tx = {
+                        from: userAccount,
+                        to: tokenAddress,
+                        data: txData,
+                        gas: Math.ceil(gasLimit * 1.15),
+                        gasPrice: await web3.eth.getGasPrice()
+                    };
+                    const signedTx = await web3.eth.accounts.signTransaction(tx, selectedWallet.privateKey);
+                    await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+                } else if (BigInt(allowance.toString()) < BigInt(amountWei.toString())) {
+                    const txApprove = await tokenContract.approve(CONTRACT_ADDRESS, amountWei);
+                    await txApprove.wait();
+                }
+
+                return await executeTransaction(method, args, value);
+            }
+
+            document.getElementById("stakeButton").addEventListener("click", async () => {
+                const amount = document.getElementById("stakeAmount").value;
+                if (!amount || amount <= 0) {
+                    showConnectionPopup("Enter a valid amount!");
+                    return;
+                }
+                showConnectionPopup("Staking MONEY...");
+                try {
+                    const amountWei = ethers.utils.parseEther(amount);
+                    const txHash = await approveAndExecute("stake", MONEY_ADDRESS, amountWei, [amountWei]);
+                    updateConnectionPopup({ message: "Staked successfully", address: userAccount, success: true });
+                    updateInfo();
+                } catch (error) {
+                    console.error(error);
+                    updateConnectionPopup({ message: `Stake failed: ${error.message}`, success: false });
+                }
+            });
+
+            document.getElementById("unstakeButton").addEventListener("click", async () => {
+                showConnectionPopup("Unstaking MONEY...");
+                try {
+                    const txHash = await executeTransaction("unstake");
+                    updateConnectionPopup({ message: "Unstaked successfully", address: userAccount, success: true });
+                    updateInfo();
+                } catch (error) {
+                    console.error(error);
+                    updateConnectionPopup({ message: `Unstake failed: ${error.message}`, success: false });
+                }
+            });
+
+            document.getElementById("claimRewardsButton").addEventListener("click", async () => {
+                showConnectionPopup("Claiming rewards...");
+                try {
+                    const txHash = await executeTransaction("claimRewards");
+                    updateConnectionPopup({ message: "Rewards claimed successfully", address: userAccount, success: true });
+                    updateInfo();
+                } catch (error) {
+                    console.error(error);
+                    updateConnectionPopup({ message: `Claim rewards failed: ${error.message}`, success: false });
+                }
+            });
+
+            async function updateInfo() {
+                if (!contract || !userAccount) return;
+                try {
+                    const [amount, stakeTime, accumulatedEth] = await contract.getStakeInfo(userAccount);
+                    const moneyBalance = await moneyContract.balanceOf(userAccount);
+                    const tokenList = await contract.getTokenList();
+                    let tokenRewards = "";
+                    for (const token of tokenList) {
+                        const reward = await contract.getAccumulatedTokenReward(userAccount, token);
+                        if (reward.gt(0)) {
+                            tokenRewards += `${token}: ${ethers.utils.formatEther(reward)}<br><hr>`;
+                        }
+                    }
+                    if (tokenRewards.endsWith("<hr>")) tokenRewards = tokenRewards.slice(0, -4);
+
+                    document.getElementById("stakeInfo").innerHTML = `
+                        Staked Amount: ${ethers.utils.formatEther(amount)} MONEY<br><hr>
+                        Stake Time: ${new Date(stakeTime * 1000).toLocaleString()}<br><hr>
+                        Accumulated ETH: ${ethers.utils.formatEther(accumulatedEth)} ETH<br><hr>
+                        MONEY Balance: ${ethers.utils.formatEther(moneyBalance)} MONEY<br><hr>
+                        Accumulated Token Rewards:<br>${tokenRewards || "None"}
+                    `;
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            async function updatePoolInfo() {
+                if (!contract) return;
+                try {
+                    const ethBalance = await contract.getPoolEthBalance();
+                    const totalStaked = await contract.totalStaked();
+                    const tokenList = await contract.getTokenList();
+                    let tokenBalances = "";
+                    for (const token of tokenList) {
+                        const balance = await contract.getPoolTokenBalance(token);
+                        tokenBalances += `${token}: ${ethers.utils.formatEther(balance)}<br><hr>`;
+                    }
+                    if (tokenBalances.endsWith("<hr>")) tokenBalances = tokenBalances.slice(0, -4);
+
+                    document.getElementById("poolInfo").innerHTML = `
+                        Pool ETH Balance: ${ethers.utils.formatEther(ethBalance)} ETH<br><hr>
+                        Total Staked: ${ethers.utils.formatEther(totalStaked)} MONEY<br><hr>
+                        Pool Token Balances:<br>${tokenBalances || "None"}
+                    `;
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            async function init() {
+                await initializeWallets();
+                document.getElementById("connectMetaMaskBtn").onclick = connectMetaMask;
+                document.getElementById("closeConnectionPopupBtn").onclick = hideConnectionPopup;
+
+                if (window.ethereum) {
+                    window.ethereum.on("accountsChanged", () => window.location.reload());
+                    window.ethereum.on("chainChanged", () => window.location.reload());
+                }
+            }
+
+            window.onload = init;
+        })();
+    </script>
+</body>
+</html>
