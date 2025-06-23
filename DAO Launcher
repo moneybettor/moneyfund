@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyFund DAO Launchpad</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #E5E7EB;
+            padding: 20px;
+            min-height: 100vh;
+            line-height: 1.5;
+            background: linear-gradient(135deg, #0A0C1E, #1F2A44);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E');
+            z-index: -1;
+        }
+
+        .flex-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .full-width-container {
+            flex: 1;
+            min-width: 0;
+            padding: 15px;
+            background: rgba(31, 41, 55, 0.6);
+            border-radius: 10px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .launch-dao-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        .bottom-bar {
+            max-width: 1200px;
+            margin: 15px auto;
+            background: rgba(31, 41, 55, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .bottom-bar-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 1200px;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #4F46E5, #A855F7);
+            color: #F9FAFB;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #4338CA, #9333EA);
+            transform: scale(1.03);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            transform: scale(1);
+            transition: transform 0.2s;
+        }
+
+        #connect-wallet-button, #launch-dao-button {
+            padding: 12px 20px;
+            margin: 5px;
+            font-size: 0.95rem;
+        }
+
+        .copy-button {
+            padding: 3px 6px;
+            font-size: 0.75rem;
+            background: #4B5EAA;
+            margin-left: 5px;
+        }
+
+        .copy-button:hover {
+            background: #3B4A8C;
+            transform: scale(1.02);
+        }
+
+        input, select {
+            padding: 8px;
+            margin: 3px 0;
+            width: 100%;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 6px;
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
+            font-size: 0.95rem;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        input:hover, select:hover {
+            background: rgba(17, 24, 39, 0.95);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        input::placeholder {
+            color: #9CA3AF;
+            opacity: 0.8;
+        }
+
+        select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23E5E7EB%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 8px auto;
+            padding-right: 25px;
+            max-width: 180px;
+        }
+
+        h2, h3 {
+            color: #FFFFFF;
+            text-align: center;
+            word-wrap: break-word;
+        }
+
+        h2 { font-size: 1.6em; margin-bottom: 8px; }
+        h3 { font-size: 1.2em; margin: 8px 0 6px; }
+
+        #walletAddress {
+            font-size: 0.85em;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.4;
+            color: #E5E7EB;
+            margin: 5px;
+        }
+
+        label {
+            color: #E5E7EB;
+            margin: 5px 0 2px;
+            display: block;
+            font-weight: 600;
+            text-align: left;
+            font-size: 0.85em;
+        }
+
+        .status-message, .error-message {
+            margin-top: 5px;
+            font-size: 0.8em;
+            text-align: center;
+            padding: 6px;
+            border-radius: 4px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .status-message { color: #10B981; }
+        .error-message { color: #F87171; }
+
+        #log {
+            margin-top: 5px;
+            max-height: 80px;
+            overflow-y: auto;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 8px;
+            font-size: 0.8em;
+            background: rgba(17, 24, 39, 0.9);
+            color: #E5E7EB;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        #dao-list {
+            margin-top: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 8px;
+            background: rgba(17, 24, 39, 0.85);
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            scrollbar-width: thin;
+            scrollbar-color: #6366F1 rgba(31, 41, 55, 0.5);
+        }
+
+        #dao-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #dao-list::-webkit-scrollbar-track {
+            background: rgba(31, 41, 55, 0.5);
+        }
+
+        #dao-list::-webkit-scrollbar-thumb {
+            background: #6366F1;
+            border-radius: 3px;
+        }
+
+        .dao-card {
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .dao-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .dao-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+            padding-bottom: 5px;
+        }
+
+        .dao-card-header h3 {
+            font-size: 1.1em;
+            margin: 0;
+            color: #FFFFFF;
+        }
+
+        .dao-card-header span {
+            font-size: 0.95em;
+            color: #6366F1;
+            font-weight: 600;
+        }
+
+        .dao-card-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+
+        .dao-card-details div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dao-card-details label {
+            font-weight: 600;
+            color: #9CA3AF;
+            margin-bottom: 1px;
+        }
+
+        .dao-card-details span {
+            color: #E5E7EB;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        @media (max-width: 768px) {
+            .flex-container {
+                flex-direction: column;
+            }
+            body { padding: 10px; }
+            .flex-container { gap: 10px; padding: 0 8px; }
+            .full-width-container { padding: 10px; }
+            .bottom-bar { padding: 10px; }
+            h2 { font-size: 1.3em; }
+            h3 { font-size: 1.1em; }
+            button { font-size: 0.9em; }
+            input, select { font-size: 0.9em; padding: 6px; }
+            #connect-wallet-button, #launch-dao-button { padding: 8px 16px; }
+            #walletAddress { font-size: 0.8em; }
+            .bottom-bar-content {
+                flex-direction: column;
+                gap: 6px;
+                align-items: flex-start;
+                justify-content: flex-start;
+            }
+            #log { max-width: 100%; }
+            .dao-card-details {
+                grid-template-columns: 1fr;
+            }
+            .dao-card {
+                padding: 8px;
+            }
+            .dao-card-header h3 {
+                font-size: 1em;
+            }
+            .dao-card-header span {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .full-width-container { flex: 1; min-width: 45%; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 5px; -webkit-text-size-adjust: 100%; }
+            .flex-container { padding: 0 5px; }
+            .full-width-container { padding: 8px; }
+            .bottom-bar { padding: 8px; }
+            h2 { font-size: 1.2em; }
+            h3 { font-size: 1em; }
+            button { padding: 6px 10px; font-size: 0.85em; }
+            input, select { padding: 5px; font-size: 0.85em; }
+            #connect-wallet-button, #launch-dao-button { padding: 6px 12px; }
+            #walletAddress { font-size: 0.75em; }
+            .dao-card {
+                padding: 6px;
+            }
+            .dao-card-header h3 {
+                font-size: 0.95em;
+            }
+            .dao-card-header span {
+                font-size: 0.85em;
+            }
+            .dao-card-details {
+                font-size: 0.75em;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .flex-container { padding: 0 10px; }
+            h2 { font-size: 1.5em; }
+            h3 { font-size: 1.2em; }
+            #connect-wallet-button, #launch-dao-button {
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="flex-container">
+        <div class="full-width-container">
+            <h2>Deploy a DAO</h2>
+            <label for="token-address">Token Address:</label>
+            <input id="token-address" type="text" placeholder="e.g., 0xToken" />
+            <label for="total-supply">Total Supply:</label>
+            <input id="total-supply" type="number" placeholder="e.g., 1000000" min="1" />
+            <label for="voting-period">Voting Period (days):</label>
+            <input id="voting-period" type="number" placeholder="e.g., 1" min="1" step="1" />
+            <label for="count-non-responders">Non-Responders Vote Yes:</label>
+            <select id="count-non-responders">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select>
+            <div class="launch-dao-container">
+                <button id="launch-dao-button" onclick="createDAO()">Deploy DAO</button>
+            </div>
+            <p id="create-status" class="status-message"></p>
+            <p id="create-error" class="error-message"></p>
+        </div>
+
+        <div class="full-width-container">
+            <h2>All DAOs</h2>
+            <div id="dao-list">
+                <div id="dao-card-container"></div>
+            </div>
+            <p id="dao-status" class="status-message"></p>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="bottom-bar-content">
+            <button id="connect-wallet-button" onclick="connectWallet()">Connect Wallet</button>
+            <select id="wallet-selector" onchange="selectWallet(this.value)">
+                <option value="">-- Select Wallet --</option>
+            </select>
+            <p id="walletAddress">Wallet Address: Not connected</p>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // Contract address (Ethereum Mainnet)
+        const FACTORY_ADDRESS = "0x4529a19CE3Dd34C878c98AA84d51c8667c665E83";
+
+        // Hardcoded RPC configuration for Ethereum Mainnet
+        const RPC_ENDPOINTS = [
+            'https://ethereum-rpc.publicnode.com',
+            'https://rpc.eth.api.onfinality.io/public',
+            'https://cloudflare-eth.com',
+            'https://eth-mainnet.rpcfast.com'
+        ];
+        let currentRpcIndex = 0;
+
+        // DAOFactory ABI
+        const daoFactoryAbi = [
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "daoAddress",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    }
+                ],
+                "name": "DAOCreated",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "bytes",
+                        "name": "reason",
+                        "type": "bytes"
+                    }
+                ],
+                "name": "DAOInitializationFailed",
+                "type": "event"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_token",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_totalSupply",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_votingPeriod",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "_countNonRespondersAsYes",
+                        "type": "bool"
+                    }
+                ],
+                "name": "createDAO",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "daos",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_token",
+                        "type": "address"
+                    }
+                ],
+                "name": "getDAO",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        // DAO ABI
+        const daoAbi = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_token",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_totalSupply",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_votingPeriod",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "_countNonRespondersAsYes",
+                        "type": "bool"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    }
+                ],
+                "name": "SafeERC20FailedOperation",
+                "type": "error"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "recipient",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "tokenAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "reason",
+                        "type": "string"
+                    }
+                ],
+                "name": "FeeCollected",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "uint256",
+                        "name": "proposalId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "proposer",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "description",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "enum DAO.ProposalType",
+                        "name": "proposalType",
+                        "type": "uint8"
+                    }
+                ],
+                "name": "ProposalCreated",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "uint256",
+                        "name": "proposalId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "passed",
+                        "type": "bool"
+                    }
+                ],
+                "name": "ProposalExecuted",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "uint256",
+                        "name": "proposalId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "voter",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "vote",
+                        "type": "bool"
+                    }
+                ],
+                "name": "Voted",
+                "type": "event"
+            },
+            {
+                "inputs": [],
+                "name": "PROPOSAL_COOLDOWN",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "TREASURY",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "WITHDRAWAL_FEE_AMOUNT",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "countNonRespondersAsYes",
+                "outputs": [
+                    {
+                        "internalType": "bool",
+                        "name": "",
+                        "type": "bool"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "description",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "enum DAO.ProposalType",
+                        "name": "proposalType",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "destination",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "tokenAddress",
+                        "type": "address"
+                    }
+                ],
+                "name": "createProposal",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "proposalId",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "executeProposal",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getDAOInfo",
+                "outputs": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "address",
+                                "name": "tokenAddress",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "totalSupply",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "ethBalance",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "tokenBalance",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "proposalCount",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "activeProposals",
+                                "type": "uint256"
+                            },
+                            {
+                                "components": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "proposer",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "string",
+                                        "name": "description",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "internalType": "enum DAO.ProposalType",
+                                        "name": "proposalType",
+                                        "type": "uint8"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "destination",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "tokenAddress",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "yesVotes",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "startTime",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "bool",
+                                        "name": "executed",
+                                        "type": "bool"
+                                    }
+                                ],
+                                "internalType": "struct DAO.Proposal[]",
+                                "name": "proposals",
+                                "type": "tuple[]"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "proposalCountPerDay",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "lastProposalTime",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "votingPeriod",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "nonResponseYes",
+                                "type": "bool"
+                            }
+                        ],
+                        "internalType": "struct DAO.DAOInfo",
+                        "name": "",
+                        "type": "tuple"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "voter",
+                        "type": "address"
+                    }
+                ],
+                "name": "getVotingWeight",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "hasVoted",
+                "outputs": [
+                    {
+                        "internalType": "bool",
+                        "name": "",
+                        "type": "bool"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "lastProposalTime",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "proposalCount",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "proposalCountPerDay",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "proposals",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "proposer",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "description",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "enum DAO.ProposalType",
+                        "name": "proposalType",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "destination",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "tokenAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "yesVotes",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "startTime",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "executed",
+                        "type": "bool"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "token",
+                "outputs": [
+                    {
+                        "internalType": "contract IERC20",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "totalSupply",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "proposalId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "support",
+                        "type": "bool"
+                    }
+                ],
+                "name": "vote",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "votingPeriod",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "stateMutability": "payable",
+                "type": "receive"
+            }
+        ];
+
+        // Minimal ERC20 ABI for fetching name and symbol
+        const tokenAbi = [
+            {
+                "inputs": [],
+                "name": "name",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "symbol",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        function getWeb3(useMetaMask = false) {
+            if (useMetaMask && window.ethereum) {
+                logMessage("Using MetaMask as Web3 provider");
+                return new Web3(window.ethereum);
+            }
+            const provider = new Web3.providers.HttpProvider(RPC_ENDPOINTS[currentRpcIndex], { timeout: 5000 });
+            logMessage(`Using RPC endpoint: ${RPC_ENDPOINTS[currentRpcIndex]}`);
+            return new Web3(provider);
+        }
+
+        let web3 = getWeb3();
+        let userAccount = null;
+        let signer = null;
+        let selectedWallet = null;
+        let wallets = [];
+
+        async function switchRpc() {
+            currentRpcIndex = (currentRpcIndex + 1) % RPC_ENDPOINTS.length;
+            web3 = getWeb3();
+            logMessage(`Switched to RPC: ${RPC_ENDPOINTS[currentRpcIndex]}`);
+        }
+
+        async function checkNetwork() {
+            try {
+                await web3.eth.net.isListening();
+                logMessage(`RPC endpoint ${RPC_ENDPOINTS[currentRpcIndex]} is listening`);
+                const chainId = await web3.eth.getChainId();
+                if (chainId !== 1) {
+                    throw new Error(`Incorrect network! Expected Ethereum Mainnet (chainId 1), got chainId ${chainId}.`);
+                }
+                logMessage(`Connected to Ethereum Mainnet (chainId 1)`);
+            } catch (error) {
+                logMessage(`Network check failed: ${error.message}. Switching RPC...`);
+                await switchRpc();
+                throw error;
+            }
+        }
+
+        async function withRetry(fn, maxRetries = 4, delayMs = 2000) {
+            let lastError = null;
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    await checkNetwork();
+                    return await fn();
+                } catch (error) {
+                    lastError = error;
+                    logMessage(`Attempt ${attempt}/${maxRetries} with RPC ${RPC_ENDPOINTS[currentRpcIndex]} failed: ${error.message || 'Unknown error'}`);
+                    if (attempt < maxRetries) {
+                        await switchRpc();
+                        await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, attempt - 1)));
+                    }
+                }
+            }
+            if (window.ethereum && selectedWallet && selectedWallet.isMetaMask) {
+                try {
+                    logMessage(`Falling back to MetaMask provider after ${maxRetries} failed attempts`);
+                    web3 = getWeb3(true);
+                    await checkNetwork();
+                    return await fn();
+                } catch (error) {
+                    lastError = error;
+                    logMessage(`MetaMask fallback failed: ${error.message || 'Unknown error'}`);
+                }
+            }
+            const errorMessage = `Operation failed after ${maxRetries} attempts${window.ethereum ? ' and MetaMask fallback' : ''}: ${lastError.message || 'Unknown error'}`;
+            logMessage(errorMessage);
+            throw new Error(errorMessage);
+        }
+
+        function logMessage(message) {
+            console.log(message);
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('p');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    logMessage("Please install MetaMask to use this feature.");
+                    document.getElementById("create-error").innerText = "Please install MetaMask to use this feature.";
+                    document.getElementById("create-error").className = "error-message";
+                    return;
+                }
+                logMessage("Requesting MetaMask accounts...");
+                web3 = getWeb3(true);
+                const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                if (!accounts || accounts.length === 0) {
+                    throw new Error("No accounts returned by MetaMask");
+                }
+                userAccount = accounts[0];
+                logMessage(`MetaMask account fetched: ${userAccount}`);
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
+                document.getElementById("create-status").innerText = "Wallet connected successfully!";
+                document.getElementById("create-status").className = "status-message";
+                await initializeWallets();
+                await refreshDAOs();
+            } catch (error) {
+                logMessage(`Wallet connection error: ${error.message}`);
+                document.getElementById("create-error").innerText = `Failed to connect wallet: ${error.message}`;
+                document.getElementById("create-error").className = "error-message";
+            }
+        }
+
+        async function initializeWallets() {
+            try {
+                logMessage("Initializing wallets...");
+                wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+                if (window.ethereum && userAccount) {
+                    const metamaskWallet = { address: userAccount, type: 'MetaMask', isMetaMask: true };
+                    if (!wallets.some(w => w.address.toLowerCase() === metamaskWallet.address.toLowerCase() && w.type === 'MetaMask')) {
+                        wallets = wallets.filter(w => w.type !== 'MetaMask');
+                        wallets.push(metamaskWallet);
+                    }
+                }
+                wallets = wallets.map(wallet => {
+                    if (wallet.type === 'MoneyFund' && wallet.privateKey) {
+                        return { ...wallet, isMetaMask: false };
+                    }
+                    return wallet;
+                });
+                localStorage.setItem('wallets', JSON.stringify(wallets));
+                const walletSelector = document.getElementById('wallet-selector');
+                walletSelector.innerHTML = '<option value="">-- Select Wallet --</option>';
+                wallets.forEach((wallet, index) => {
+                    if (wallet.address) {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = `${wallet.type}: ${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`;
+                        walletSelector.appendChild(option);
+                    } else {
+                        logMessage(`Invalid wallet at index ${index}: missing address`);
+                    }
+                });
+                const selectedIndex = parseInt(localStorage.getItem('selectedWalletIndex'));
+                logMessage(`Stored selectedWalletIndex: ${selectedIndex}`);
+                if (wallets.length > 0 && !isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < wallets.length) {
+                    selectedWallet = wallets[selectedIndex];
+                    userAccount = selectedWallet.address;
+                    walletSelector.value = selectedIndex;
+                    document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
+                    if (selectedWallet.isMetaMask && window.ethereum) {
+                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        if (!accounts || accounts.length === 0 || accounts[0].toLowerCase() !== selectedWallet.address.toLowerCase()) {
+                            logMessage("MetaMask selected but not connected. Requesting connection.");
+                            await connectWallet();
+                        } else {
+                            signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+                            logMessage("MetaMask wallet synced");
+                        }
+                    } else {
+                        web3 = getWeb3();
+                        signer = null;
+                        logMessage("MoneyFund wallet selected");
+                    }
+                    logMessage(`Selected wallet: ${userAccount}`);
+                    await refreshDAOs();
+                } else {
+                    selectedWallet = null;
+                    userAccount = null;
+                    walletSelector.value = "";
+                    document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                    logMessage("No valid wallet selected");
+                }
+            } catch (error) {
+                logMessage(`Wallet initialization error: ${error.message}`);
+                document.getElementById("walletAddress").innerText = "Wallet Address: Error loading wallets";
+            }
+        }
+
+        function selectWallet(index) {
+            try {
+                const idx = parseInt(index);
+                document.getElementById("create-status").innerText = "";
+                document.getElementById("create-error").innerText = "";
+                if (idx >= 0 && idx < wallets.length && wallets[idx].address) {
+                    selectedWallet = wallets[idx];
+                    localStorage.setItem('selectedWalletIndex', idx);
+                    userAccount = selectedWallet.address;
+                    document.getElementById("walletAddress").innerText = `Wallet Address: ${userAccount}`;
+                    if (selectedWallet.isMetaMask) {
+                        if (window.ethereum) {
+                            web3 = getWeb3(true);
+                            const accounts = window.ethereum.request({ method: 'eth_accounts' });
+                            if (!accounts || accounts.length === 0) {
+                                logMessage("MetaMask not connected. Triggering connect.");
+                                connectWallet();
+                            } else {
+                                signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+                                logMessage("MetaMask wallet selected and synced");
+                            }
+                        } else {
+                            logMessage("MetaMask extension not detected.");
+                            document.getElementById("create-error").innerText = "MetaMask extension not detected.";
+                            document.getElementById("create-error").className = "error-message";
+                            selectedWallet = null;
+                            userAccount = null;
+                            document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                            document.getElementById('wallet-selector').value = "";
+                            localStorage.removeItem('selectedWalletIndex');
+                        }
+                    } else {
+                        web3 = getWeb3();
+                        signer = null;
+                        logMessage("MoneyFund wallet selected");
+                    }
+                    logMessage(`Selected wallet: ${userAccount}`);
+                    refreshDAOs();
+                } else {
+                    selectedWallet = null;
+                    userAccount = null;
+                    signer = null;
+                    localStorage.removeItem('selectedWalletIndex');
+                    document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                    document.getElementById('wallet-selector').value = "";
+                    web3 = getWeb3();
+                    logMessage("Invalid wallet selection");
+                }
+            } catch (error) {
+                logMessage(`Wallet selection error: ${error.message}`);
+                document.getElementById("create-error").innerText = `Failed to select wallet: ${error.message}`;
+                document.getElementById("create-error").className = "error-message";
+            }
+        }
+
+        async function getGasPrice() {
+            return await withRetry(async () => {
+                const baseGasPrice = BigInt(await web3.eth.getGasPrice());
+                const baseGasPriceGwei = Number(web3.utils.fromWei(baseGasPrice.toString(), 'gwei'));
+                const adjustedGasPriceGwei = Math.max(1, baseGasPriceGwei * 1.25);
+                return web3.utils.toWei(adjustedGasPriceGwei.toFixed(0), 'gwei');
+            });
+        }
+
+        async function createDAO() {
+            try {
+                logMessage(`Signer: ${signer ? 'OK' : 'NULL'}, Web3: ${!!web3}, Account: ${userAccount}`);
+                logMessage("createDAO function triggered");
+                const status = document.getElementById("create-status");
+                const error = document.getElementById("create-error");
+                status.innerText = "Initiating DAO creation...";
+                status.className = "status-message";
+                error.innerText = "";
+                error.className = "error-message";
+
+                if (!selectedWallet || !userAccount) {
+                    logMessage("No wallet selected or connected");
+                    error.innerText = "Please connect and select a wallet first.";
+                    status.innerText = "";
+                    return;
+                }
+                logMessage(`Wallet connected: ${userAccount}`);
+
+                const tokenAddress = document.getElementById("token-address").value.trim();
+                const totalSupply = document.getElementById("total-supply").value.trim();
+                const votingPeriodDays = document.getElementById("voting-period").value.trim();
+                const countNonRespondersAsYes = document.getElementById("count-non-responders").value === "true";
+
+                logMessage(`Inputs: token=${tokenAddress}, totalSupply=${totalSupply}, votingPeriod=${votingPeriodDays} days, countNonRespondersAsYes=${countNonRespondersAsYes}`);
+
+                if (!tokenAddress || !totalSupply || !votingPeriodDays) {
+                    logMessage("Missing input fields");
+                    error.innerText = "Please fill in all fields.";
+                    status.innerText = "";
+                    return;
+                }
+
+                if (!web3.utils.isAddress(tokenAddress)) {
+                    logMessage(`Invalid token address: ${tokenAddress}`);
+                    error.innerText = `Invalid token address: ${tokenAddress}`;
+                    status.innerText = "";
+                    return;
+                }
+
+                const totalSupplyNum = parseInt(totalSupply);
+                if (isNaN(totalSupplyNum) || totalSupplyNum <= 0) {
+                    logMessage("Invalid total supply");
+                    error.innerText = "Total supply must be a positive number.";
+                    status.innerText = "";
+                    return;
+                }
+
+                const votingPeriodNum = parseInt(votingPeriodDays);
+                if (isNaN(votingPeriodNum) || votingPeriodNum <= 0) {
+                    logMessage("Invalid voting period");
+                    error.innerText = "Voting period must be a positive number of days.";
+                    status.innerText = "";
+                    return;
+                }
+
+                const votingPeriodSeconds = votingPeriodNum * 24 * 60 * 60;
+
+                status.innerText = "Preparing to deploy DAO...";
+                logMessage("Creating factory contract instance");
+                const factory = new web3.eth.Contract(daoFactoryAbi, FACTORY_ADDRESS);
+
+                let gasEstimate;
+                try {
+                    logMessage("Estimating gas");
+                    gasEstimate = await withRetry(() =>
+                        factory.methods.createDAO(tokenAddress, totalSupplyNum, votingPeriodSeconds, countNonRespondersAsYes).estimateGas({ from: userAccount })
+                    );
+                    gasEstimate = Math.ceil(Number(gasEstimate) * 1.2);
+                    logMessage(`Estimated gas limit: ${gasEstimate}`);
+                } catch (err) {
+                    gasEstimate = 1000000;
+                    logMessage(`Gas estimation failed, using default ${gasEstimate}: ${err.message}`);
+                }
+
+                const gasPrice = await getGasPrice();
+                logMessage(`Gas price: ${web3.utils.fromWei(gasPrice, 'gwei')} Gwei`);
+
+                status.innerText = selectedWallet.isMetaMask ? "Deploying DAO... Please confirm in MetaMask." : "Deploying DAO... Signing with MoneyFund wallet.";
+                logMessage("Initiating transaction");
+
+                let tx;
+                if (selectedWallet.isMetaMask) {
+                    logMessage("Using MetaMask for transaction");
+                    if (!signer && window.ethereum) {
+                        const provider = new ethers.providers.Web3Provider(window.ethereum);
+                        signer = provider.getSigner();
+                        logMessage("Initialized signer from MetaMask provider");
+                    }
+                    if (!signer) {
+                        throw new Error("MetaMask signer not available");
+                    }
+                    const factoryEthers = new ethers.Contract(FACTORY_ADDRESS, daoFactoryAbi, signer);
+                    tx = await factoryEthers.createDAO(tokenAddress, totalSupplyNum, votingPeriodSeconds, countNonRespondersAsYes, {
+                        gasLimit: gasEstimate,
+                        gasPrice: gasPrice
+                    });
+                    logMessage("Waiting for transaction confirmation");
+                    await tx.wait();
+                } else {
+                    logMessage("Using MoneyFund wallet for transaction");
+                    const txData = factory.methods.createDAO(tokenAddress, totalSupplyNum, votingPeriodSeconds, countNonRespondersAsYes).encodeABI();
+                    const nonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
+                    const transactionObject = {
+                        from: userAccount,
+                        to: FACTORY_ADDRESS,
+                        data: txData,
+                        gas: gasEstimate,
+                        gasPrice: gasPrice,
+                        nonce: nonce
+                    };
+                    const signedTx = await web3.eth.accounts.signTransaction(transactionObject, selectedWallet.privateKey);
+                    tx = await withRetry(() => web3.eth.sendSignedTransaction(signedTx.rawTransaction));
+                    logMessage("Transaction sent and confirmed");
+                }
+
+                const daoAddress = tx.logs.find(log => {
+                    try {
+                        const iface = new ethers.utils.Interface(daoFactoryAbi);
+                        const parsedLog = iface.parseLog(log);
+                        return parsedLog.name === 'DAOCreated';
+                    } catch (e) {
+                        return false;
+                    }
+                })?.args.daoAddress;
+
+                if (!web3.utils.isAddress(daoAddress)) {
+                    throw new Error("Invalid DAO address received.");
+                }
+
+                const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
+                let tokenName = "Unknown";
+                let tokenSymbol = "UNK";
+                try {
+                    tokenName = await withRetry(() => tokenContract.methods.name().call());
+                    tokenSymbol = await withRetry(() => tokenContract.methods.symbol().call());
+                } catch (error) {
+                    logMessage(`Failed to fetch token name/symbol for ${tokenAddress}: ${error.message}`);
+                }
+
+                status.innerText = `DAO for ${tokenName} (${tokenSymbol}) deployed at: ${daoAddress}! Tx: ${tx.transactionHash || tx.hash}`;
+                logMessage(`DAO for ${tokenName} (${tokenSymbol}) deployed at: ${daoAddress}: ${tx.transactionHash || tx.hash}`);
+                await refreshDAOs();
+            } catch (err) {
+                logMessage(`DAO creation failed: ${err.message}`);
+                document.getElementById("create-error").innerText = `DAO creation failed: ${err.message}`;
+                document.getElementById("create-error").className = "error-message";
+                document.getElementById("create-status").innerText = "";
+                alert(`Failed to create DAO: ${err.message}. Check the console and log for details.`);
+            }
+        }
+
+        async function refreshDAOs() {
+            const statusMessage = document.getElementById("dao-status");
+            statusMessage.innerText = "Loading DAOs...";
+            statusMessage.className = "status-message";
+
+            try {
+                const factory = new web3.eth.Contract(daoFactoryAbi, FACTORY_ADDRESS);
+                const cardContainer = document.getElementById("dao-card-container");
+                cardContainer.innerHTML = "";
+
+                const tokenAddresses = [];
+                const storedTokens = JSON.parse(localStorage.getItem('knownTokens') || '[]');
+                tokenAddresses.push(...storedTokens);
+
+                if (tokenAddresses.length === 0) {
+                    cardContainer.innerHTML = '<p style="text-align: center; color: #E5E7EB;">No DAOs found. Deploy one or add token addresses.</p>';
+                    statusMessage.innerText = "No DAOs available.";
+                    statusMessage.className = "status-message";
+                    return;
+                }
+
+                const daos = [];
+                for (const token of tokenAddresses) {
+                    try {
+                        const daoAddress = await withRetry(() => factory.methods.getDAO(token).call());
+                        if (daoAddress !== "0x0000000000000000000000000000000000000000") {
+                            const daoContract = new web3.eth.Contract(daoAbi, daoAddress);
+                            const daoInfo = await withRetry(() => daoContract.methods.getDAOInfo().call());
+                            const tokenContract = new web3.eth.Contract(tokenAbi, token);
+                            let tokenName = "Unknown";
+                            let tokenSymbol = "UNK";
+                            try {
+                                tokenName = await withRetry(() => tokenContract.methods.name().call());
+                                tokenSymbol = await withRetry(() => tokenContract.methods.symbol().call());
+                            } catch (error) {
+                                logMessage(`Failed to fetch token name/symbol for ${token}: ${error.message}`);
+                            }
+                            daos.push({ daoAddress, token, tokenName, tokenSymbol, daoInfo });
+                        }
+                    } catch (error) {
+                        logMessage(`Failed to fetch DAO for token ${token}: ${error.message}`);
+                    }
+                }
+
+                if (daos.length === 0) {
+                    cardContainer.innerHTML = '<p style="text-align: center; color: #E5E7EB;">No DAOs found.</p>';
+                    statusMessage.innerText = "No DAOs available.";
+                    statusMessage.className = "status-message";
+                    return;
+                }
+
+                for (const dao of daos) {
+                    const { daoAddress, token, tokenName, tokenSymbol, daoInfo } = dao;
+                    const ethBalance = web3.utils.fromWei(daoInfo.ethBalance, 'ether');
+                    const tokenBalance = daoInfo.tokenBalance ? web3.utils.fromWei(daoInfo.tokenBalance, 'ether') : '0';
+                    const votingPeriodDays = (Number(daoInfo.votingPeriod) / (24 * 60 * 60)).toFixed(2);
+                    const lastProposalTime = daoInfo.lastProposalTime > 0 ? new Date(Number(daoInfo.lastProposalTime) * 1000).toLocaleDateString() : "None";
+
+                    const card = document.createElement("div");
+                    card.className = "dao-card";
+                    card.innerHTML = `
+                        <div class="dao-card-header">
+                            <h3>${tokenName}</h3>
+                            <span>${tokenSymbol}</span>
+                        </div>
+                        <div class="dao-card-details">
+                            <div>
+                                <label>DAO Address</label>
+                                <span>${daoAddress.slice(0, 6)}...${daoAddress.slice(-4)}</span>
+                            </div>
+                            <div>
+                                <label>Address</label>
+                                <span>${token.slice(0, 6)}...${token.slice(-4)}</span>
+                            </div>
+                            <div>
+                                <label>Total Supply</label>
+                                <span>${Number(daoInfo.totalSupply).toLocaleString()}</span>
+                            </div>
+                            <div>
+                                <label>ETH Balance</label>
+                                <span>${Number(ethBalance).toFixed(4)} ETH</span>
+                            </div>
+                            <div>
+                                <label>Token Balance</label>
+                                <span>${Number(tokenBalance).toFixed(4)}</span>
+                            </div>
+                            <div>
+                                <label>Voting Period</label>
+                                <span>${votingPeriodDays} days</span>
+                            </div>
+                            <div>
+                                <label>Non-Responders Vote Yes</label>
+                                <span>${daoInfo.nonResponseYes ? "Yes" : "No"}</span>
+                            </div>
+                            <div>
+                                <label>Proposal Count</label>
+                                <span>${daoInfo.proposalCount}</span>
+                            </div>
+                            <div>
+                                <label>Active Proposals</label>
+                                <span>${daoInfo.activeProposals}</span>
+                            </div>
+                            <div>
+                                <label>Proposals Per Day</label>
+                                <span>${daoInfo.proposalCountPerDay}</span>
+                            </div>
+                            <div>
+                                <label>Last Proposal</label>
+                                <span>${lastProposalTime}</span>
+                            </div>
+                        </div>
+                    `;
+                    cardContainer.appendChild(card);
+                }
+
+                statusMessage.innerText = `Loaded ${daos.length} DAOs successfully!`;
+                statusMessage.className = "status-message";
+                localStorage.setItem('knownTokens', JSON.stringify(tokenAddresses));
+            } catch (error) {
+                console.log("Refresh DAOs error details:", error);
+                logMessage(`Failed to load DAOs: ${error.message}`);
+                statusMessage.innerText = `Failed to load DAOs: ${error.message}. Try refreshing the page.`;
+                statusMessage.className = "error-message";
+            }
+        }
+
+        window.addEventListener('load', async () => {
+            await initializeWallets();
+            const launchButton = document.getElementById('launch-dao-button');
+            launchButton.addEventListener('click', () => {
+                logMessage("Deploy DAO button clicked");
+                createDAO();
+            });
+        });
+
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', async (accounts) => {
+                if (accounts.length === 0) {
+                    selectedWallet = null;
+                    userAccount = null;
+                    signer = null;
+                    document.getElementById("walletAddress").innerText = "Wallet Address: Not connected";
+                    document.getElementById('wallet-selector').value = "";
+                    localStorage.removeItem('selectedWalletIndex');
+                    logMessage("MetaMask disconnected.");
+                } else if (selectedWallet && selectedWallet.isMetaMask && accounts[0].toLowerCase() !== selectedWallet.address.toLowerCase()) {
+                    logMessage("MetaMask account changed. Reconnecting...");
+                    await connectWallet();
+                }
+            });
+
+            window.ethereum.on('chainChanged', () => {
+                logMessage("Network changed. Reloading...");
+                window.location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
