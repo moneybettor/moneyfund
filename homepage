@@ -160,7 +160,7 @@
         .contract-item {
             display: flex;
             align-items: center;
-            padding: 6px 0;
+            padding: 4.8px 0; /* Reduced from 6px to fit 9 items */
             border-bottom: 1px solid var(--description-color);
             transition: background 0.3s ease;
         }
@@ -774,7 +774,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, box-shadow edeffect: transform 0.3s ease;
             max-width: 100%;
         }
 
@@ -930,7 +930,7 @@
         .fund-fee-row {
             display: flex;
             align-items: center;
-            justify-content:: center;
+            justify-content: center;
             gap: 12px;
             margin-bottom: 3.6px;
             max-width: 100%;
@@ -1108,7 +1108,7 @@
             padding: 4.8px;
             margin: 2.4px;
             text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2px 2.4px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1250,23 +1250,23 @@
             padding: 4.8px;
             margin: 2.4px;
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2.4px 4.8px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease;
             max-width: 100%;
         }
 
         .launch-main-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .launch-main-box i {
             font-size: 12px;
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 4px;
         }
 
         .launch-input-box {
@@ -1291,7 +1291,7 @@
             box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
         }
 
-        .launch-staking-box {
+        .launch-stacking-box {
             background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
             border: 1px solid #16a34a;
             border-radius: 4.8px;
@@ -1308,12 +1308,12 @@
             max-width: 100%;
         }
 
-        .launch-staking-box:hover {
+        .launch-stacking-box:hover {
             transform: scale(1.08);
             box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
         }
 
-        .launch-staking-box i {
+        .launch-stacking-box i {
             font-size: 12px;
             color: #000000;
             margin-right: 4.8px;
@@ -1521,23 +1521,23 @@
             padding: 4.8px;
             margin: 2.4px;
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2.2px 4.8px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease;
             max-width: 100%;
         }
 
         .dex-reward-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .dex-reward-box i {
             font-size: 12px;
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 4px;
         }
 
         .dex-dao-box {
@@ -1549,23 +1549,23 @@
             padding: 4.8px;
             margin: 2.4px;
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 muffled 2.4px 4.8px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease;
             max-width: 100%;
         }
 
         .dex-dao-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0.2);
         }
 
         .dex-dao-box i {
             font-size: 12px;
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 4px;
         }
 
         .dex-arrow {
@@ -1916,7 +1916,7 @@
             .contract-item {
                 flex-direction: column;
                 align-items: flex-start;
-                padding: 6px 0;
+                padding: 4.8px 0; /* Maintain reduced padding */
             }
 
             .contract-title {
@@ -1996,9 +1996,9 @@
             .fund-box i, .fund-main-box i, .fund-staking-box i, .fund-burn-box i,
             .fund-shane-box i, .fund-custom-box i,
             .dao-box i, .dao-main-box i, .dao-voting-box i, .dao-execution-box i,
-            .launch-box i, .launch-main-box i, .launch-staking-box i, .launch-dao-box i,
+            .launch-box i, .launch-main-box i, .launch-stacking-box i, .launch-dao-box i,
             .dex-box i, .dex-main-box i, .dex-reward-box i, .dex-dao-box i,
-            .airdrop-box i, .airdrop-main-box i, .airdrop-staking-box i, .airdrop-dao-box i {
+            .airdrop-box i, .airdrop-main-box i, .airdrop-stacking-box i, .airdrop-dao-box i {
                 font-size: 9.6px;
                 margin-right: 3.6px;
             }
@@ -2064,10 +2064,10 @@
                             <a href="https://etherscan.io/address/0x9759883ea07e2cA1E2d32E97f42d254841616AB5" class="contract-address" target="_blank">0x9759883ea07e2cA1E2d32E97f42d254841616AB5</a>
                         </div>
                     </div>
-                    <span class="contract-arrow">→</span>
+                                        <span class="contract-arrow">→</span>
                     <div class="contract-description">Earn dividends by staking MONEY</div>
                 </div>
-                               <div class="contract-item">
+                <div class="contract-item">
                     <div class="contract-left">
                         <span class="contract-icon"><i class="fas fa-vote-yea"></i></span>
                         <div class="contract-details">
@@ -2083,7 +2083,7 @@
                         <span class="contract-icon"><i class="fas fa-rocket"></i></span>
                         <div class="contract-details">
                             <div class="contract-title">Fund Launcher</div>
-                            <a href="https://etherscan.io/address/0xA4a107C5B8dE797c32ae701ffE2b306Cb9044BA6" class="contract-address" target="_blank">0xA4a107C5B8dE797c32ae701ffE2b306Cb9044BA6</a>
+                            <a href="https://etherscan.io/address/0xd846D1a576776a70412b473d2479362953e4C5d5" class="contract-address" target="_blank">0xd846D1a576776a70412b473d2479362953e4C5d5</a>
                         </div>
                     </div>
                     <span class="contract-arrow">→</span>
@@ -2094,7 +2094,7 @@
                         <span class="contract-icon"><i class="fas fa-coins"></i></span>
                         <div class="contract-details">
                             <div class="contract-title">Coin Launcher</div>
-                            <a href="https://etherscan.io/address/0x3962895A933aa0B1613aED997901e601B2CC0821" class="contract-address" target="_blank">0x3962895A933aa0B1613aED997901e601B2CC0821</a>
+                            <a href="https://etherscan.io/address/0x4529a19CE3Dd34C878c98AA84d51c8667c665E83" class="contract-address" target="_blank">0x4529a19CE3Dd34C878c98AA84d51c8667c665E83</a>
                         </div>
                     </div>
                     <span class="contract-arrow">→</span>
@@ -2110,6 +2110,28 @@
                     </div>
                     <span class="contract-arrow">→</span>
                     <div class="contract-description">Saves over 40% on gas.</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-lock"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">Dividend Launcher</div>
+                            <a href="https://etherscan.io/address/0xd846D1a576776a70412b473d2479362953e4C5d5" class="contract-address" target="_blank">0xd846D1a576776a70412b473d2479362953e4C5d5</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Create custom staking pools</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-vote-yea"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">DAO Launcher</div>
+                            <a href="https://etherscan.io/address/0x4529a19CE3Dd34C878c98AA84d51c8667c665E83" class="contract-address" target="_blank">0x4529a19CE3Dd34C878c98AA84d51c8667c665E83</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Deploy custom DAOs</div>
                 </div>
                 <div class="contract-item">
                     <div class="contract-left">
