@@ -17,9 +17,9 @@
         html[data-theme="dark"] {
             --bg-start: #0A0C1E;
             --bg-end: #1F2A44;
-            --card-bg: rgba(44, 62, 80, 0.9); /* Lighter than main background */
+            --card-bg: rgba(44, 62, 80, 0.9);
             --list-bg: rgba(31, 41, 55, 0.6);
-            --text-color: #f3f4f6; /* Light gray for readability on darker card background */
+            --text-color: #f3f4f6;
             --header-color: #ffffff;
             --shadow-color: rgba(0, 0, 0, 0.3);
             --description-color: #a0b3d6;
@@ -28,9 +28,9 @@
         html[data-theme="light"] {
             --bg-start: #0A0C1E;
             --bg-end: #1F2A44;
-            --card-bg: rgba(229, 231, 235, 0.9); /* Lighter gray for light theme */
+            --card-bg: rgba(229, 231, 235, 0.9);
             --list-bg: rgba(31, 41, 55, 0.6);
-            --text-color: #1f2937; /* Dark gray for readability on lighter card background */
+            --text-color: #1f2937;
             --header-color: #ffffff;
             --shadow-color: rgba(0, 0, 0, 0.1);
             --description-color: #4a4a4a;
@@ -82,12 +82,12 @@
 
         .card.intro {
             grid-column: 1 / -1;
-            min-height: 200px;
+            min-height: 150px; /* Reduced by 25% from 200px */
             padding: 10px;
         }
 
         .card.contracts, .card.stats {
-            min-height: 550px;
+            min-height: 412.5px; /* Reduced by 25% from 550px */
         }
 
         .card:hover {
@@ -139,7 +139,7 @@
         /* Contract List Styles */
         .contract-list {
             width: 100%;
-            height: 500px;
+            height: 375px; /* Reduced by 25% from 500px */
             background: var(--list-bg);
             border-radius: 8px;
             box-shadow: 0 2px 10px var(--shadow-color);
@@ -160,7 +160,7 @@
         .contract-item {
             display: flex;
             align-items: center;
-            padding: 4.8px 0; /* Reduced from 6px to fit 9 items */
+            padding: 4.8px 0;
             border-bottom: 1px solid var(--description-color);
             transition: background 0.3s ease;
         }
@@ -247,7 +247,7 @@
         /* Stats Iframe Styles */
         .iframe-container {
             width: 100%;
-            height: 500px;
+            height: 375px; /* Reduced by 25% from 500px */
             background: var(--list-bg);
             border-radius: 8px;
             box-shadow: 0 2px 10px var(--shadow-color);
@@ -683,7 +683,7 @@
             font-style: italic;
         }
 
-        /* Fund Launcher Diagram Styles */
+        /* Fund Diagram Styles */
         .fund-diagram-container {
             width: 240px;
             padding: 9.6px;
@@ -774,7 +774,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease, box-shadow edeffect: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             max-width: 100%;
         }
 
@@ -1549,7 +1549,7 @@
             padding: 4.8px;
             margin: 2.4px;
             text-align: center;
-            box-shadow: 0 muffled 2.4px 4.8px rgba(0,0,0,0.1);
+            box-shadow: 0 2.4px 4.8px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1848,6 +1848,420 @@
             font-style: italic;
         }
 
+        /* Dividend Launcher Diagram Styles */
+        .dividend-diagram-container {
+            width: 240px;
+            padding: 9.6px;
+            text-align: center;
+            margin: 0 auto;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .dividend-diagram-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .dividend-title {
+            font-size: 14.4px;
+            font-weight: 700;
+            margin-bottom: 9.6px;
+            color: var(--header-color);
+        }
+
+        .dividend-box {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #1e3a8a;
+            border-radius: 4.8px;
+            padding: 4.8px;
+            margin: 2.4px;
+            width: 84px;
+            font-size: 9.6px;
+            text-align: center;
+            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dividend-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+        }
+
+        .dividend-box i {
+            font-size: 12px;
+            color: #000000;
+            margin-right: 4.8px;
+        }
+
+        .dividend-main-box {
+            background: linear-gradient(145deg, #fff3cc, #ffe082);
+            border: 1px solid #f97316;
+            border-radius: 4.8px;
+            width: 96px;
+            font-weight: bold;
+            font-size: 9.6px;
+            padding: 4.8px;
+            margin: 2.4px;
+            text-align: center;
+            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dividend-main-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+        }
+
+        .dividend-main-box i {
+            font-size: 12px;
+            color: #000000;
+            margin-right: 4.8px;
+        }
+
+        .dividend-input-box {
+            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+            border: 1px solid #3b82f6;
+            border-radius: 4.8px;
+            width: 60px;
+            font-size: 7.2px;
+            padding: 4.8px;
+            margin: 2.4px;
+            text-align: center;
+            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dividend-input-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+        }
+
+        .dividend-staking-box {
+            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+            border: 1px solid #16a34a;
+            border-radius: 4.8px;
+            width: 84px;
+            font-size: 9.6px;
+            padding: 4.8px;
+            margin: 2.4px;
+            text-align: center;
+            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dividend-staking-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+        }
+
+        .dividend-staking-box i {
+            font-size: 12px;
+            color: #000000;
+            margin-right: 4.8px;
+        }
+
+        .dividend-arrow {
+            font-size: 12px;
+            color: #60a5fa;
+            margin: 1.2px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .dividend-arrow:hover {
+            transform: translateY(2px);
+        }
+
+        .dividend-arrow-horizontal {
+            display: inline-block;
+            width: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #60a5fa;
+            transition: transform 0.3s ease;
+        }
+
+        .dividend-arrow-horizontal:hover {
+            transform: translateX(2px);
+        }
+
+        .dividend-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 3.6px;
+            max-width: 100%;
+        }
+
+        .dividend-input-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 228px;
+            margin: 0 auto 3.6px;
+        }
+
+        .dividend-fee-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 3.6px;
+            max-width: 100%;
+        }
+
+        .dividend-flow-label {
+            font-size: 7.2px;
+            color: var(--description-color);
+            margin-top: -2.4px;
+            font-style: italic;
+        }
+
+        .dividend-flow-label-horizontal {
+            font-size: 7.2px;
+            color: var(--description-color);
+            line-height: 1.2;
+            display: block;
+            margin-top: 1.2px;
+            font-style: italic;
+        }
+
+        /* DAO Launcher Diagram Styles */
+        .daol-diagram-container {
+            width: 240px;
+            padding: 9.6px;
+            text-align: center;
+            margin: 0 auto;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .daol-diagram-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .daol-title {
+            font-size: 14.4px;
+            font-weight: 700;
+            margin-bottom: 9.6px;
+            color: var(--header-color);
+        }
+
+        .daol-box {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #1e3a8a;
+            border-radius: 4.8px;
+            padding: 4.8px;
+            margin: 2.4px;
+            width: 84px;
+            font-size: 9.6px;
+            text-align: center;
+            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .daol-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+        }
+
+        .daol-box i {
+            font-size: 12px;
+            color: #000000;
+            margin-right: 4.8px;
+        }
+
+        .daol-main-box {
+            background: linear-gradient(145deg, #fff3cc, #ffe082);
+            border: 1px solid #f97316;
+            border-radius: 4.8px;
+            width: 96px;
+            font-weight: bold;
+            font-size: 9.6px;
+            padding: 4.8px;
+            margin: 2.4px;
+            text-align: center;
+            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .daol-main-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+        }
+
+        .daol-main-box i {
+            font-size: 12px;
+            color: #000000;
+            margin-right: 4.8px;
+        }
+
+        .daol-input-box {
+            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+            border: 1px solid #3b82f6;
+            border-radius: 4.8px;
+            width: 60px;
+            font-size: 7.2px;
+            padding: 4.8px;
+            margin: 2.4px;
+            text-align: center;
+            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .daol-input-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+        }
+
+        .daol-voting-box {
+            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+            border: 1px solid #3b82f6;
+            border-radius: 4.8px;
+            width: 84px;
+            font-size: 9.6px;
+            padding: 4.8px;
+            margin: 2.4px;
+            text-align: center;
+            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+       .daol-voting-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+        }
+
+        .daol-voting-box i {
+            font-size: 12px;
+            color: #000000;
+            margin-right: 4.8px;
+        }
+
+        .daol-execution-box {
+            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+            border: 1px solid #16a34a;
+            border-radius: 4.8px;
+            width: 84px;
+            font-size: 9.6px;
+            padding: 4.8px;
+            margin: 2.4px;
+            text-align: center;
+            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .daol-execution-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+        }
+
+        .daol-execution-box i {
+            font-size: 12px;
+            color: #000000;
+            margin-right: 4.8px;
+        }
+
+        .daol-arrow {
+            font-size: 12px;
+            color: #60a5fa;
+            margin: 1.2px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .daol-arrow:hover {
+            transform: translateY(2px);
+        }
+
+        .daol-arrow-horizontal {
+            display: inline-block;
+            width: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #60a5fa;
+            transition: transform 0.3s ease;
+        }
+
+        .daol-arrow-horizontal:hover {
+            transform: translateX(2px);
+        }
+
+        .daol-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 3.6px;
+            max-width: 100%;
+        }
+
+        .daol-voting-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 3.6px;
+            max-width: 100%;
+        }
+
+        .daol-input-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 228px;
+            margin: 0 auto 3.6px;
+        }
+
+        .daol-flow-label {
+            font-size: 7.2px;
+            color: var(--description-color);
+            margin-top: -2.4px;
+            font-style: italic;
+        }
+
+        .daol-flow-label-horizontal {
+            font-size: 7.2px;
+            color: var(--description-color);
+            line-height: 1.2;
+            display: block;
+            margin-top: 1.2px;
+            font-style: italic;
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .container {
@@ -1898,7 +2312,7 @@
 
             .diagram-container, .dao-diagram-container, .fund-diagram-container,
             .usdm-diagram-container, .launch-diagram-container, .dex-diagram-container,
-            .airdrop-diagram-container {
+            .airdrop-diagram-container, .dividend-diagram-container, .daol-diagram-container {
                 width: 100%;
                 padding: 0;
             }
@@ -1906,7 +2320,7 @@
 
         @media (max-width: 1080px) {
             .contract-list, .iframe-container {
-                height: 400px;
+                height: 300px; /* Reduced by 25% from 400px */
             }
 
             .contract-list h1, .iframe-header {
@@ -1916,7 +2330,7 @@
             .contract-item {
                 flex-direction: column;
                 align-items: flex-start;
-                padding: 4.8px 0; /* Maintain reduced padding */
+                padding: 4.8px 0;
             }
 
             .contract-title {
@@ -1951,7 +2365,7 @@
         @media (max-width: 300px) {
             .usdm-diagram-container, .diagram-container, .fund-diagram-container,
             .dao-diagram-container, .launch-diagram-container, .dex-diagram-container,
-            .airdrop-diagram-container {
+            .airdrop-diagram-container, .dividend-diagram-container, .daol-diagram-container {
                 width: 100%;
                 padding: 4.8px;
             }
@@ -1960,34 +2374,38 @@
             .box, .pool-box, .fund-box, .fund-main-box, .fund-staking-box,
             .fund-burn-box, .fund-shane-box, .fund-custom-box,
             .dao-box, .dao-main-box, .dao-voting-box, .dao-execution-box,
-            .launch-box, .launch-main-box, .launch-staking-box, .launch-dao-box,
+            .launch-box, .launch-main-box, .launch-stacking-box, .launch-dao-box,
             .dex-box, .dex-main-box, .dex-reward-box, .dex-dao-box,
-            .airdrop-box, .airdrop-main-box, .airdrop-staking-box, .airdrop-dao-box {
+            .airdrop-box, .airdrop-main-box, .airdrop-staking-box, .airdrop-dao-box,
+            .dividend-box, .dividend-main-box, .dividend-staking-box,
+            .daol-box, .daol-main-box, .daol-voting-box, .daol-execution-box {
                 width: 72px;
                 font-size: 8.4px;
                 padding: 3.6px;
             }
 
             .usdm-input-box, .fund-input-box, .dao-input-box, .launch-input-box,
-            .dex-input-box, .airdrop-input-box {
+            .dex-input-box, .airdrop-input-box, .dividend-input-box, .daol-input-box {
                 width: 48px;
                 font-size: 6px;
             }
 
-            .usdm-title, .title, .fund-title, .dao-title, .launch-title, .dex-title, .airdrop-title {
+            .usdm-title, .title, .fund-title, .dao-title, .launch-title, .dex-title, 
+            .airdrop-title, .dividend-title, .daol-title {
                 font-size: 12px;
             }
 
             .usdm-arrow, .usdm-arrow-horizontal, .arrow, .arrow-horizontal,
             .fund-arrow, .fund-arrow-horizontal, .dao-arrow, .dao-arrow-horizontal,
             .launch-arrow, .launch-arrow-horizontal, .dex-arrow, .dex-arrow-horizontal,
-            .airdrop-arrow, .airdrop-arrow-horizontal {
+            .airdrop-arrow, .airdrop-arrow-horizontal, .dividend-arrow, .dividend-arrow-horizontal,
+            .daol-arrow, .daol-arrow-horizontal {
                 font-size: 9.6px;
             }
 
             .usdm-arrow-horizontal, .arrow-horizontal, .fund-arrow-horizontal,
             .dao-arrow-horizontal, .launch-arrow-horizontal, .dex-arrow-horizontal,
-            .airdrop-arrow-horizontal {
+            .airdrop-arrow-horizontal, .dividend-arrow-horizontal, .daol-arrow-horizontal {
                 width: 18px;
             }
 
@@ -1998,13 +2416,16 @@
             .dao-box i, .dao-main-box i, .dao-voting-box i, .dao-execution-box i,
             .launch-box i, .launch-main-box i, .launch-stacking-box i, .launch-dao-box i,
             .dex-box i, .dex-main-box i, .dex-reward-box i, .dex-dao-box i,
-            .airdrop-box i, .airdrop-main-box i, .airdrop-stacking-box i, .airdrop-dao-box i {
+            .airdrop-box i, .airdrop-main-box i, .airdrop-stacking-box i, .airdrop-dao-box i,
+            .dividend-box i, .dividend-main-box i, .dividend-staking-box i,
+            .daol-box i, .daol-main-box i, .daol-voting-box i, .daol-execution-box i {
                 font-size: 9.6px;
                 margin-right: 3.6px;
             }
 
             .usdm-input-box i, .fund-input-box i, .dao-input-box i,
-            .launch-input-box i, .dex-input-box i, .airdrop-input-box i {
+            .launch-input-box i, .dex-input-box i, .airdrop-input-box i,
+            .dividend-input-box i, .daol-input-box i {
                 font-size: 7.2px;
                 margin-right: 2.4px;
             }
@@ -2016,7 +2437,7 @@
         <div class="card intro">
             <h2>Introduction</h2>
             <div class="description">
-                MoneyFund is an Ethereum-based DeFi protocol featuring two assets (MONEY, USDM) and eight Dapps (Coin Launcher, Fund Launcher, Staking Pool Launcher, DAO Launcher, Dividends, DAO, Airdropper, and DEX). MONEY, with a fixed 1 million token supply, serves as the backbone of the ecosystem as it captures value from all eight smart contracts. Revenue is distributed to MONEY holders through staking dividends and DAO treasury allocations. This white paper details MoneyFund's lego-like mechanics and interconnected revenue streams.
+                 MoneyFund is an Ethereum-based DeFi protocol featuring two assets (MONEY, USDM) and eight Dapps (Coin Launcher, Fund Launcher, Staking Pool Launcher, DAO Launcher, Dividends, DAO, Airdropper, and DEX). MONEY, with a fixed 1 million token supply, serves as the backbone of the ecosystem as it captures value from all eight smart contracts. Revenue is distributed to MONEY holders through staking dividends and DAO treasury allocations. This white paper details MoneyFund's lego-like mechanics and interconnected revenue streams.
             </div>
         </div>
 
@@ -2064,7 +2485,7 @@
                             <a href="https://etherscan.io/address/0x9759883ea07e2cA1E2d32E97f42d254841616AB5" class="contract-address" target="_blank">0x9759883ea07e2cA1E2d32E97f42d254841616AB5</a>
                         </div>
                     </div>
-                                        <span class="contract-arrow">→</span>
+                    <span class="contract-arrow">→</span>
                     <div class="contract-description">Earn dividends by staking MONEY</div>
                 </div>
                 <div class="contract-item">
@@ -2426,12 +2847,74 @@
             <div class="description">
                 The dividend launcher allows users to create custom staking pool contracts that allow Eth and ERC20's to be distributed proportionally to stakers. During Pool deployment the creator specifies what the staked token is for the pool to be built around, the hardlock duration (duration in days for which staked tokens are not withdrawable [H]), the initial penalty (the starting penalty percentage that is initiated at the end of the hardlock period [P]), and daily penalty decay (percentage amount by which the initial penalty is reduced per day [D]). Breakeven Days = Hard Lock Duration + (Initial Penalty % / Penalty Decay % per Day)...H+(P/D)=T. Additionally, a permanent 0.5% fee is hardcoded across all staking pools such that all transactions pay the money dividend pool.
             </div>
+            <div class="dividend-diagram-container">
+                <div class="dividend-title">Dividend Launcher</div>
+                <div class="dividend-row">
+                    <div class="dividend-box"><i class="fas fa-users"></i>Users</div>
+                </div>
+                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Access</span></div>
+                <div class="dividend-row">
+                    <div class="dividend-main-box"><i class="fas fa-rocket"></i>Dividend Launcher</div>
+                </div>
+                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Specify</span></div>
+                <div class="dividend-input-row">
+                    <div class="dividend-input-box">Staked Token</div>
+                    <div class="dividend-input-box">Hardlock (H)</div>
+                    <div class="dividend-input-box">Penalty (P)</div>
+                    <div class="dividend-input-box">Decay (D)</div>
+                </div>
+                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Deploy</span></div>
+                <div class="dividend-row">
+                    <div class="dividend-box"><i class="fas fa-lock"></i>Custom Staking Pool</div>
+                </div>
+                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Transactions</span></div>
+                <div class="dividend-fee-row">
+                    <div class="dividend-staking-box"><i class="fas fa-coins"></i>Money Dividend Pool<br>(0.5%)</div>
+                    <div class="dividend-arrow-horizontal">←<span class="dividend-flow-label-horizontal">0.5% Fee</span></div>
+                    <div class="dividend-box">Fee</div>
+                </div>
+                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Distribute</span></div>
+                <div class="dividend-row">
+                    <div class="dividend-box"><i class="fas fa-gift"></i>Proportional Dividends</div>
+                </div>
+            </div>
         </div>
 
         <div class="card">
             <h2>DAO Launcher</h2>
             <div class="description">
                 The MoneyFund DAO launcher allows users to deploy custom governance contracts for voting and transacting. During deployment the creator specifies the contract address of the token that the DAO is being launched for, the total supply of said token, the voting period duration (# of days voting is allowed for each proposal), and rape mode vs standard mode. Rape mode is a mechanism that is exclusive to MoneyFund- it enables automated consensus for nonresponders to prevent stagnation. Essentially, rape mode means silence is consent...after the voting duration has passed all non-votes become yes-votes. In standard mode this does not apply and if the proposal does not reach its 51% threshold during the voting period then it will not execute.
+            </div>
+            <div class="daol-diagram-container">
+                <div class="daol-title">DAO Launcher</div>
+                <div class="daol-row">
+                    <div class="daol-box"><i class="fas fa-users"></i>Users</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Access</span></div>
+                <div class="daol-row">
+                    <div class="daol-main-box"><i class="fas fa-rocket"></i>DAO Launcher</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Specify</span></div>
+                <div class="daol-input-row">
+                    <div class="daol-input-box">Token Address</div>
+                    <div class="daol-input-box">Token Supply</div>
+                    <div class="daol-input-box">Voting Period</div>
+                    <div class="daol-input-box">Rape/Standard</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Deploy</span></div>
+                <div class="daol-row">
+                    <div class="daol-box"><i class="fas fa-vote-yea"></i>Custom DAO</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Vote</span></div>
+                <div class="daol-voting-row">
+                    <div class="daol-voting-box"><i class="fas fa-ballot"></i>Voting<br>(51% Approval)</div>
+                    <div class="daol-arrow-horizontal">→<span class="daol-flow-label-horizontal">Rape Mode</span></div>
+                    <div class="daol-box"><i class="fas fa-check"></i>Auto-Support</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Execute</span></div>
+                <div class="daol-row">
+                    <div class="daol-execution-box"><i class="fas fa-cogs"></i>Contract Execution</div>
+                </div>
             </div>
         </div>
 
