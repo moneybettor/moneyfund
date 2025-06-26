@@ -2016,7 +2016,7 @@
         <div class="card intro">
             <h2>Introduction</h2>
             <div class="description">
-                MoneyFund is an Ethereum-based DeFi protocol featuring two assets (MONEY, USDM) and six Dapps (DEX, Fund Launcher, Staking Pool, DAO, Airdropper, and Coin Launcher). MONEY, with a fixed 1 million token supply, serves as the backbone of the ecosystem as it captures value from all six smart contracts. Revenue is distributed to MONEY holders through staking dividends and DAO treasury allocations. This white paper details their interconnected mechanics and revenue streams.
+                MoneyFund is an Ethereum-based DeFi protocol featuring two assets (MONEY, USDM) and eight Dapps (Coin Launcher, Fund Launcher, Staking Pool Launcher, DAO Launcher, Dividends, DAO, Airdropper, and DEX). MONEY, with a fixed 1 million token supply, serves as the backbone of the ecosystem as it captures value from all eight smart contracts. Revenue is distributed to MONEY holders through staking dividends and DAO treasury allocations. This white paper details MoneyFund's lego-like mechanics and interconnected revenue streams.
             </div>
         </div>
 
