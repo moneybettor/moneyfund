@@ -17,7 +17,7 @@
         html[data-theme="dark"] {
             --bg-start: #0A0C1E;
             --bg-end: #1F2A44;
-            --card-bg: rgba(0, 0, 0, 1);
+            --card-bg: #374151;
             --list-bg: rgba(31, 41, 55, 0.6);
             --text-color: #ffffff;
             --header-color: #ffffff;
@@ -28,7 +28,7 @@
         html[data-theme="light"] {
             --bg-start: #0A0C1E;
             --bg-end: #1F2A44;
-            --card-bg: rgba(0, 0, 0, 1);
+            --card-bg: #374151;
 
 
             --list-bg: rgba(31, 41, 55, 0.6);
