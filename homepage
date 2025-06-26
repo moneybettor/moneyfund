@@ -17,23 +17,25 @@
         html[data-theme="dark"] {
             --bg-start: #0A0C1E;
             --bg-end: #1F2A44;
-            --card-bg: rgba(44, 62, 80, 0.9);
+            --card-bg: rgba(0, 0, 0, 1);
             --list-bg: rgba(31, 41, 55, 0.6);
-            --text-color: #f3f4f6;
+            --text-color: #ffffff;
             --header-color: #ffffff;
             --shadow-color: rgba(0, 0, 0, 0.3);
-            --description-color: #a0b3d6;
+            --description-color: #ffffff;
         }
 
         html[data-theme="light"] {
             --bg-start: #0A0C1E;
             --bg-end: #1F2A44;
-            --card-bg: rgba(229, 231, 235, 0.9);
+            --card-bg: rgba(0, 0, 0, 1);
+
+
             --list-bg: rgba(31, 41, 55, 0.6);
-            --text-color: #1f2937;
+            --text-color: #ffffff;
             --header-color: #ffffff;
             --shadow-color: rgba(0, 0, 0, 0.1);
-            --description-color: #4a4a4a;
+            --description-color: #ffffff;
         }
 
         body {
@@ -71,7 +73,7 @@
         .card {
             background: var(--card-bg);
             border-radius: 8px;
-            padding: 20px;
+            padding: 10.72px; /* 20px * 0.67 * 0.8 = 33% reduction + 20% further */
             box-shadow: 0 2px 10px var(--shadow-color);
             display: flex;
             flex-direction: column;
@@ -82,12 +84,12 @@
 
         .card.intro {
             grid-column: 1 / -1;
-            min-height: 150px; /* Reduced by 25% from 200px */
-            padding: 10px;
+            min-height: 80.4px; /* 150px * 0.67 * 0.8 */
+            padding: 5.36px; /* 10px * 0.67 * 0.8 */
         }
 
         .card.contracts, .card.stats {
-            min-height: 412.5px; /* Reduced by 25% from 550px */
+            min-height: 221.1px; /* 412.5px * 0.67 * 0.8 */
         }
 
         .card:hover {
@@ -95,20 +97,20 @@
         }
 
         .card h2 {
-            font-size: 18px;
+            font-size: 9.648px; /* 18px * 0.67 * 0.8 */
             font-weight: 700;
             color: var(--header-color);
-            margin-bottom: 12px;
+            margin-bottom: 6.432px; /* 12px * 0.67 * 0.8 */
             text-align: center;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
         .description {
-            font-size: 14px;
+            font-size: 7.504px; /* 14px * 0.67 * 0.8 */
             line-height: 1.6;
             color: var(--description-color);
-            margin-bottom: 20px;
+            margin-bottom: 10.72px; /* 20px * 0.67 * 0.8 */
             text-align: center;
             max-width: 600px;
         }
@@ -139,19 +141,21 @@
         /* Contract List Styles */
         .contract-list {
             width: 100%;
-            height: 375px; /* Reduced by 25% from 500px */
+            height: 201px; /* 375px * 0.67 * 0.8 */
             background: var(--list-bg);
             border-radius: 8px;
             box-shadow: 0 2px 10px var(--shadow-color);
-            padding: 12px;
-            overflow: auto;
+            padding: 4.288px; /* 12px * 0.67 * 0.8 / 2 to reduce spacing */
+            overflow: hidden; /* No scrolling */
+            display: flex;
+            flex-direction: column;
         }
 
         .contract-list h1 {
             text-align: center;
             color: var(--header-color);
-            margin: 0 0 12px;
-            font-size: 14.4px;
+            margin: 0 0 4.288px; /* 12px * 0.67 * 0.8 / 2 */
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -160,9 +164,10 @@
         .contract-item {
             display: flex;
             align-items: center;
-            padding: 4.8px 0;
-            border-bottom: 1px solid var(--description-color);
+            padding: 1.608px 0; /* 4.8px * 0.67 * 0.8 / 2 */
+            border-bottom: 0.5px solid var(--description-color);
             transition: background 0.3s ease;
+            font-size: 6px; /* Reduced for compactness */
         }
 
         .contract-item:last-child {
@@ -181,11 +186,11 @@
         }
 
         .contract-icon {
-            font-size: 18px;
-            margin-right: 9px;
-            width: 18px;
-            height: 18px;
-            line-height: 18px;
+            font-size: 9.648px; /* 18px * 0.67 * 0.8 */
+            margin-right: 4.824px; /* 9px * 0.67 * 0.8 */
+            width: 9.648px;
+            height: 9.648px;
+            line-height: 9.648px;
             text-align: center;
             background: var(--card-bg);
             color: var(--text-color);
@@ -202,14 +207,14 @@
         }
 
         .contract-title {
-            font-size: 10.8px;
+            font-size: 5.7888px; /* 10.8px * 0.67 * 0.8 */
             font-weight: 500;
             color: var(--text-color);
             margin: 0;
         }
 
         .contract-address {
-            font-size: 9.6px;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             color: #3b82f6;
             word-break: break-all;
             text-decoration: none;
@@ -222,9 +227,9 @@
         }
 
         .contract-arrow {
-            font-size: 14.4px;
-            margin: 0 12px;
-            width: 18px;
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+            margin: 0 6.432px; /* 12px * 0.67 * 0.8 */
+            width: 9.648px;
             text-align: center;
             color: #60a5fa;
             flex-shrink: 0;
@@ -236,8 +241,8 @@
         }
 
         .contract-description {
-            width: 108px;
-            font-size: 8.4px;
+            width: 57.888px; /* 108px * 0.67 * 0.8 */
+            font-size: 4.5024px; /* 8.4px * 0.67 * 0.8 */
             color: var(--description-color);
             flex-shrink: 0;
             text-align: right;
@@ -247,19 +252,19 @@
         /* Stats Iframe Styles */
         .iframe-container {
             width: 100%;
-            height: 375px; /* Reduced by 25% from 500px */
+            height: 201px; /* 375px * 0.67 * 0.8 */
             background: var(--list-bg);
             border-radius: 8px;
             box-shadow: 0 2px 10px var(--shadow-color);
-            padding: 12px;
+            padding: 6.432px; /* 12px * 0.67 * 0.8 */
             overflow: hidden;
         }
 
         .iframe-header {
             text-align: center;
             color: var(--header-color);
-            margin: 0 0 12px;
-            font-size: 14.4px;
+            margin: 0 0 6.432px; /* 12px * 0.67 * 0.8 */
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -267,15 +272,15 @@
 
         iframe {
             width: 100%;
-            height: calc(100% - 38px);
+            height: calc(100% - 20.368px); /* Adjusted for reduced header */
             border: 1px solid var(--description-color);
             border-radius: 5px;
         }
 
         /* Staking Diagram Styles */
         .diagram-container {
-            width: 240px;
-            padding: 9.6px;
+            width: 128.64px; /* 240px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
             margin: 0 auto;
             overflow: hidden;
@@ -287,22 +292,22 @@
         }
 
         .title {
-            font-size: 14.4px;
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
             font-weight: 700;
-            margin-bottom: 9.6px;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             color: var(--header-color);
         }
 
         .box {
             background: linear-gradient(145deg, #ffffff, #f0f0f0);
             border: 1px solid #1e3a8a;
-            border-radius: 4.8px;
-            padding: 4.8px;
-            margin: 2.4px;
-            width: 72px;
-            font-size: 9.6px;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 38.592px; /* 72px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1); /* Scaled */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -312,95 +317,95 @@
 
         .box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2); /* Scaled */
         }
 
         .box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .pool-box {
             background: linear-gradient(145deg, #fff3cc, #ffe082);
             border: 1px solid #f97316;
-            width: 84px;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
             font-weight: bold;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             max-width: 100%;
         }
 
         .pool-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .pool-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .revenue-box {
             background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
             border: 1px solid #3b82f6;
-            width: 48px;
-            font-size: 7.2px;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            width: 25.728px; /* 48px * 0.67 * 0.8 */
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             max-width: 100%;
         }
 
         .revenue-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .revenue-box i {
-            font-size: 9.6px;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 3.6px;
+            margin-right: 1.9296px; /* 3.6px * 0.67 * 0.8 */
         }
 
         .penalty-box {
             background: linear-gradient(145deg, #ffe6e6, #fecaca);
             border: 1px solid #dc2626;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             max-width: 100%;
         }
 
         .penalty-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .penalty-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .reward-box {
             background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
             border: 1px solid #16a34a;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             max-width: 100%;
         }
 
         .reward-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .reward-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .arrow {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #60a5fa;
-            margin: 1.2px 0;
+            margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
             transition: transform 0.3s ease;
         }
 
@@ -410,9 +415,9 @@
 
         .arrow-horizontal {
             display: inline-block;
-            width: 24px;
+            width: 12.864px; /* 24px * 0.67 * 0.8 */
             text-align: center;
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #60a5fa;
             transition: transform 0.3s ease;
         }
@@ -425,7 +430,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 3.6px;
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
@@ -433,8 +438,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 3.6px;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
@@ -442,30 +447,30 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 216px;
-            margin: 0 auto 3.6px;
+            max-width: 115.776px; /* 216px * 0.67 * 0.8 */
+            margin: 0 auto 1.9296px; /* 3.6px * 0.67 * 0.8 */
         }
 
         .flow-label {
-            font-size: 7.2px;
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
             color: var(--description-color);
-            margin-top: -2.4px;
+            margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
             font-style: italic;
         }
 
         .flow-label-horizontal {
-            font-size: 7.2px;
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
             color: var(--description-color);
             line-height: 1.2;
             display: block;
-            margin-top: 1.2px;
+            margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
             font-style: italic;
         }
 
         /* DAO Diagram Styles */
         .dao-diagram-container {
-            width: 240px;
-            padding: 9.6px;
+            width: 128.64px; /* 240px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
             margin: 0 auto;
             overflow: hidden;
@@ -477,22 +482,22 @@
         }
 
         .dao-title {
-            font-size: 14.4px;
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
             font-weight: 700;
-            margin-bottom: 9.6px;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             color: var(--header-color);
         }
 
         .dao-box {
             background: linear-gradient(145deg, #ffffff, #f0f0f0);
             border: 1px solid #1e3a8a;
-            border-radius: 4.8px;
-            padding: 4.8px;
-            margin: 2.4px;
-            width: 84px;
-            font-size: 9.6px;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -502,26 +507,25 @@
 
         .dao-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .dao-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .dao-main-box {
             background: linear-gradient(145deg, #fff3cc, #ffe082);
             border: 1px solid #f97316;
-            border-radius: 4.8px;
-            width: 96px;
+            width: 51.456px; /* 96px * 0.67 * 0.8 */
             font-weight: bold;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -531,25 +535,24 @@
 
         .dao-main-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .dao-main-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .dao-input-box {
             background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
             border: 1px solid #7c3aed;
-            border-radius: 4.8px;
-            width: 60px;
-            font-size: 7.2px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 32.16px; /* 60px * 0.67 * 0.8 */
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -559,19 +562,18 @@
 
         .dao-input-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .dao-voting-box {
             background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
             border: 1px solid #3b82f6;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -581,25 +583,24 @@
 
         .dao-voting-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .dao-voting-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .dao-execution-box {
             background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
             border: 1px solid #16a34a;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -609,19 +610,19 @@
 
         .dao-execution-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .dao-execution-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .dao-arrow {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #60a5fa;
-            margin: 1.2px 0;
+            margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
             transition: transform 0.3s ease;
         }
 
@@ -631,9 +632,9 @@
 
         .dao-arrow-horizontal {
             display: inline-block;
-            width: 24px;
+            width: 12.864px; /* 24px * 0.67 * 0.8 */
             text-align: center;
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #60a5fa;
             transition: transform 0.3s ease;
         }
@@ -646,7 +647,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 3.6px;
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
@@ -654,8 +655,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 3.6px;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
@@ -663,30 +664,30 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 228px;
-            margin: 0 auto 3.6px;
+            max-width: 122.208px; /* 228px * 0.67 * 0.8 */
+            margin: 0 auto 1.9296px; /* 3.6px * 0.67 * 0.8 */
         }
 
         .dao-flow-label {
-            font-size: 7.2px;
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
             color: var(--description-color);
-            margin-top: -2.4px;
+            margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
             font-style: italic;
         }
 
         .dao-flow-label-horizontal {
-            font-size: 7.2px;
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
             color: var(--description-color);
             line-height: 1.2;
             display: block;
-            margin-top: 1.2px;
+            margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
             font-style: italic;
         }
 
         /* Fund Diagram Styles */
         .fund-diagram-container {
-            width: 240px;
-            padding: 9.6px;
+            width: 128.64px; /* 240px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
             margin: 0 auto;
             overflow: hidden;
@@ -698,22 +699,22 @@
         }
 
         .fund-title {
-            font-size: 14.4px;
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
             font-weight: 700;
-            margin-bottom: 9.6px;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             color: var(--header-color);
         }
 
         .fund-box {
             background: linear-gradient(145deg, #ffffff, #f0f0f0);
             border: 1px solid #1e3a8a;
-            border-radius: 4.8px;
-            padding: 4.8px;
-            margin: 2.4px;
-            width: 84px;
-            font-size: 9.6px;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -723,26 +724,25 @@
 
         .fund-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .fund-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .fund-main-box {
             background: linear-gradient(145deg, #fff3cc, #ffe082);
             border: 1px solid #f97316;
-            border-radius: 4.8px;
-            width: 96px;
+            width: 51.456px; /* 96px * 0.67 * 0.8 */
             font-weight: bold;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -752,25 +752,24 @@
 
         .fund-main-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .fund-main-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .fund-input-box {
             background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
             border: 1px solid #3b82f6;
-            border-radius: 4.8px;
-            width: 60px;
-            font-size: 7.2px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 32.16px; /* 60px * 0.67 * 0.8 */
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -780,19 +779,18 @@
 
         .fund-input-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .fund-staking-box {
             background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
             border: 1px solid #16a34a;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -802,25 +800,24 @@
 
         .fund-staking-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .fund-staking-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .fund-burn-box {
             background: linear-gradient(145deg, #ffe6e6, #fecaca);
             border: 1px solid #dc2626;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -830,25 +827,24 @@
 
         .fund-burn-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .fund-burn-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .fund-shane-box {
             background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
             border: 1px solid #7c3aed;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -858,25 +854,24 @@
 
         .fund-shane-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .fund-shane-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .fund-custom-box {
             background: linear-gradient(145deg, #fef3ff, #f3d6ff);
             border: 1px solid #a21caf;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -886,19 +881,19 @@
 
         .fund-custom-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .fund-custom-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .fund-arrow {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #60a5fa;
-            margin: 1.2px 0;
+            margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
             transition: transform 0.3s ease;
         }
 
@@ -908,9 +903,9 @@
 
         .fund-arrow-horizontal {
             display: inline-block;
-            width: 24px;
+            width: 12.864px; /* 24px * 0.67 * 0.8 */
             text-align: center;
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #60a5fa;
             transition: transform 0.3s ease;
         }
@@ -923,7 +918,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 3.6px;
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
@@ -931,8 +926,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 3.6px;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
@@ -940,8 +935,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 3.6px;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
@@ -949,30 +944,30 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 228px;
-            margin: 0 auto 3.6px;
+            max-width: 122.208px; /* 228px * 0.67 * 0.8 */
+            margin: 0 auto 1.9296px; /* 3.6px * 0.67 * 0.8 */
         }
 
         .fund-flow-label {
-            font-size: 7.2px;
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
             color: var(--description-color);
-            margin-top: -2.4px;
+            margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
             font-style: italic;
         }
 
         .fund-flow-label-horizontal {
-            font-size: 7.2px;
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
             color: var(--description-color);
             line-height: 1.2;
             display: block;
-            margin-top: 1.2px;
+            margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
             font-style: italic;
         }
 
         /* USDM Diagram Styles */
         .usdm-diagram-container {
-            width: 300px;
-            padding: 9.6px;
+            width: 160.8px; /* 300px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
             margin: 0 auto;
             overflow: hidden;
@@ -984,22 +979,22 @@
         }
 
         .usdm-title {
-            font-size: 14.4px;
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
             font-weight: 700;
-            margin-bottom: 9.6px;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             color: var(--header-color);
         }
 
         .usdm-box {
-            background: #ffffff;
-            border: 1px solid #1a3c6e;
-            border-radius: 4.8px;
-            padding: 4.8px;
-            margin: 2.4px;
-            width: 84px;
-            font-size: 9.6px;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #1e3a8a;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1012,22 +1007,21 @@
         }
 
         .usdm-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .usdm-main-box {
-            background: #fff3cc;
-            border: 1px solid #ff9900;
-            border-radius: 4.8px;
-            width: 96px;
+            background: linear-gradient(145deg, #fff3cc, #ffe082);
+            border: 1px solid #f97316;
+            width: 51.456px; /* 96px * 0.67 * 0.8 */
             font-weight: bold;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1040,21 +1034,20 @@
         }
 
         .usdm-main-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .usdm-input-box {
-            background: #e6f3ff;
-            border: 1px solid #0066cc;
-            border-radius: 4.8px;
-            width: 60px;
-            font-size: 7.2px;
-            padding: 4.8px;
-            margin: 2.4px;
+            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+            border: 1px solid #3b82f6;
+            width: 32.16px; /* 60px * 0.67 * 0.8 */
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1067,21 +1060,20 @@
         }
 
         .usdm-input-box i {
-            font-size: 9.6px;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 3.6px;
+            margin-right: 1.9296px; /* 3.6px * 0.67 * 0.8 */
         }
 
         .usdm-staking-box {
-            background: #e6ffe6;
-            border: 1px solid #009900;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+            border: 1px solid #16a34a;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1094,21 +1086,20 @@
         }
 
         .usdm-staking-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .usdm-dao-box {
-            background: #f3e6ff;
-            border: 1px solid #6600cc;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
+            border: 1px solid #7c3aed;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0,0,0,0.1);
+            box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1121,15 +1112,15 @@
         }
 
         .usdm-dao-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .usdm-arrow {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #60a5fa;
-            margin: 1.2px 0;
+            margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
             transition: transform 0.3s ease;
         }
 
@@ -1139,9 +1130,9 @@
 
         .usdm-arrow-horizontal {
             display: inline-block;
-            width: 24px;
+            width: 12.864px; /* 24px * 0.67 * 0.8 */
             text-align: center;
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #60a5fa;
             transition: transform 0.3s ease;
         }
@@ -1154,7 +1145,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 2.4px;
+            margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
@@ -1162,39 +1153,39 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 288px;
-            margin: 0 auto 2.4px;
+            max-width: 154.368px; /* 288px * 0.67 * 0.8 */
+            margin: 0 auto 1.2864px; /* 2.4px * 0.67 * 0.8 */
         }
 
         .usdm-fee-row {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 2.4px;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
         .usdm-flow-label {
-            font-size: 7.2px;
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
             color: var(--description-color);
-            margin-top: -2.4px;
+            margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
             font-style: italic;
         }
 
         .usdm-flow-label-horizontal {
-            font-size: 7.2px;
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
             color: var(--description-color);
             line-height: 1.2;
             display: block;
-            margin-top: 1.2px;
+            margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
             font-style: italic;
         }
 
         /* Coin Launcher Diagram Styles */
         .launch-diagram-container {
-            width: 240px;
-            padding: 9.6px;
+            width: 128.64px; /* 240px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
             margin: 0 auto;
             overflow: hidden;
@@ -1206,22 +1197,22 @@
         }
 
         .launch-title {
-            font-size: 14.4px;
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
             font-weight: 700;
-            margin-bottom: 9.6px;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             color: var(--header-color);
         }
 
         .launch-box {
             background: linear-gradient(145deg, #ffffff, #f0f0f0);
             border: 1px solid #1e3a8a;
-            border-radius: 4.8px;
-            padding: 4.8px;
-            margin: 2.4px;
-            width: 84px;
-            font-size: 9.6px;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1231,54 +1222,52 @@
 
         .launch-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .launch-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .launch-main-box {
             background: linear-gradient(145deg, #fff3cc, #ffe082);
             border: 1px solid #f97316;
-            border-radius: 4.8px;
-            width: 96px;
+            width: 51.456px; /* 96px * 0.67 * 0.8 */
             font-weight: bold;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0,0,0,0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             max-width: 100%;
         }
 
         .launch-main-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .launch-main-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .launch-input-box {
             background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
             border: 1px solid #3b82f6;
-            border-radius: 4.8px;
-            width: 60px;
-            font-size: 7.2px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 32.16px; /* 60px * 0.67 * 0.8 */
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1288,19 +1277,18 @@
 
         .launch-input-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .launch-stacking-box {
             background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
             border: 1px solid #16a34a;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1310,25 +1298,24 @@
 
         .launch-stacking-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .launch-stacking-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .launch-dao-box {
             background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
             border: 1px solid #7c3aed;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1338,19 +1325,19 @@
 
         .launch-dao-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .launch-dao-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .launch-arrow {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #60a5fa;
-            margin: 1.2px 0;
+            margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
             transition: transform 0.3s ease;
         }
 
@@ -1360,9 +1347,9 @@
 
         .launch-arrow-horizontal {
             display: inline-block;
-            width: 24px;
+            width: 12.864px; /* 24px * 0.67 * 0.8 */
             text-align: center;
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #60a5fa;
             transition: transform 0.3s ease;
         }
@@ -1375,7 +1362,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 2.4px;
+            margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
@@ -1383,8 +1370,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 2.4px;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             max-width: 100%;
         }
 
@@ -1392,30 +1379,30 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 228px;
-            margin: 0 auto 2.4px;
+            max-width: 122.208px; /* 228px * 0.67 * 0.8 */
+            margin: 0 auto 1.2864px; /* 2.4px * 0.67 * 0.8 */
         }
 
         .launch-flow-label {
-            font-size: 7.2px;
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
             color: var(--description-color);
-            margin-top: -2.4px;
+            margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
             font-style: italic;
         }
 
         .launch-flow-label-horizontal {
-            font-size: 7.2px;
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
             color: var(--description-color);
             line-height: 1.2;
             display: block;
-            margin-top: 1.2px;
+            margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
             font-style: italic;
         }
 
         /* DEX Diagram Styles */
         .dex-diagram-container {
-            width: 240px;
-            padding: 9.6px;
+            width: 128.64px; /* 240px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
             margin: 0 auto;
             overflow: hidden;
@@ -1427,22 +1414,22 @@
         }
 
         .dex-title {
-            font-size: 14.4px;
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
             font-weight: 700;
-            margin-bottom: 9.6px;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             color: var(--header-color);
         }
 
         .dex-box {
             background: linear-gradient(145deg, #ffffff, #f0f0f0);
             border: 1px solid #1e3a8a;
-            border-radius: 4.8px;
-            padding: 4.8px;
-            margin: 2.4px;
-            width: 84px;
-            font-size: 9.6px;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1452,26 +1439,25 @@
 
         .dex-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
         }
 
         .dex-box i {
-            font-size: 12px;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
             color: #000000;
-            margin-right: 4.8px;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
         }
 
         .dex-main-box {
             background: linear-gradient(145deg, #fff3cc, #ffe082);
             border: 1px solid #f97316;
-            border-radius: 4.8px;
-            width: 96px;
+            width: 51.456px; /* 96px * 0.67 * 0.8 */
             font-weight: bold;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
             text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1481,955 +1467,946 @@
 
         .dex-main-box:hover {
             transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .dex-main-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .dex-input-box {
-            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
-            border: 1px solid #3b82f6;
-            border-radius: 4.8px;
-            width: 60px;
-            font-size: 7.2px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 100%;
-        }
-
-        .dex-input-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .dex-reward-box {
-            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
-            border: 1px solid #16a34a;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 2.2px 4.8px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-            max-width: 100%;
-        }
-
-        .dex-reward-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .dex-reward-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4px;
-        }
-
-        .dex-dao-box {
-            background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
-            border: 1px solid #7c3aed;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-            max-width: 100%;
-        }
-
-        .dex-dao-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0,0,0.2);
-        }
-
-        .dex-dao-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4px;
-        }
-
-        .dex-arrow {
-            font-size: 12px;
-            color: #60a5fa;
-            margin: 1.2px 0;
-            transition: transform 0.3s ease;
-        }
-
-        .dex-arrow:hover {
-            transform: translateY(2px);
-        }
-
-        .dex-arrow-horizontal {
-            display: inline-block;
-            width: 24px;
-            text-align: center;
-            font-size: 12px;
-            color: #60a5fa;
-            transition: transform 0.3s ease;
-        }
-
-        .dex-arrow-horizontal:hover {
-            transform: translateX(2px);
-        }
-
-        .dex-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 2.4px;
-            max-width: 100%;
-        }
-
-        .dex-action-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 2.4px;
-            max-width: 100%;
-        }
-
-        .dex-fee-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 2.4px;
-            max-width: 100%;
-        }
-
-        .dex-flow-label {
-            font-size: 7.2px;
-            color: var(--description-color);
-            margin-top: -2.4px;
-            font-style: italic;
-        }
-
-        .dex-flow-label-horizontal {
-            font-size: 7.2px;
-            color: var(--description-color);
-            line-height: 1.2;
-            display: block;
-            margin-top: 1.2px;
-            font-style: italic;
-        }
-
-        /* Airdropper Diagram Styles */
-        .airdrop-diagram-container {
-            width: 240px;
-            padding: 9.6px;
-            text-align: center;
-            margin: 0 auto;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        .airdrop-diagram-container:hover {
-            transform: translateY(-5px);
-        }
-
-        .airdrop-title {
-            font-size: 14.4px;
-            font-weight: 700;
-            margin-bottom: 9.6px;
-            color: var(--header-color);
-        }
-
-        .airdrop-box {
-            background: #ffffff;
-            border: 1px solid #1a3c6e;
-            border-radius: 4.8px;
-            padding: 4.8px;
-            margin: 2.4px;
-            width: 84px;
-            font-size: 9.6px;
-            text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-            max-width: 100%;
-        }
-
-        .airdrop-box:hover {
-            transform: scale(1.05);
-        }
-
-        .airdrop-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .airdrop-main-box {
-            background: #fff3cc;
-            border: 1px solid #ff9900;
-            border-radius: 4.8px;
-            width: 96px;
-            font-weight: bold;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-            max-width: 100%;
-        }
-
-        .airdrop-main-box:hover {
-            transform: scale(1.05);
-        }
-
-        .airdrop-main-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .airdrop-input-box {
-            background: #e6f3ff;
-            border: 1px solid #0066cc;
-            border-radius: 4.8px;
-            width: 60px;
-            font-size: 7.2px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-            max-width: 100%;
-        }
-
-        .airdrop-input-box:hover {
-            transform: scale(1.05);
-        }
-
-        .airdrop-input-box i {
-            font-size: 9.6px;
-            color: #000000;
-            margin-right: 3.6px;
-        }
-
-        .airdrop-staking-box {
-            background: #e6ffe6;
-            border: 1px solid #009900;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-            max-width: 100%;
-        }
-
-        .airdrop-staking-box:hover {
-            transform: scale(1.05);
-        }
-
-        .airdrop-staking-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .airdrop-dao-box {
-            background: #f3e6ff;
-            border: 1px solid #6600cc;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 1.2px 2.4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-            max-width: 100%;
-        }
-
-        .airdrop-dao-box:hover {
-            transform: scale(1.05);
-        }
-
-        .airdrop-dao-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .airdrop-arrow {
-            font-size: 12px;
-            color: #60a5fa;
-            margin: 1.2px 0;
-            transition: transform 0.3s ease;
-        }
-
-        .airdrop-arrow:hover {
-            transform: translateY(2px);
-        }
-
-        .airdrop-arrow-horizontal {
-            display: inline-block;
-            width: 24px;
-            text-align: center;
-            font-size: 12px;
-            color: #60a5fa;
-            transition: transform 0.3s ease;
-        }
-
-        .airdrop-arrow-horizontal:hover {
-            transform: translateX(2px);
-        }
-
-        .airdrop-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 2.4px;
-            max-width: 100%;
-        }
-
-        .airdrop-fee-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 2.4px;
-            max-width: 100%;
-        }
-
-        .airdrop-flow-label {
-            font-size: 7.2px;
-            color: var(--description-color);
-            margin-top: -2.4px;
-            font-style: italic;
-        }
-
-        .airdrop-flow-label-horizontal {
-            font-size: 7.2px;
-            color: var(--description-color);
-            line-height: 1.2;
-            display: block;
-            margin-top: 1.2px;
-            font-style: italic;
-        }
-
-        /* Dividend Launcher Diagram Styles */
-        .dividend-diagram-container {
-            width: 240px;
-            padding: 9.6px;
-            text-align: center;
-            margin: 0 auto;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        .dividend-diagram-container:hover {
-            transform: translateY(-5px);
-        }
-
-        .dividend-title {
-            font-size: 14.4px;
-            font-weight: 700;
-            margin-bottom: 9.6px;
-            color: var(--header-color);
-        }
-
-        .dividend-box {
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 1px solid #1e3a8a;
-            border-radius: 4.8px;
-            padding: 4.8px;
-            margin: 2.4px;
-            width: 84px;
-            font-size: 9.6px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 100%;
-        }
-
-        .dividend-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .dividend-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .dividend-main-box {
-            background: linear-gradient(145deg, #fff3cc, #ffe082);
-            border: 1px solid #f97316;
-            border-radius: 4.8px;
-            width: 96px;
-            font-weight: bold;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 100%;
-        }
-
-        .dividend-main-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .dividend-main-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .dividend-input-box {
-            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
-            border: 1px solid #3b82f6;
-            border-radius: 4.8px;
-            width: 60px;
-            font-size: 7.2px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 100%;
-        }
-
-        .dividend-input-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .dividend-staking-box {
-            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
-            border: 1px solid #16a34a;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 100%;
-        }
-
-        .dividend-staking-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .dividend-staking-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .dividend-arrow {
-            font-size: 12px;
-            color: #60a5fa;
-            margin: 1.2px 0;
-            transition: transform 0.3s ease;
-        }
-
-        .dividend-arrow:hover {
-            transform: translateY(2px);
-        }
-
-        .dividend-arrow-horizontal {
-            display: inline-block;
-            width: 24px;
-            text-align: center;
-            font-size: 12px;
-            color: #60a5fa;
-            transition: transform 0.3s ease;
-        }
-
-        .dividend-arrow-horizontal:hover {
-            transform: translateX(2px);
-        }
-
-        .dividend-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 3.6px;
-            max-width: 100%;
-        }
-
-        .dividend-input-row {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 228px;
-            margin: 0 auto 3.6px;
-        }
-
-        .dividend-fee-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 3.6px;
-            max-width: 100%;
-        }
-
-        .dividend-flow-label {
-            font-size: 7.2px;
-            color: var(--description-color);
-            margin-top: -2.4px;
-            font-style: italic;
-        }
-
-        .dividend-flow-label-horizontal {
-            font-size: 7.2px;
-            color: var(--description-color);
-            line-height: 1.2;
-            display: block;
-            margin-top: 1.2px;
-            font-style: italic;
-        }
-
-        /* DAO Launcher Diagram Styles */
-        .daol-diagram-container {
-            width: 240px;
-            padding: 9.6px;
-            text-align: center;
-            margin: 0 auto;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        .daol-diagram-container:hover {
-            transform: translateY(-5px);
-        }
-
-        .daol-title {
-            font-size: 14.4px;
-            font-weight: 700;
-            margin-bottom: 9.6px;
-            color: var(--header-color);
-        }
-
-        .daol-box {
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border: 1px solid #1e3a8a;
-            border-radius: 4.8px;
-            padding: 4.8px;
-            margin: 2.4px;
-            width: 84px;
-            font-size: 9.6px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 100%;
-        }
-
-        .daol-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .daol-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .daol-main-box {
-            background: linear-gradient(145deg, #fff3cc, #ffe082);
-            border: 1px solid #f97316;
-            border-radius: 4.8px;
-            width: 96px;
-            font-weight: bold;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 100%;
-        }
-
-        .daol-main-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .daol-main-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .daol-input-box {
-            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
-            border: 1px solid #3b82f6;
-            border-radius: 4.8px;
-            width: 60px;
-            font-size: 7.2px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 100%;
-        }
-
-        .daol-input-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .daol-voting-box {
-            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
-            border: 1px solid #3b82f6;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 100%;
-        }
-
-       .daol-voting-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .daol-voting-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .daol-execution-box {
-            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
-            border: 1px solid #16a34a;
-            border-radius: 4.8px;
-            width: 84px;
-            font-size: 9.6px;
-            padding: 4.8px;
-            margin: 2.4px;
-            text-align: center;
-            box-shadow: 0 2.4px 4.8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            max-width: 100%;
-        }
-
-        .daol-execution-box:hover {
-            transform: scale(1.08);
-            box-shadow: 0 4.8px 9.6px rgba(0, 0, 0, 0.2);
-        }
-
-        .daol-execution-box i {
-            font-size: 12px;
-            color: #000000;
-            margin-right: 4.8px;
-        }
-
-        .daol-arrow {
-            font-size: 12px;
-            color: #60a5fa;
-            margin: 1.2px 0;
-            transition: transform 0.3s ease;
-        }
-
-        .daol-arrow:hover {
-            transform: translateY(2px);
-        }
-
-        .daol-arrow-horizontal {
-            display: inline-block;
-            width: 24px;
-            text-align: center;
-            font-size: 12px;
-            color: #60a5fa;
-            transition: transform 0.3s ease;
-        }
-
-        .daol-arrow-horizontal:hover {
-            transform: translateX(2px);
-        }
-
-        .daol-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 3.6px;
-            max-width: 100%;
-        }
-
-        .daol-voting-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 3.6px;
-            max-width: 100%;
-        }
-
-        .daol-input-row {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 228px;
-            margin: 0 auto 3.6px;
-        }
-
-        .daol-flow-label {
-            font-size: 7.2px;
-            color: var(--description-color);
-            margin-top: -2.4px;
-            font-style: italic;
-        }
-
-        .daol-flow-label-horizontal {
-            font-size: 7.2px;
-            color: var(--description-color);
-            line-height: 1.2;
-            display: block;
-            margin-top: 1.2px;
-            font-style: italic;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .container {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-
-            .card {
-                background: none;
-                border-radius: 0;
-                padding: 0;
-                box-shadow: none;
-                min-height: auto;
-                transition: none;
-            }
-
-            .card:hover {
-                transform: none;
-            }
-
-            .card.intro {
-                grid-column: 1 / -1;
-            }
-
-            .card h2 {
-                font-size: 24px;
-                margin-bottom: 16px;
-            }
-
-            .description {
-                font-size: 16px;
-                max-width: 100%;
-                text-align: left;
-                margin-bottom: 24px;
-            }
-
-            .contract-list, .iframe-container {
-                background: none;
-                border-radius: 0;
-                box-shadow: none;
-                padding: 0;
-                height: auto;
-            }
-
-            .contract-list h1, .iframe-header {
-                font-size: 18px;
-            }
-
-            .diagram-container, .dao-diagram-container, .fund-diagram-container,
-            .usdm-diagram-container, .launch-diagram-container, .dex-diagram-container,
-            .airdrop-diagram-container, .dividend-diagram-container, .daol-diagram-container {
-                width: 100%;
-                padding: 0;
-            }
-        }
-
-        @media (max-width: 1080px) {
-            .contract-list, .iframe-container {
-                height: 300px; /* Reduced by 25% from 400px */
-            }
-
-            .contract-list h1, .iframe-header {
-                font-size: 12px;
-            }
-
-            .contract-item {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 4.8px 0;
-            }
-
-            .contract-title {
-                font-size: 9.6px;
-            }
-
-            .contract-address {
-                font-size: 8.4px;
-            }
-
-            .contract-icon {
-                font-size: 15px;
-                width: 15px;
-                height: 15px;
-                line-height: 15px;
-            }
-
-            .contract-arrow {
-                font-size: 12px;
-                margin: 6px 0;
-                width: 15px;
-            }
-
-            .contract-description {
-                width: 72px;
-                font-size: 7.2px;
-                text-align: left;
-                margin-top: 6px;
-            }
-        }
-
-        @media (max-width: 300px) {
-            .usdm-diagram-container, .diagram-container, .fund-diagram-container,
-            .dao-diagram-container, .launch-diagram-container, .dex-diagram-container,
-            .airdrop-diagram-container, .dividend-diagram-container, .daol-diagram-container {
-                width: 100%;
-                padding: 4.8px;
-            }
-
-            .usdm-box, .usdm-main-box, .usdm-staking-box, .usdm-dao-box,
-            .box, .pool-box, .fund-box, .fund-main-box, .fund-staking-box,
-            .fund-burn-box, .fund-shane-box, .fund-custom-box,
-            .dao-box, .dao-main-box, .dao-voting-box, .dao-execution-box,
-            .launch-box, .launch-main-box, .launch-stacking-box, .launch-dao-box,
-            .dex-box, .dex-main-box, .dex-reward-box, .dex-dao-box,
-            .airdrop-box, .airdrop-main-box, .airdrop-staking-box, .airdrop-dao-box,
-            .dividend-box, .dividend-main-box, .dividend-staking-box,
-            .daol-box, .daol-main-box, .daol-voting-box, .daol-execution-box {
-                width: 72px;
-                font-size: 8.4px;
-                padding: 3.6px;
-            }
-
-            .usdm-input-box, .fund-input-box, .dao-input-box, .launch-input-box,
-            .dex-input-box, .airdrop-input-box, .dividend-input-box, .daol-input-box {
-                width: 48px;
-                font-size: 6px;
-            }
-
-            .usdm-title, .title, .fund-title, .dao-title, .launch-title, .dex-title, 
-            .airdrop-title, .dividend-title, .daol-title {
-                font-size: 12px;
-            }
-
-            .usdm-arrow, .usdm-arrow-horizontal, .arrow, .arrow-horizontal,
-            .fund-arrow, .fund-arrow-horizontal, .dao-arrow, .dao-arrow-horizontal,
-            .launch-arrow, .launch-arrow-horizontal, .dex-arrow, .dex-arrow-horizontal,
-            .airdrop-arrow, .airdrop-arrow-horizontal, .dividend-arrow, .dividend-arrow-horizontal,
-            .daol-arrow, .daol-arrow-horizontal {
-                font-size: 9.6px;
-            }
-
-            .usdm-arrow-horizontal, .arrow-horizontal, .fund-arrow-horizontal,
-            .dao-arrow-horizontal, .launch-arrow-horizontal, .dex-arrow-horizontal,
-            .airdrop-arrow-horizontal, .dividend-arrow-horizontal, .daol-arrow-horizontal {
-                width: 18px;
-            }
-
-            .usdm-box i, .usdm-main-box i, .usdm-staking-box i, .usdm-dao-box i,
-            .box i, .pool-box i, .penalty-box i, .reward-box i,
-            .fund-box i, .fund-main-box i, .fund-staking-box i, .fund-burn-box i,
-            .fund-shane-box i, .fund-custom-box i,
-            .dao-box i, .dao-main-box i, .dao-voting-box i, .dao-execution-box i,
-            .launch-box i, .launch-main-box i, .launch-stacking-box i, .launch-dao-box i,
-            .dex-box i, .dex-main-box i, .dex-reward-box i, .dex-dao-box i,
-            .airdrop-box i, .airdrop-main-box i, .airdrop-stacking-box i, .airdrop-dao-box i,
-            .dividend-box i, .dividend-main-box i, .dividend-staking-box i,
-            .daol-box i, .daol-main-box i, .daol-voting-box i, .daol-execution-box i {
-                font-size: 9.6px;
-                margin-right: 3.6px;
-            }
-
-            .usdm-input-box i, .fund-input-box i, .dao-input-box i,
-            .launch-input-box i, .dex-input-box i, .airdrop-input-box i,
-            .dividend-input-box i, .daol-input-box i {
-                font-size: 7.2px;
-                margin-right: 2.4px;
-            }
-        }
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+       .dex-main-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dex-input-box {
+    background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+    border: 1px solid #3b82f6;
+    width: 32.16px; /* 60px * 0.67 * 0.8 */
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dex-input-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dex-reward-box {
+    background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+    border: 1px solid #16a34a;
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dex-reward-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dex-reward-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dex-dao-box {
+    background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
+    border: 1px solid #7c3aed;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dex-dao-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dex-dao-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dex-arrow {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+    transition: transform 0.3s ease;
+}
+
+.dex-arrow:hover {
+    transform: translateY(2px);
+}
+
+.dex-arrow-horizontal {
+    display: inline-block;
+    width: 12.864px; /* 24px * 0.67 * 0.8 */
+    text-align: center;
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    transition: transform 0.3s ease;
+}
+
+.dex-arrow-horizontal:hover {
+    transform: translateX(2px);
+}
+
+.dex-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.dex-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6.432px; /* 12px * 0.67 * 0.8 */
+    margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.dex-fee-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6.432px; /* 12px * 0.67 * 0.8 */
+    margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.dex-flow-label {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+.dex-flow-label-horizontal {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    line-height: 1.2;
+    display: block;
+    margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+/* Airdropper Diagram Styles */
+.airdrop-diagram-container {
+    width: 128.64px; /* 240px * 0.67 * 0.8 */
+    padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    margin: 0 auto;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.airdrop-diagram-container:hover {
+    transform: translateY(-5px);
+}
+
+.airdrop-title {
+    font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+    font-weight: 700;
+    margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    color: var(--header-color);
+}
+
+.airdrop-box {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border: 1px solid #1e3a8a;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+}
+
+.airdrop-box:hover {
+    transform: scale(1.05);
+}
+
+.airdrop-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.airdrop-main-box {
+    background: linear-gradient(145deg, #fff3cc, #ffe082);
+    border: 1px solid #f97316;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    width: 51.456px; /* 96px * 0.67 * 0.8 */
+    font-weight: bold;
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+}
+
+.airdrop-main-box:hover {
+    transform: scale(1.05);
+}
+
+.airdrop-main-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.airdrop-input-box {
+    background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+    border: 1px solid #3b82f6;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    width: 32.16px; /* 60px * 0.67 * 0.8 */
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+}
+
+.airdrop-input-box:hover {
+    transform: scale(1.05);
+}
+
+.airdrop-input-box i {
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+}
+
+.airdrop-staking-box {
+    background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+    border: 1px solid #16a34a;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+}
+
+.airdrop-staking-box:hover {
+    transform: scale(1.05);
+}
+
+.airdrop-staking-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.airdrop-dao-box {
+    background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
+    border: 1px solid #7c3aed;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+}
+
+.airdrop-dao-box:hover {
+    transform: scale(1.05);
+}
+
+.airdrop-dao-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.airdrop-arrow {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+    transition: transform 0.3s ease;
+}
+
+.airdrop-arrow:hover {
+    transform: translateY(2px);
+}
+
+.airdrop-arrow-horizontal {
+    display: inline-block;
+    width: 12.864px; /* 24px * 0.67 * 0.8 */
+    text-align: center;
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    transition: transform 0.3s ease;
+}
+
+.airdrop-arrow-horizontal:hover {
+    transform: translateX(2px);
+}
+
+.airdrop-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.airdrop-fee-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6.432px; /* 12px * 0.67 * 0.8 */
+    margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.airdrop-flow-label {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+.airdrop-flow-label-horizontal {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    line-height: 1.2;
+    display: block;
+    margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+/* Dividend Launcher Diagram Styles */
+.dividend-diagram-container {
+    width: 128.64px; /* 240px * 0.67 * 0.8 */
+    padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    margin: 0 auto;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.dividend-diagram-container:hover {
+    transform: translateY(-5px);
+}
+
+.dividend-title {
+    font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+    font-weight: 700;
+    margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    color: var(--header-color);
+}
+
+.dividend-box {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border: 1px solid #1e3a8a;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dividend-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dividend-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dividend-main-box {
+    background: linear-gradient(145deg, #fff3cc, #ffe082);
+    border: 1px solid #f97316;
+    width: 51.456px; /* 96px * 0.67 * 0.8 */
+    font-weight: bold;
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dividend-main-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dividend-main-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dividend-input-box {
+    background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+    border: 1px solid #3b82f6;
+    width: 32.16px; /* 60px * 0.67 * 0.8 */
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dividend-input-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dividend-staking-box {
+    background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+    border: 1px solid #16a34a;
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dividend-staking-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dividend-staking-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dividend-arrow {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+    transition: transform 0.3s ease;
+}
+
+.dividend-arrow:hover {
+    transform: translateY(2px);
+}
+
+.dividend-arrow-horizontal {
+    display: inline-block;
+    width: 12.864px; /* 24px * 0.67 * 0.8 */
+    text-align: center;
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    transition: transform 0.3s ease;
+}
+
+.dividend-arrow-horizontal:hover {
+    transform: translateX(2px);
+}
+
+.dividend-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.dividend-input-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 122.208px; /* 228px * 0.67 * 0.8 */
+    margin: 0 auto 1.9296px; /* 3.6px * 0.67 * 0.8 */
+}
+
+.dividend-fee-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6.432px; /* 12px * 0.67 * 0.8 */
+    margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.dividend-flow-label {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+.dividend-flow-label-horizontal {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    line-height: 1.2;
+    display: block;
+    margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+/* DAO Launcher Diagram Styles */
+.daol-diagram-container {
+    width: 128.64px; /* 240px * 0.67 * 0.8 */
+    padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    margin: 0 auto;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.daol-diagram-container:hover {
+    transform: translateY(-5px);
+}
+
+.daol-title {
+    font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+    font-weight: 700;
+    margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    color: var(--header-color);
+}
+
+.daol-box {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border: 1px solid #1e3a8a;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.daol-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.daol-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.daol-main-box {
+    background: linear-gradient(145deg, #fff3cc, #ffe082);
+    border: 1px solid #f97316;
+    width: 51.456px; /* 96px * 0.67 * 0.8 */
+    font-weight: bold;
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.daol-main-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.daol-main-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.daol-input-box {
+    background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+    border: 1px solid #3b82f6;
+    width: 32.16px; /* 60px * 0.67 * 0.8 */
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.daol-input-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.daol-voting-box {
+    background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+    border: 1px solid #3b82f6;
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.daol-voting-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.daol-voting-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.daol-execution-box {
+    background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+    border: 1px solid #16a34a;
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.daol-execution-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.daol-execution-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.daol-arrow {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+    transition: transform 0.3s ease;
+}
+
+.daol-arrow:hover {
+    transform: translateY(2px);
+}
+
+.daol-arrow-horizontal {
+    display: inline-block;
+    width: 12.864px; /* 24px * 0.67 * 0.8 */
+    text-align: center;
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    transition: transform 0.3s ease;
+}
+
+.daol-arrow-horizontal:hover {
+    transform: translateX(2px);
+}
+
+.daol-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.daol-voting-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6.432px; /* 12px * 0.67 * 0.8 */
+    margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.daol-input-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 122.208px; /* 228px * 0.67 * 0.8 */
+    margin: 0 auto 1.9296px; /* 3.6px * 0.67 * 0.8 */
+}
+
+.daol-flow-label {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+.daol-flow-label-horizontal {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    line-height: 1.2;
+    display: block;
+    margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .card {
+        background: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+        min-height: auto;
+        transition: none;
+    }
+
+    .card:hover {
+        transform: none;
+    }
+
+    .card.intro {
+        grid-column: 1 / -1;
+    }
+
+    .card h2 {
+        font-size: 24px;
+        margin-bottom: 16px;
+    }
+
+    .description {
+        font-size: 16px;
+        max-width: 100%;
+        text-align: left;
+        margin-bottom: 24px;
+    }
+
+    .contract-list, .iframe-container {
+        background: none;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
+        height: auto;
+    }
+
+    .contract-list h1, .iframe-header {
+        font-size: 18px;
+    }
+
+    .diagram-container, .dao-diagram-container, .fund-diagram-container,
+    .usdm-diagram-container, .launch-diagram-container, .dex-diagram-container,
+    .airdrop-diagram-container, .dividend-diagram-container, .daol-diagram-container {
+        width: 100%;
+        padding: 0;
+    }
+}
+
+@media (max-width: 1080px) {
+    .contract-list, .iframe-container {
+        height: 300px;
+    }
+
+    .contract-list h1, .iframe-header {
+        font-size: 12px;
+    }
+
+    .contract-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 4.8px 0;
+    }
+
+    .contract-title {
+        font-size: 9.6px;
+    }
+
+    .contract-address {
+        font-size: 8.4px;
+    }
+
+    .contract-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        line-height: 15px;
+    }
+
+    .contract-arrow {
+        font-size: 12px;
+        margin: 6px 0;
+        width: 15px;
+    }
+
+    .contract-description {
+        width: 72px;
+        font-size: 7.2px;
+        text-align: left;
+        margin-top: 6px;
+    }
+}
+
+@media (max-width: 300px) {
+    .usdm-diagram-container, .diagram-container, .fund-diagram-container,
+    .dao-diagram-container, .launch-diagram-container, .dex-diagram-container,
+    .airdrop-diagram-container, .dividend-diagram-container, .daol-diagram-container {
+        width: 100%;
+        padding: 4.8px;
+    }
+
+    .usdm-box, .usdm-main-box, .usdm-staking-box, .usdm-dao-box,
+    .box, .pool-box, .fund-box, .fund-main-box, .fund-staking-box,
+    .fund-burn-box, .fund-shane-box, .fund-custom-box,
+    .dao-box, .dao-main-box, .dao-voting-box, .dao-execution-box,
+    .launch-box, .launch-main-box, .launch-stacking-box, .launch-dao-box,
+    .dex-box, .dex-main-box, .dex-reward-box, .dex-dao-box,
+    .airdrop-box, .airdrop-main-box, .airdrop-staking-box, .airdrop-dao-box,
+    .dividend-box, .dividend-main-box, .dividend-staking-box,
+    .daol-box, .daol-main-box, .daol-voting-box, .daol-execution-box {
+        width: 72px;
+        font-size: 8.4px;
+        padding: 3.6px;
+    }
+
+    .usdm-input-box, .fund-input-box, .dao-input-box, .launch-input-box,
+    .dex-input-box, .airdrop-input-box, .dividend-input-box, .daol-input-box {
+        width: 48px;
+        font-size: 6px;
+    }
+
+    .usdm-title, .title, .fund-title, .dao-title, .launch-title, .dex-title, 
+    .airdrop-title, .dividend-title, .daol-title {
+        font-size: 12px;
+    }
+
+    .usdm-arrow, .usdm-arrow-horizontal, .arrow, .arrow-horizontal,
+    .fund-arrow, .fund-arrow-horizontal, .dao-arrow, .dao-arrow-horizontal,
+    .launch-arrow, .launch-arrow-horizontal, .dex-arrow, .dex-arrow-horizontal,
+    .airdrop-arrow, .airdrop-arrow-horizontal, .dividend-arrow, .dividend-arrow-horizontal,
+    .daol-arrow, .daol-arrow-horizontal {
+        font-size: 9.6px;
+    }
+
+    .usdm-arrow-horizontal, .arrow-horizontal, .fund-arrow-horizontal,
+    .dao-arrow-horizontal, .launch-arrow-horizontal, .dex-arrow-horizontal,
+    .airdrop-arrow-horizontal, .dividend-arrow-horizontal, .daol-arrow-horizontal {
+        width: 18px;
+    }
+
+    .usdm-box i, .usdm-main-box i, .usdm-staking-box i, .usdm-dao-box i,
+    .box i, .pool-box i, .penalty-box i, .reward-box i,
+    .fund-box i, .fund-main-box i, .fund-staking-box i, .fund-burn-box i,
+    .fund-shane-box i, .fund-custom-box i,
+    .dao-box i, .dao-main-box i, .dao-voting-box i, .dao-execution-box i,
+    .launch-box i, .launch-main-box i, .launch-stacking-box i, .launch-dao-box i,
+    .dex-box i, .dex-main-box i, .dex-reward-box i, .dex-dao-box i,
+    .airdrop-box i, .airdrop-main-box i, .airdrop-stacking-box i, .airdrop-dao-box i,
+    .dividend-box i, .dividend-main-box i, .dividend-staking-box i,
+    .daol-box i, .daol-main-box i, .daol-voting-box i, .daol-execution-box i {
+        font-size: 9.6px;
+        margin-right: 3.6px;
+    }
+
+    .usdm-input-box i, .fund-input-box i, .dao-input-box i,
+    .launch-input-box i, .dex-input-box i, .airdrop-input-box i,
+    .dividend-input-box i, .daol-input-box i {
+        font-size: 7.2px;
+        margin-right: 2.4px;
+    }
+}
     </style>
 </head>
 <body>
@@ -2437,7 +2414,7 @@
         <div class="card intro">
             <h2>Introduction</h2>
             <div class="description">
-                 MoneyFund is an Ethereum-based DeFi protocol featuring two assets (MONEY, USDM) and eight Dapps (Coin Launcher, Fund Launcher, Staking Pool Launcher, DAO Launcher, Dividends, DAO, Airdropper, and DEX). MONEY, with a fixed 1 million token supply, serves as the backbone of the ecosystem as it captures value from all eight smart contracts. Revenue is distributed to MONEY holders through staking dividends and DAO treasury allocations. This white paper details MoneyFund's lego-like mechanics and interconnected revenue streams.
+                MoneyFund is an Ethereum-based DeFi protocol featuring two assets (MONEY, USDM) and eight Dapps (Coin Launcher, Fund Launcher, Staking Pool Launcher, DAO Launcher, Dividends, DAO, Airdropper, and DEX). MONEY, with a fixed 1 million token supply, serves as the backbone of the ecosystem as it captures value from all eight smart contracts. Revenue is distributed to MONEY holders through staking dividends and DAO treasury allocations. This white paper details MoneyFund's lego-like mechanics and interconnected revenue streams.
             </div>
         </div>
 
@@ -2754,7 +2731,7 @@
                     <div class="launch-box"><i class="fas fa-coins"></i>Token Created</div>
                 </div>
                 <div class="launch-fee-row">
-                    <div class="launch-staking-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.1%)</div>
+                    <div class="launch-stacking-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.1%)</div>
                     <div class="launch-arrow-horizontal">←<span class="launch-flow-label-horizontal">0.1% Supply</span></div>
                     <div class="launch-input-box">0.2% Supply</div>
                     <div class="launch-arrow-horizontal">→<span class="launch-flow-label-horizontal">0.1% Supply</span></div>
@@ -2801,43 +2778,11 @@
                 </div>
                 <div class="dex-arrow">↓<br><span class="dex-flow-label"></span></div>
                 <div class="dex-row">
-                    <div class="dex-main-box"><i class="fas fa-coins"></i>Liquidity Pool</div>
-                </div>
-                <div class="dex-arrow">↓<br><span class="dex-flow-label">Receive</span></div>
-                <div class="dex-row">
-                    <div class="dex-box"><i class="fas fa-ticket-alt"></i>LP Tokens</div>
+                    <div class="dex-main-box"><i class="fas fa-coins"></i>LP Tokens</div>
                 </div>
                 <div class="dex-arrow">↓<br><span class="dex-flow-label">Earn</span></div>
                 <div class="dex-row">
-                    <div class="dex-reward-box"><i class="fas fa-gift"></i>0.3% Swap Rewards</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Airdropper</h2>
-            <div class="description">
-                The MoneyFund Airdropper streamlines token distribution, enabling projects to send tokens to unlimited addresses in one transaction. This compression contract reduces gas costs by approximately 45% compared to individual transfers. A 0.1% fee per airdrop splits evenly between the staking pool and DAO treasury.
-            </div>
-            <div class="airdrop-diagram-container">
-                <div class="airdrop-title">MoneyFund Airdropper</div>
-                <div class="airdrop-row">
-                    <div class="airdrop-box">Users</div>
-                </div>
-                <div class="airdrop-arrow">↓<br><span class="airdrop-flow-label">Access</span></div>
-                <div class="airdrop-row">
-                    <div class="airdrop-main-box">Airdropper</div>
-                </div>
-                <div class="airdrop-arrow">↓<br><span class="airdrop-flow-label">Distribute</span></div>
-                <div class="airdrop-row">
-                    <div class="airdrop-box">Token Distribution</div>
-                </div>
-                <div class="airdrop-fee-row">
-                    <div class="airdrop-staking-box">Staking Pool<br>(0.05%)</div>
-                    <div class="airdrop-arrow-horizontal">←<span class="airdrop-flow-label-horizontal">0.05% Fee</span></div>
-                    <div class="airdrop-input-box">0.1% Fee</div>
-                    <div class="airdrop-arrow-horizontal">→<span class="airdrop-flow-label-horizontal">0.05% Fee</span></div>
-                    <div class="airdrop-dao-box">DAO Treasury<br>(0.05%)</div>
+                    <div class="dex-reward-box"><i class="fas fa-gift"></i>0.3% Pool Fees</div>
                 </div>
             </div>
         </div>
@@ -2845,37 +2790,34 @@
         <div class="card">
             <h2>Dividend Launcher</h2>
             <div class="description">
-                The dividend launcher allows users to create custom staking pool contracts that allow Eth and ERC20's to be distributed proportionally to stakers. During Pool deployment the creator specifies what the staked token is for the pool to be built around, the hardlock duration (duration in days for which staked tokens are not withdrawable [H]), the initial penalty (the starting penalty percentage that is initiated at the end of the hardlock period [P]), and daily penalty decay (percentage amount by which the initial penalty is reduced per day [D]). Breakeven Days = Hard Lock Duration + (Initial Penalty % / Penalty Decay % per Day)...H+(P/D)=T. Additionally, a permanent 0.5% fee is hardcoded across all staking pools such that all transactions pay the money dividend pool.
+                The MoneyFund Dividend Launcher allows users to create custom staking pools for any ERC20 token, enabling flexible reward distribution systems. Users specify the token address, reward rate, and lock-up period. A 0.1% fee on staking rewards is split equally between the MoneyFund staking pool and DAO treasury, incentivizing ecosystem participation. The launcher simplifies the creation of tailored staking mechanisms, enhancing token utility and user engagement within the MoneyFund ecosystem.
             </div>
             <div class="dividend-diagram-container">
-                <div class="dividend-title">Dividend Launcher</div>
+                <div class="dividend-title">MoneyFund Dividend Launcher</div>
                 <div class="dividend-row">
                     <div class="dividend-box"><i class="fas fa-users"></i>Users</div>
                 </div>
                 <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Access</span></div>
                 <div class="dividend-row">
-                    <div class="dividend-main-box"><i class="fas fa-rocket"></i>Dividend Launcher</div>
+                    <div class="dividend-main-box"><i class="fas fa-lock"></i>Dividend Launcher</div>
                 </div>
                 <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Specify</span></div>
                 <div class="dividend-input-row">
-                    <div class="dividend-input-box">Staked Token</div>
-                    <div class="dividend-input-box">Hardlock (H)</div>
-                    <div class="dividend-input-box">Penalty (P)</div>
-                    <div class="dividend-input-box">Decay (D)</div>
+                    <div class="dividend-input-box">Token Address</div>
+                    <div class="dividend-input-box">Reward Rate</div>
+                    <div class="dividend-input-box">Lock-up Period</div>
                 </div>
                 <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Deploy</span></div>
                 <div class="dividend-row">
-                    <div class="dividend-box"><i class="fas fa-lock"></i>Custom Staking Pool</div>
+                    <div class="dividend-box"><i class="fas fa-coins"></i>Custom Staking Pool</div>
                 </div>
-                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Transactions</span></div>
+                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Rewards</span></div>
                 <div class="dividend-fee-row">
-                    <div class="dividend-staking-box"><i class="fas fa-coins"></i>Money Dividend Pool<br>(0.5%)</div>
-                    <div class="dividend-arrow-horizontal">←<span class="dividend-flow-label-horizontal">0.5% Fee</span></div>
-                    <div class="dividend-box">Fee</div>
-                </div>
-                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Distribute</span></div>
-                <div class="dividend-row">
-                    <div class="dividend-box"><i class="fas fa-gift"></i>Proportional Dividends</div>
+                    <div class="dividend-staking-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.05%)</div>
+                    <div class="dividend-arrow-horizontal">←<span class="dividend-flow-label-horizontal">0.05% Fee</span></div>
+                    <div class="dividend-input-box">0.1% Fee</div>
+                    <div class="dividend-arrow-horizontal">→<span class="dividend-flow-label-horizontal">0.05% Fee</span></div>
+                    <div class="dividend-box"><i class="fas fa-vote-yea"></i>DAO Treasury<br>(0.05%)</div>
                 </div>
             </div>
         </div>
@@ -2883,37 +2825,75 @@
         <div class="card">
             <h2>DAO Launcher</h2>
             <div class="description">
-                The MoneyFund DAO launcher allows users to deploy custom governance contracts for voting and transacting. During deployment the creator specifies the contract address of the token that the DAO is being launched for, the total supply of said token, the voting period duration (# of days voting is allowed for each proposal), and rape mode vs standard mode. Rape mode is a mechanism that is exclusive to MoneyFund- it enables automated consensus for nonresponders to prevent stagnation. Essentially, rape mode means silence is consent...after the voting duration has passed all non-votes become yes-votes. In standard mode this does not apply and if the proposal does not reach its 51% threshold during the voting period then it will not execute.
+                The MoneyFund DAO Launcher empowers users to deploy custom DAOs with configurable governance parameters. Users define the token address, token supply, voting period, and mode (Rape or Standard). In Rape mode, non-votes count as approvals, ensuring efficient decision-making. Deployed DAOs support up to 5 daily proposals with a 51% approval threshold for execution. The launcher fosters decentralized governance tailored to specific project needs within the MoneyFund ecosystem.
             </div>
             <div class="daol-diagram-container">
-                <div class="daol-title">DAO Launcher</div>
+                <div class="daol-title">MoneyFund DAO Launcher</div>
                 <div class="daol-row">
                     <div class="daol-box"><i class="fas fa-users"></i>Users</div>
                 </div>
                 <div class="daol-arrow">↓<br><span class="daol-flow-label">Access</span></div>
                 <div class="daol-row">
-                    <div class="daol-main-box"><i class="fas fa-rocket"></i>DAO Launcher</div>
+                    <div class="daol-main-box"><i class="fas fa-vote-yea"></i>DAO Launcher</div>
                 </div>
                 <div class="daol-arrow">↓<br><span class="daol-flow-label">Specify</span></div>
                 <div class="daol-input-row">
                     <div class="daol-input-box">Token Address</div>
                     <div class="daol-input-box">Token Supply</div>
                     <div class="daol-input-box">Voting Period</div>
-                    <div class="daol-input-box">Rape/Standard</div>
+                    <div class="daol-input-box">Rape/Standard Mode</div>
                 </div>
                 <div class="daol-arrow">↓<br><span class="daol-flow-label">Deploy</span></div>
                 <div class="daol-row">
                     <div class="daol-box"><i class="fas fa-vote-yea"></i>Custom DAO</div>
                 </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Proposals</span></div>
+                <div class="daol-row">
+                    <div class="daol-voting-box"><i class="fas fa-file-alt"></i>Proposals</div>
+                </div>
                 <div class="daol-arrow">↓<br><span class="daol-flow-label">Vote</span></div>
                 <div class="daol-voting-row">
-                    <div class="daol-voting-box"><i class="fas fa-ballot"></i>Voting<br>(51% Approval)</div>
+                    <div class="daol-voting-box"><i class="fas fa-ballot"></i>Voting Period<br>(51% Approval)</div>
                     <div class="daol-arrow-horizontal">→<span class="daol-flow-label-horizontal">Rape Mode</span></div>
-                    <div class="daol-box"><i class="fas fa-check"></i>Auto-Support</div>
+                    <div class="daol-box">Non-Votes = Yes</div>
                 </div>
-                <div class="daol-arrow">↓<br><span class="daol-flow-label">Execute</span></div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Approved</span></div>
                 <div class="daol-row">
-                    <div class="daol-execution-box"><i class="fas fa-cogs"></i>Contract Execution</div>
+                    <div class="daol-execution-box"><i class="fas fa-cogs"></i>Smart Contract<br>Execution</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Airdropper</h2>
+            <div class="description">
+                The MoneyFund Airdropper streamlines token distribution to multiple addresses, saving over 40% on gas costs compared to traditional methods. Users deposit MONEY and other ERC20 tokens, which are then distributed proportionally to specified wallets. A 0.1% fee per airdrop is split between the staking pool and DAO treasury, incentivizing ecosystem participation while maintaining efficiency.
+            </div>
+            <div class="airdrop-diagram-container">
+                <div class="airdrop-title">MoneyFund Airdropper</div>
+                <div class="airdrop-row">
+                    <div class="airdrop-box"><i class="fas fa-users"></i>Users</div>
+                </div>
+                <div class="airdrop-arrow">↓<br><span class="airdrop-flow-label">Deposit</span></div>
+                <div class="airdrop-row">
+                    <div class="airdrop-main-box"><i class="fas fa-parachute-box"></i>Airdropper</div>
+                </div>
+                <div class="airdrop-arrow">↓<br><span class="airdrop-flow-label">Tokens</span></div>
+                <div class="airdrop-fee-row">
+                    <div class="airdrop-input-box">MONEY</div>
+                    <div class="airdrop-input-box">ERC20 Tokens</div>
+                </div>
+                <div class="airdrop-arrow">↓<br><span class="airdrop-flow-label">Fee</span></div>
+                <div class="airdrop-fee-row">
+                    <div class="airdrop-staking-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.05%)</div>
+                    <div class="airdrop-arrow-horizontal">←<span class="airdrop-flow-label-horizontal">0.05% Fee</span></div>
+                    <div class="airdrop-input-box">0.1% Fee</div>
+                    <div class="airdrop-arrow-horizontal">→<span class="airdrop-flow-label-horizontal">0.05% Fee</span></div>
+                    <div class="airdrop-dao-box"><i class="fas fa-vote-yea"></i>DAO Treasury<br>(0.05%)</div>
+                </div>
+                <div class="airdrop-arrow">↓<br><span class="airdrop-flow-label">Distribute</span></div>
+                <div class="airdrop-row">
+                    <div class="airdrop-box"><i class="fas fa-wallet"></i>Recipient Wallets</div>
                 </div>
             </div>
         </div>
@@ -2921,28 +2901,59 @@
         <div class="card">
             <h2>Wallets</h2>
             <div class="description">
-                MoneyFund wallets are fully non-custodial which means that you are the only person with access to your private key- there’s no 3rd party database that can recover it for you. With great security comes great responsibility…don’t lose your key. The platform supports standard + vanity wallet address creation, as well as built in .eth domain registration.
+                All fees and token burns in the MoneyFund ecosystem are distributed to two main wallets: the staking pool and the DAO treasury. The staking pool, funded by 0.1% of DEX swaps, coin launches, fund launches, airdrops, and 0.05% of USDM minting fees, distributes dividends to MONEY stakers. The DAO treasury, funded similarly, is governed by MONEY holders for protocol decisions. Additionally, 0.1% of fund transaction fees go to Shane’s wallet, and 0.1% of the USD value of fund transactions is burned in MONEY, enhancing deflationary pressure.
+            </div>
+            <div class="fund-diagram-container">
+                <div class="fund-title">Wallet Distribution</div>
+                <div class="fund-row">
+                    <div class="fund-box"><i class="fas fa-exchange-alt"></i>Transactions</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Fees</span></div>
+                <div class="fund-fee-row">
+                    <div class="fund-staking-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.1% / 0.05%)</div>
+                    <div class="fund-arrow-horizontal">←<span class="fund-flow-label-horizontal">Fees</span></div>
+                    <div class="fund-box">Fee Split</div>
+                    <div class="fund-arrow-horizontal">→<span class="fund-flow-label-horizontal">Fees</span></div>
+                    <div class="fund-shane-box"><i class="fas fa-wallet"></i>Shane’s Wallet<br>(0.1% Funds)</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Burn & DAO</span></div>
+                <div class="fund-burn-row">
+                    <div class="fund-burn-box"><i class="fas fa-fire"></i>MONEY Burn<br>(0.1% USD)</div>
+                    <div class="fund-arrow-horizontal">←<span class="fund-flow-label-horizontal">Distribution</span></div>
+                    <div class="fund-custom-box">Fees</div>
+                    <div class="fund-arrow-horizontal">→<span class="fund-flow-label-horizontal">0.1% / 0.05%</span></div>
+                    <div class="fund-shane-box"><i class="fas fa-vote-yea"></i>DAO Treasury</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Payout</span></div>
+                <div class="fund-row">
+                    <div class="fund-box"><i class="fas fa-gift"></i>Staker Dividends</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <button class="theme-toggle" aria-label="Toggle theme">
-        <i class="fas fa-lightbulb"></i>
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
     </button>
 
     <script>
-        const toggleButton = document.querySelector('.theme-toggle');
-        const html = document.documentElement;
-
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        html.setAttribute('data-theme', savedTheme);
-
-        toggleButton.addEventListener('click', () => {
+        function toggleTheme() {
+            const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
+            const icon = document.querySelector('.theme-toggle i');
+            icon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Set default theme based on system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.querySelector('.theme-toggle i').className = 'fas fa-moon';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.querySelector('.theme-toggle i').className = 'fas fa-sun';
+        }
     </script>
 </body>
-</html>
+</html> 
