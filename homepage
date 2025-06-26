@@ -2481,7 +2481,7 @@
                         <span class="contract-icon"><i class="fas fa-rocket"></i></span>
                         <div class="contract-details">
                             <div class="contract-title">Fund Launcher</div>
-                            <a href="https://etherscan.io/address/0xd846D1a576776a70412b473d2479362953e4C5d5" class="contract-address" target="_blank">0xd846D1a576776a70412b473d2479362953e4C5d5</a>
+                            <a href="https://etherscan.io/address/0xa4a107c5b8de797c32ae701ffe2b306cb9044ba6" class="contract-address" target="_blank">0xa4a107c5b8de797c32ae701ffe2b306cb9044ba6</a>
                         </div>
                     </div>
                     <span class="contract-arrow">→</span>
@@ -2492,7 +2492,7 @@
                         <span class="contract-icon"><i class="fas fa-coins"></i></span>
                         <div class="contract-details">
                             <div class="contract-title">Coin Launcher</div>
-                            <a href="https://etherscan.io/address/0x4529a19CE3Dd34C878c98AA84d51c8667c665E83" class="contract-address" target="_blank">0x4529a19CE3Dd34C878c98AA84d51c8667c665E83</a>
+                            <a href="https://etherscan.io/address/0x3962895a933aa0b1613aed997901e601b2cc0821" class="contract-address" target="_blank">0x3962895a933aa0b1613aed997901e601b2cc0821</a>
                         </div>
                     </div>
                     <span class="contract-arrow">→</span>
@@ -2901,7 +2901,7 @@
         <div class="card">
             <h2>Wallets</h2>
             <div class="description">
-                All fees and token burns in the MoneyFund ecosystem are distributed to two main wallets: the staking pool and the DAO treasury. The staking pool, funded by 0.1% of DEX swaps, coin launches, fund launches, airdrops, and 0.05% of USDM minting fees, distributes dividends to MONEY stakers. The DAO treasury, funded similarly, is governed by MONEY holders for protocol decisions. Additionally, 0.1% of fund transaction fees go to Shane’s wallet, and 0.1% of the USD value of fund transactions is burned in MONEY, enhancing deflationary pressure.
+                MoneyFund wallets are fully non-custodial which means that you are the only person with access to your private key- there’s no 3rd party database that can recover it for you. With great security comes great responsibility…don’t lose your key. The platform supports standard + vanity wallet address creation, as well as built in .eth domain registration.
             </div>
             <div class="fund-diagram-container">
                 <div class="fund-title">Wallet Distribution</div>
