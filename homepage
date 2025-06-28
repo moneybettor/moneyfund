@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoneyFund - World's Biggest Hedge Fund</title>
+    <title>MoneyFund - World's Biggest Hedge Fun</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
     <style>
         * {
@@ -50,7 +50,7 @@
 
         .hero {
             padding: 64px 24px; /* Reduced 20% from 80px 30px */
-            background: linear-gradient(135deg, #1e3b2f, #2a4b3a); /* Dark green gradient for hero */
+            background: #001135 url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E'); /* Noisy blue background */
             border-radius: 12px; /* Soft, modern radius */
             border: 1px solid rgba(232, 185, 35, 0.25); /* Subtle gold border */
             box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4), 0 0 10px rgba(46, 79, 63, 0.2); /* Shadow with green glow */
