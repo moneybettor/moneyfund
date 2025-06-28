@@ -227,10 +227,10 @@
             margin-top: 15px;
             max-height: 500px;
             overflow-y: auto;
+            border: 1px solid rgba(99, 102, 241, 0.15);
             padding: 8px;
             background: rgba(17, 24, 39, 0.85);
             border-radius: 8px;
-            border: 1px solid rgba(99, 102, 241, 0.15);
             scrollbar-width: thin;
             scrollbar-color: #6366F1 rgba(31, 41, 55, 0.5);
         }
@@ -1174,7 +1174,7 @@
             }
         ];
 
-        // Minimal ERC20 ABI for fetching name and symbol
+        // Minimal ERC20 ABI for fetching name, symbol, and decimals
         const tokenAbi = [
             {
                 "inputs": [],
@@ -1197,6 +1197,19 @@
                         "internalType": "string",
                         "name": "",
                         "type": "string"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "decimals",
+                "outputs": [
+                    {
+                        "internalType": "uint8",
+                        "name": "",
+                        "type": "uint8"
                     }
                 ],
                 "stateMutability": "view",
@@ -1640,16 +1653,23 @@
 
                 logMessage(`Proposal inputs: description=${description}, type=${proposalType}, destination=${destination}, amount=${amount}, tokenAddress=${tokenAddress}`);
 
-                if (!description || isNaN(proposalType) || !destination || !amount || !tokenAddress) {
+                if (!description || isNaN(proposalType) || !amount || !tokenAddress) {
                     logMessage("Missing proposal fields");
-                    status.innerText = "Please fill in all proposal fields.";
+                    status.innerText = "Please fill in all required proposal fields.";
                     status.className = "error-message";
                     return;
                 }
 
-                if (!web3.utils.isAddress(destination) || !web3.utils.isAddress(tokenAddress)) {
-                    logMessage("Invalid address in proposal inputs");
-                    status.innerText = "Invalid destination or token address.";
+                if ((proposalType === 2 || proposalType === 3) && (!destination || !web3.utils.isAddress(destination))) {
+                    logMessage("Invalid destination address for withdraw proposal");
+                    status.innerText = "Invalid destination address for withdraw proposal.";
+                    status.className = "error-message";
+                    return;
+                }
+
+                if (!web3.utils.isAddress(tokenAddress)) {
+                    logMessage("Invalid token address");
+                    status.innerText = "Invalid token address.";
                     status.className = "error-message";
                     return;
                 }
@@ -1674,7 +1694,7 @@
                 try {
                     logMessage("Estimating gas for proposal creation");
                     gasEstimate = await withRetry(() =>
-                        daoContract.methods.createProposal(description, proposalType, destination, amountWei, tokenAddress).estimateGas({ from: userAccount })
+                        daoContract.methods.createProposal(description, proposalType, destination || "0x0000000000000000000000000000000000000000", amountWei, tokenAddress).estimateGas({ from: userAccount })
                     );
                     gasEstimate = Math.ceil(Number(gasEstimate) * 1.2);
                     logMessage(`Estimated gas limit: ${gasEstimate}`);
@@ -1700,7 +1720,7 @@
                         throw new Error("MetaMask signer not available");
                     }
                     const daoEthers = new ethers.Contract(daoAddress, daoAbi, signer);
-                    tx = await daoEthers.createProposal(description, proposalType, destination, amountWei, tokenAddress, {
+                    tx = await daoEthers.createProposal(description, proposalType, destination || "0x0000000000000000000000000000000000000000", amountWei, tokenAddress, {
                         gasLimit: gasEstimate,
                         gasPrice: gasPrice
                     });
@@ -1719,7 +1739,7 @@
                     if (account.address.toLowerCase() !== userAccount.toLowerCase()) {
                         throw new Error("Private key does not match selected wallet address");
                     }
-                    const txData = daoContract.methods.createProposal(description, proposalType, destination, amountWei, tokenAddress).encodeABI();
+                    const txData = daoContract.methods.createProposal(description, proposalType, destination || "0x0000000000000000000000000000000000000000", amountWei, tokenAddress).encodeABI();
                     const nonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
                     const transactionObject = {
                         from: userAccount,
@@ -1904,13 +1924,15 @@
                         const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
                         let tokenName = "Unknown";
                         let tokenSymbol = "UNK";
+                        let decimals = 18; // Default to 18 if decimals call fails
                         try {
                             tokenName = await withRetry(() => tokenContract.methods.name().call());
                             tokenSymbol = await withRetry(() => tokenContract.methods.symbol().call());
+                            decimals = await withRetry(() => tokenContract.methods.decimals().call());
                         } catch (error) {
-                            logMessage(`Failed to fetch token name/symbol for ${tokenAddress}: ${error.message}`);
+                            logMessage(`Failed to fetch token name/symbol/decimals for ${tokenAddress}: ${error.message}`);
                         }
-                        daos.push({ daoAddress, token: tokenAddress, tokenName, tokenSymbol, daoInfo, countNonRespondersAsYes, votingPeriod });
+                        daos.push({ daoAddress, token: tokenAddress, tokenName, tokenSymbol, daoInfo, countNonRespondersAsYes, votingPeriod, decimals });
                     } catch (error) {
                         logMessage(`Failed to fetch DAO info for ${daoAddress}: ${error.message}`);
                     }
@@ -1924,9 +1946,10 @@
                 }
 
                 for (const dao of daos) {
-                    const { daoAddress, token, tokenName, tokenSymbol, daoInfo, countNonRespondersAsYes, votingPeriod } = dao;
+                    const { daoAddress, token, tokenName, tokenSymbol, daoInfo, countNonRespondersAsYes, votingPeriod, decimals } = dao;
                     const ethBalance = web3.utils.fromWei(daoInfo.ethBalance, 'ether');
                     const tokenBalance = daoInfo.tokenBalance ? web3.utils.fromWei(daoInfo.tokenBalance, 'ether') : '0';
+                    const formattedTotalSupply = (Number(daoInfo.totalSupply) / (10 ** decimals)).toFixed(4);
                     const votingPeriodDays = (Number(votingPeriod) / (24 * 60 * 60)).toFixed(2);
                     const lastProposalTime = daoInfo.lastProposalTime > 0 ? new Date(Number(daoInfo.lastProposalTime) * 1000).toLocaleDateString() : "None";
 
@@ -1962,87 +1985,97 @@
                             <h3>${tokenName}</h3>
                             <span>${tokenSymbol}</span>
                         </div>
-                       <div class="dao-card-details">
-    <div>
-        <label>DAO Address</label>
-        <span>${daoAddress.slice(0, 6)}...${daoAddress.slice(-4)}</span>
-    </div>
-    <div>
-        <label>Token Address</label>
-        <span>${token.slice(0, 6)}...${token.slice(-4)}</span>
-    </div>
-    <div>
-        <label>Total Supply</label>
-        <span>${Number(daoInfo.totalSupply).toLocaleString()}</span>
-    </div>
-    <div>
-        <label>ETH Balance</label>
-        <span>${Number(ethBalance).toFixed(4)} ETH</span>
-    </div>
-    <div>
-        <label>Token Balance</label>
-        <span>${Number(tokenBalance).toFixed(4)}</span>
-    </div>
-    <div>
-        <label>Voting Period</label>
-        <span>${votingPeriodDays} days</span>
-    </div>
-    <div>
-        <label>Non-Responders Vote Yes</label>
-        <span>${countNonRespondersAsYes ? "Yes" : "No"}</span>
-    </div>
-    <div>
-        <label>Proposal Count</label>
-        <span>${daoInfo.proposalCount}</span>
-    </div>
-    <div>
-        <label>Active Proposals</label>
-        <span>${daoInfo.activeProposals}</span>
-    </div>
-    <div>
-        <label>Proposals Per Day</label>
-        <span>${daoInfo.proposalCountPerDay}</span>
-    </div>
-    <div>
-        <label>Last Proposal</label>
-        <span>${lastProposalTime}</span>
-    </div>
-</div>
-<div class="dao-actions">
-    <button onclick="document.getElementById('proposal-form-${daoAddress}').style.display='block';">Create Proposal</button>
-    <button onclick="document.getElementById('vote-form-${daoAddress}').style.display='block';">Vote</button>
-</div>
-<div class="proposal-form" id="proposal-form-${daoAddress}" style="display: none;">
-    <label for="proposal-description-${daoAddress}">Description:</label>
-    <input id="proposal-description-${daoAddress}" type="text" placeholder="e.g., Swap ETH for tokens" />
-    <label for="proposal-type-${daoAddress}">Proposal Type:</label>
-    <select id="proposal-type-${daoAddress}">
-        <option value="0">Swap ETH to ERC20</option>
-        <option value="1">Swap ERC20 to ETH</option>
-        <option value="2">Withdraw ETH</option>
-        <option value="3">Withdraw ERC20</option>
-    </select>
-    <label for="proposal-destination-${daoAddress}">Destination Address:</label>
-    <input id="proposal-destination-${daoAddress}" type="text" placeholder="e.g., 0xDestination" />
-    <label for="proposal-amount-${daoAddress}">Amount (in tokens or ETH):</label>
-    <input id="proposal-amount-${daoAddress}" type="number" placeholder="e.g., 1" step="0.0001" />
-    <label for="proposal-token-address-${daoAddress}">Token Address:</label>
-    <input id="proposal-token-address-${daoAddress}" type="text" placeholder="e.g., 0xToken" />
-    <button onclick="createProposal('${daoAddress}')">Submit Proposal</button>
-</div>
-<div class="vote-form" id="vote-form-${daoAddress}" style="display: none;">
-    <label for="vote-proposal-id-${daoAddress}">Proposal ID:</label>
-    <input id="vote-proposal-id-${daoAddress}" type="number" placeholder="e.g., 0" min="0" step="1" />
-    <label for="vote-support-${daoAddress}">Vote:</label>
-    <select id="vote-support-${daoAddress}">
-        <option value="true">Yes</option>
-        <option value="false">No</option>
-    </select>
-    <button onclick="voteOnProposal('${daoAddress}')">Submit Vote</button>
-</div>
-${proposalsHtml}
-`;
+                        <div class="dao-card-details">
+                            <div>
+                                <label>DAO Address</label>
+                                <span>${daoAddress.slice(0, 6)}...${daoAddress.slice(-4)}</span>
+                            </div>
+                            <div>
+                                <label>Token Address</label>
+                                <span>${token.slice(0, 6)}...${token.slice(-4)}</span>
+                            </div>
+                            <div>
+                                <label>Total Supply</label>
+                                <span>${formattedTotalSupply}</span>
+                            </div>
+                            <div>
+                                <label>ETH Balance</label>
+                                <span>${Number(ethBalance).toFixed(4)} ETH</span>
+                            </div>
+                            <div>
+                                <label>Token Balance</label>
+                                <span>${Number(tokenBalance).toFixed(4)}</span>
+                            </div>
+                            <div>
+                                <label>Voting Period</label>
+                                <span>${votingPeriodDays} days</span>
+                            </div>
+                            <div>
+                                <label>Non-Responders Vote Yes</label>
+                                <span>${countNonRespondersAsYes ? "Yes" : "No"}</span>
+                            </div>
+                                                       <div>
+                                <label>Proposal Count</label>
+                                <span>${daoInfo.proposalCount}</span>
+                            </div>
+                            <div>
+                                <label>Active Proposals</label>
+                                <span>${daoInfo.activeProposals}</span>
+                            </div>
+                            <div>
+                                <label>Proposals Per Day</label>
+                                <span>${daoInfo.proposalCountPerDay}</span>
+                            </div>
+                            <div>
+                                <label>Last Proposal</label>
+                                <span>${lastProposalTime}</span>
+                            </div>
+                        </div>
+                        <div class="dao-actions">
+                            <button onclick="document.getElementById('proposal-form-${daoAddress}').style.display='block';">Create Proposal</button>
+                            <button onclick="document.getElementById('vote-form-${daoAddress}').style.display='block';">Vote</button>
+                        </div>
+                        <div class="proposal-form" id="proposal-form-${daoAddress}" style="display: none;">
+                            <label for="proposal-description-${daoAddress}">Description:</label>
+                            <input id="proposal-description-${daoAddress}" type="text" placeholder="e.g., Swap ETH for tokens" />
+                            <label for="proposal-type-${daoAddress}">Proposal Type:</label>
+                            <select id="proposal-type-${daoAddress}" onchange="toggleDestinationField('${daoAddress}')">
+                                <option value="0">Swap ETH to ERC20</option>
+                                <option value="1">Swap ERC20 to ETH</option>
+                                <option value="2">Withdraw ETH</option>
+                                <option value="3">Withdraw ERC20</option>
+                            </select>
+                            <label id="proposal-destination-label-${daoAddress}" for="proposal-destination-${daoAddress}" style="display: none;">Destination Address:</label>
+                            <input id="proposal-destination-${daoAddress}" type="text" placeholder="e.g., 0xDestination" style="display: none;" />
+                            <label for="proposal-amount-${daoAddress}">Amount (in tokens or ETH):</label>
+                            <input id="proposal-amount-${daoAddress}" type="number" placeholder="e.g., 1" step="0.0001" />
+                            <label for="proposal-token-address-${daoAddress}">Token Address:</label>
+                            <input id="proposal-token-address-${daoAddress}" type="text" placeholder="e.g., 0xToken" />
+                            <button onclick="createProposal('${daoAddress}')">Submit Proposal</button>
+                        </div>
+                        <div class="vote-form" id="vote-form-${daoAddress}" style="display: none;">
+                            <label for="vote-proposal-id-${daoAddress}">Proposal ID:</label>
+                            <input id="vote-proposal-id-${daoAddress}" type="number" placeholder="e.g., 0" min="0" step="1" />
+                            <label for="vote-support-${daoAddress}">Vote:</label>
+                            <select id="vote-support-${daoAddress}">
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                            </select>
+                            <button onclick="voteOnProposal('${daoAddress}')">Submit Vote</button>
+                        </div>
+                        ${proposalsHtml}
+                    `;
                     cardContainer.appendChild(card);
+
+                    // Add event listener for proposal type change after card is added to DOM
+                    setTimeout(() => {
+                        const selectElement = document.getElementById(`proposal-type-${daoAddress}`);
+                        if (selectElement) {
+                            selectElement.addEventListener('change', () => toggleDestinationField(daoAddress));
+                            // Initialize destination field visibility
+                            toggleDestinationField(daoAddress);
+                        }
+                    }, 0);
                 }
 
                 statusMessage.innerText = `Loaded ${daos.length} DAOs successfully!`;
@@ -2053,6 +2086,16 @@ ${proposalsHtml}
                 statusMessage.innerText = `Failed to load DAOs: ${error.message}. Ensure contract is accessible at ${FACTORY_ADDRESS}.`;
                 statusMessage.className = "error-message";
             }
+        }
+
+        function toggleDestinationField(daoAddress) {
+            const proposalType = parseInt(document.getElementById(`proposal-type-${daoAddress}`).value);
+            const destinationLabel = document.getElementById(`proposal-destination-label-${daoAddress}`);
+            const destinationInput = document.getElementById(`proposal-destination-${daoAddress}`);
+            // Show destination field only for Withdraw ETH (2) and Withdraw ERC20 (3)
+            const shouldShow = proposalType === 2 || proposalType === 3;
+            destinationLabel.style.display = shouldShow ? 'block' : 'none';
+            destinationInput.style.display = shouldShow ? 'block' : 'none';
         }
 
         window.addEventListener('load', async () => {
