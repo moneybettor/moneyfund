@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoneyFund - World's Biggest Hedge Fun</title>
+    <title>MoneyFund - World's Biggest Hedge Fund</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
     <style>
         * {
@@ -15,8 +15,8 @@
 
         body {
             overflow-x: hidden;
-            background: linear-gradient(45deg, #03080f, #060e1a, #0a1426, #0e1b33, #12223f, #16294c); /* Significantly darker blue gradient */
-            background-size: 600% 600%; /* Smooth, dynamic lines */
+            background: linear-gradient(45deg, #03080f, #060e1a, #0a1426, #0e1b33, #12223f, #16294c); /* Darker gradient restored */
+            background-size: 920% 920%; /* Increased to reduce line density by ~35% */
             animation: gradientShift 20s ease infinite; /* Elegant flow */
             color: #ffffff; /* Unified white text */
             position: relative;
@@ -52,7 +52,7 @@
             padding: 73.6px 27.6px; /* Increased 15% from 64px 24px */
             background: #0a2f2a url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E'); /* Dark teal */
             border-radius: 12px; /* Soft, modern radius */
-            border: 1px solid rgba(232, 185, 35, 0.25); /* Subtle gold border */
+            border: 2px solid rgba(232, 185, 35, 0.25); /* Widened gold border */
             box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4), 0 0 10px rgba(46, 79, 63, 0.2); /* Shadow with green glow */
             max-width: 828px; /* Increased 15% from 720px */
             margin: 0 auto;
@@ -79,19 +79,19 @@
         .cta-button {
             display: inline-block;
             padding: 16.56px 36.8px; /* Increased 15% from 14.4px 32px */
-            background: linear-gradient(45deg, #0a1a2b, #1e375f); /* Dark blue gradient matching body */
+            background: linear-gradient(45deg, #1a3a6b, #3665a8); /* Lighter blue gradient */
             color: #ffffff; /* White text */
             text-decoration: none;
             font-weight: 600; /* Semi-bold */
             font-size: 1.058rem; /* Increased 15% from 0.92rem */
             border-radius: 8px; /* Soft radius */
-            border: 1px solid rgba(232, 185, 35, 0.35); /* Subtle gold border */
+            border: 2px solid rgba(232, 185, 35, 0.35); /* Widened gold border */
             transition: background 0.3s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease, box-shadow 0.3s ease;
             box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3); /* Subtle shadow */
         }
 
         .cta-button:hover {
-            background: linear-gradient(45deg, #10233f, #25416f); /* Slightly lighter dark blue gradient */
+            background: linear-gradient(45deg, #2a4a8b, #4878b8); /* Lighter blue hover gradient */
             transform: translateY(-3px); /* Pronounced lift */
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
         }
