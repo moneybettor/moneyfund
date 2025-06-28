@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoneyFund - World's Biggest Hedge Fund</title>
+    <title>MoneyFund - World's Biggest Hedge Fun</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
     <style>
         * {
@@ -140,7 +140,7 @@
     <div id="particles-js-secondary"></div>
     <div class="content">
         <div class="hero">
-            <h2>World's Biggest Hedge Fund</h2>
+            <h2>World's Biggest Hedge Fun</h2>
             <p>The Ticker is MONEY</p>
             <a href="https://moneyfund.com/aboutmoney" class="cta-button" id="cta-button">Read The Whitepaper</a>
         </div>
