@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* [Original CSS unchanged] */
         * {
             margin: 0;
             padding: 0;
@@ -568,11 +567,9 @@
     </div>
 
     <script>
-        const FACTORY_ADDRESS = "0xd846D1a576776a70412b473d2479362953e4C5d5";
+        const FACTORY_ADDRESS = "0x1e9fad843af0e7bc66095f9663b6cbb2992f3d91";
         const RPC_ENDPOINTS = [
-            'https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73',
-            'https://rpc.ankr.com/eth',
-            'https://cloudflare-eth.com'
+            'https://mainnet.infura.io/v3/cf2916fb6dbc47ae824d6f36db817b73'
         ];
         let currentRpcIndex = 0;
 
@@ -622,9 +619,799 @@
             }
         }
 
-        const factoryAbi = [/* [Original factoryAbi unchanged] */];
-        const poolAbi = [/* [Original poolAbi unchanged] */];
-        const erc20Abi = [/* [Original erc20Abi unchanged] */];
+        const factoryAbi = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "hardLockDuration",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "initialPenaltyPercent",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "penaltyDecayPercentPerDay",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "createPool",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "poolAddr",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "DecayTooFast",
+                "type": "error"
+            },
+            {
+                "inputs": [],
+                "name": "InvalidToken",
+                "type": "error"
+            },
+            {
+                "inputs": [],
+                "name": "NotERC20",
+                "type": "error"
+            },
+            {
+                "inputs": [],
+                "name": "ParamOutOfRange",
+                "type": "error"
+            },
+            {
+                "inputs": [],
+                "name": "PoolExists",
+                "type": "error"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "string",
+                        "name": "reason",
+                        "type": "string"
+                    }
+                ],
+                "name": "PoolInitializationFailed",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "poolAddress",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "hardLockDuration",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "initialPenaltyPercent",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "penaltyDecayPercentPerDay",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "StakingPoolCreated",
+                "type": "event"
+            },
+            {
+                "inputs": [],
+                "name": "getAllPools",
+                "outputs": [
+                    {
+                        "internalType": "address[]",
+                        "name": "",
+                        "type": "address[]"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    }
+                ],
+                "name": "getPool",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "pools",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        const poolAbi = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_factory",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "_token",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_hardLockDuration",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_initialPenaltyPercent",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_penaltyDecayPercentPerDay",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            },
+            {
+                "inputs": [],
+                "name": "InsufficientBalance",
+                "type": "error"
+            },
+            {
+                "inputs": [],
+                "name": "InvalidAmount",
+                "type": "error"
+            },
+            {
+                "inputs": [],
+                "name": "InvalidToken",
+                "type": "error"
+            },
+            {
+                "inputs": [],
+                "name": "Locked",
+                "type": "error"
+            },
+            {
+                "inputs": [],
+                "name": "NoStake",
+                "type": "error"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "owner",
+                        "type": "address"
+                    }
+                ],
+                "name": "OwnableInvalidOwner",
+                "type": "error"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "account",
+                        "type": "address"
+                    }
+                ],
+                "name": "OwnableUnauthorizedAccount",
+                "type": "error"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "token",
+                        "type": "address"
+                    }
+                ],
+                "name": "SafeERC20FailedOperation",
+                "type": "error"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "oldRecip",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "newRecip",
+                        "type": "address"
+                    }
+                ],
+                "name": "FeeRecipientUpdated",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "previousOwner",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "newOwner",
+                        "type": "address"
+                    }
+                ],
+                "name": "OwnershipTransferred",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "user",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "address",
+                        "name": "rewardTok",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amt",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "RewardsClaimed",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "user",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amt",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "Staked",
+                "type": "event"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "user",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "amt",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "penalty",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "Unstaked",
+                "type": "event"
+            },
+            {
+                "inputs": [],
+                "name": "FEE_DENOMINATOR",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "FEE_PERCENT",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "HARD_LOCK_DURATION",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "INITIAL_PENALTY_PERCENT",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "MIN_STAKE",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "PENALTY_DECAY_PERCENT_PER_DAY",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "rewardToken",
+                        "type": "address"
+                    }
+                ],
+                "name": "claimReward",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address[]",
+                        "name": "rewardTokens_",
+                        "type": "address[]"
+                    }
+                ],
+                "name": "claimRewards",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "factoryAddress",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "feeRecipient",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "owner",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "renounceOwnership",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "rewardPerTokenStored",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "rewardTokens",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "rewards",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "stake",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "stakes",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "amount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "stakeTimestamp",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "token",
+                "outputs": [
+                    {
+                        "internalType": "contract IERC20",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "tokenBalance",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "totalStaked",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "newOwner",
+                        "type": "address"
+                    }
+                ],
+                "name": "transferOwnership",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "unstake",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "newRecipient",
+                        "type": "address"
+                    }
+                ],
+                "name": "updateFeeRecipient",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "name": "userRewardPerTokenPaid",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "stateMutability": "payable",
+                "type": "receive"
+            }
+        ];
+
+        const erc20Abi = [
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "name",
+                "outputs": [
+                    { "name": "", "type": "string" }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "symbol",
+                "outputs": [
+                    { "name": "", "type": "string" }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "decimals",
+                "outputs": [
+                    { "name": "", "type": "uint8" }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    { "name": "_owner", "type": "address" }
+                ],
+                "name": "balanceOf",
+                "outputs": [
+                    { "name": "balance", "type": "uint256" }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    { "name": "_to", "type": "address" },
+                    { "name": "_value", "type": "uint256" }
+                ],
+                "name": "transfer",
+                "outputs": [
+                    { "name": "success", "type": "bool" }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    { "name": "_spender", "type": "address" },
+                    { "name": "_value", "type": "uint256" }
+                ],
+                "name": "approve",
+                "outputs": [
+                    { "name": "success", "type": "bool" }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
 
         function getWeb3() {
             return new Web3(RPC_ENDPOINTS[currentRpcIndex]);
@@ -695,7 +1482,7 @@
             console.log(`${type.toUpperCase()}: ${message}`);
             const statusLog = document.getElementById('status-log');
             const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const emoji = type === 'success' ? 'ðŸš€' : type === 'error' ? 'ðŸŒˆ' : '';
+            const emoji = type === 'success' ? '🚀' : type === 'error' ? '🌈' : '';
             let displayMessage = message;
             if (type === 'success') {
                 displayMessage = message.replace(txHashRegex, hash => `<a href="https://etherscan.io/tx/${hash}" target="_blank" rel="noopener noreferrer">${hash.slice(0, 6)}...${hash.slice(-4)}</a>`);
@@ -1057,13 +1844,6 @@
                     throw new Error("Invalid pool address received.");
                 }
 
-                // Add token to tracked tokens
-                const trackedTokens = JSON.parse(localStorage.getItem('trackedTokens') || '[]');
-                if (!trackedTokens.includes(token)) {
-                    trackedTokens.push(token);
-                    localStorage.setItem('trackedTokens', JSON.stringify(trackedTokens));
-                }
-
                 logStatus(`Dividend pool for token ${token.slice(0, 6)}...${token.slice(-4)} created at: ${poolAddress.slice(0, 6)}...${poolAddress.slice(-4)}! Transaction: ${tx.transactionHash || tx.hash}`, 'success');
                 console.log(`Dividend pool created at: ${poolAddress}: ${tx.transactionHash || tx.hash}`);
                 await refreshPools();
@@ -1343,7 +2123,7 @@
                     if (!selectedWallet.privateKey || !validatePrivateKey(selectedWallet.privateKey)) {
                         throw new Error("MoneyFund wallet private key missing or invalid.");
                     }
-                    const txData = pool.methods.claimRewards(rewardTokens).encodeABI();
+                                        const txData = pool.methods.claimRewards(rewardTokens).encodeABI();
                     const nonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
                     const transactionObject = {
                         from: userAccount,
@@ -1372,22 +2152,23 @@
                 poolContainer.innerHTML = '';
 
                 const factory = new web3.eth.Contract(factoryAbi, FACTORY_ADDRESS);
-                const tokens = JSON.parse(localStorage.getItem('trackedTokens') || '[]').filter(validateAddress);
+                const poolAddresses = await withRetry(() => factory.methods.getAllPools().call());
 
-                if (!tokens.length) {
-                    poolContainer.innerHTML = '<p style="text-align: center; color: #D1D5DB;">No pools tracked. Create a pool or add a token address.</p>';
+                if (!poolAddresses.length || poolAddresses.every(addr => addr === '0x0000000000000000000000000000000000000000')) {
+                    poolContainer.innerHTML = '<p style="text-align: center; color: #D1D5DB;">No pools found. Create a pool to get started.</p>';
                     return;
                 }
 
-                for (const token of tokens) {
+                for (const poolAddress of poolAddresses.filter(validateAddress)) {
                     try {
-                        const poolAddress = await withRetry(() => factory.methods.getPool(token).call());
-                        if (!validateAddress(poolAddress) || poolAddress === '0x0000000000000000000000000000000000000000') {
+                        const pool = new web3.eth.Contract(poolAbi, poolAddress);
+                        const tokenAddress = await withRetry(() => pool.methods.token().call());
+                        if (!validateAddress(tokenAddress)) {
+                            console.error(`Invalid token address for pool ${poolAddress}`);
                             continue;
                         }
 
-                        const pool = new web3.eth.Contract(poolAbi, poolAddress);
-                        const tokenContract = new web3.eth.Contract(erc20Abi, token);
+                        const tokenContract = new web3.eth.Contract(erc20Abi, tokenAddress);
 
                         const [name, symbol, decimals, hardLockDuration, initialPenaltyPercent, penaltyDecayPercent, totalStaked, userStake] = await Promise.all([
                             withRetry(() => tokenContract.methods.name().call()).catch(() => 'Unknown'),
@@ -1414,7 +2195,7 @@
                                 </div>
                                 <div>
                                     <label>Token Address</label>
-                                    <span>${token.slice(0, 6)}...${token.slice(-4)}</span>
+                                    <span>${tokenAddress.slice(0, 6)}...${tokenAddress.slice(-4)}</span>
                                 </div>
                                 <div>
                                     <label>Hard Lock</label>
@@ -1455,43 +2236,44 @@
                         `;
                         poolContainer.appendChild(poolCard);
                     } catch (err) {
-                        console.error(`Error loading pool for token ${token}: ${err.message}`);
+                        console.error(`Error loading pool ${poolAddress}: ${err.message}`);
                     }
                 }
-            } catch (error) {
-                console.error(`Refresh pools failed: ${error.message}`);
-                logStatus(`Failed to refresh pools: ${error.message}`, 'error');
+            } catch (err) {
+                console.error(`Failed to refresh pools: ${err.message}`);
+                logStatus(`Failed to refresh pools: ${err.message}`, 'error');
+                poolContainer.innerHTML = '<p style="text-align: center; color: #D1D5DB;">Failed to load pools. Please try again later.</p>';
             }
         }
 
         async function handleStake(poolAddress) {
-            const amountInput = document.getElementById(`stake-amount-${poolAddress}`);
-            const amount = amountInput.value;
-            const button = amountInput.nextElementSibling;
+            const button = document.querySelector(`#stake-amount-${poolAddress}`).parentElement.querySelector('.stake-button');
             const originalText = showSpinner(button);
-
+            const amount = document.getElementById(`stake-amount-${poolAddress}`).value;
+            logStatus(`Initiating stake of ${amount} tokens in pool ${poolAddress.slice(0, 6)}...${poolAddress.slice(-4)}...`);
             try {
-                logStatus(`Initiating stake of ${amount} tokens in pool ${poolAddress.slice(0, 6)}...${poolAddress.slice(-4)}...`);
                 const result = await stakeTokens(poolAddress, amount);
                 if (result.error) {
                     logStatus(result.error, 'error');
                     alert(result.error);
                 } else {
                     logStatus(result.success, 'success');
-                    amountInput.value = '';
                     await refreshPools();
                 }
+            } catch (err) {
+                console.error(`Stake failed: ${err.message}`);
+                logStatus(`Failed to stake tokens: ${err.message}`, 'error');
+                alert(`Failed to stake tokens: ${err.message}`);
             } finally {
                 hideSpinner(button, originalText);
             }
         }
 
         async function handleUnstake(poolAddress) {
-            const button = event.target;
+            const button = document.querySelector(`.unstake-button[onclick="handleUnstake('${poolAddress}')"]`);
             const originalText = showSpinner(button);
-
+            logStatus(`Initiating unstake from pool ${poolAddress.slice(0, 6)}...${poolAddress.slice(-4)}...`);
             try {
-                logStatus(`Initiating unstake from pool ${poolAddress.slice(0, 6)}...${poolAddress.slice(-4)}...`);
                 const result = await unstakeTokens(poolAddress);
                 if (result.error) {
                     logStatus(result.error, 'error');
@@ -1500,39 +2282,29 @@
                     logStatus(result.success, 'success');
                     await refreshPools();
                 }
+            } catch (err) {
+                console.error(`Unstake failed: ${err.message}`);
+                logStatus(`Failed to unstake tokens: ${err.message}`, 'error');
+                alert(`Failed to unstake tokens: ${err.message}`);
             } finally {
                 hideSpinner(button, originalText);
             }
         }
 
         async function handleClaimRewards(poolAddress) {
-            const button = event.target;
+            const button = document.querySelector(`.claim-rewards-button[onclick="handleClaimRewards('${poolAddress}')"]`);
             const originalText = showSpinner(button);
-
+            logStatus(`Initiating reward claim from pool ${poolAddress.slice(0, 6)}...${poolAddress.slice(-4)}...`);
             try {
-                logStatus(`Initiating reward claim from pool ${poolAddress.slice(0, 6)}...${poolAddress.slice(-4)}...`);
                 const pool = new web3.eth.Contract(poolAbi, poolAddress);
-                const rewardTokens = [];
-                let i = 0;
-                while (true) {
-                    try {
-                        const token = await withRetry(() => pool.methods.rewardTokens(i).call());
-                        if (validateAddress(token) && token !== '0x0000000000000000000000000000000000000000') {
-                            rewardTokens.push(token);
-                        }
-                        i++;
-                    } catch {
-                        break;
-                    }
-                }
-
-                if (!rewardTokens.length) {
+                const rewardTokens = await withRetry(() => pool.methods.rewardTokens().call());
+                const validRewardTokens = rewardTokens.filter(validateAddress);
+                if (validRewardTokens.length === 0) {
                     logStatus("No reward tokens available to claim.", 'error');
                     alert("No reward tokens available to claim.");
                     return;
                 }
-
-                const result = await claimRewards(poolAddress, rewardTokens);
+                const result = await claimRewards(poolAddress, validRewardTokens);
                 if (result.error) {
                     logStatus(result.error, 'error');
                     alert(result.error);
@@ -1540,6 +2312,10 @@
                     logStatus(result.success, 'success');
                     await refreshPools();
                 }
+            } catch (err) {
+                console.error(`Claim rewards failed: ${err.message}`);
+                logStatus(`Failed to claim rewards: ${err.message}`, 'error');
+                alert(`Failed to claim rewards: ${err.message}`);
             } finally {
                 hideSpinner(button, originalText);
             }
@@ -1547,7 +2323,7 @@
 
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
-                logStatus(`Copied address ${text.slice(0, 6)}...${text.slice(-4)} to clipboard!`, 'success');
+                logStatus(`Copied address ${text.slice(0, 6)}...${text.slice(-4)} to clipboard`, 'success');
             }).catch(err => {
                 console.error(`Failed to copy: ${err.message}`);
                 logStatus(`Failed to copy address: ${err.message}`, 'error');
@@ -1559,58 +2335,38 @@
             const initialPenalty = document.getElementById('breakeven-initial-penalty').value;
             const decay = document.getElementById('breakeven-decay').value;
 
-            document.getElementById('hard-lock-duration').value = hardLock;
-            document.getElementById('initial-penalty-percent').value = initialPenalty;
-            document.getElementById('penalty-decay-percent').value = decay;
+            document.getElementById('breakeven-hard-lock').value = hardLock;
+            document.getElementById('breakeven-initial-penalty').value = initialPenalty;
+            document.getElementById('breakeven-decay').value = decay;
 
-            const hardLockNum = validateInteger(hardLock, 0);
-            const initialPenaltyNum = validateInteger(initialPenalty, 0, 100);
-            const decayNum = validateDecimal(decay, 0, 100, 4);
-
-            if (hardLockNum && initialPenaltyNum && decayNum && parseFloat(decayNum) > 0) {
-                const breakevenDays = parseInt(hardLockNum) + (parseInt(initialPenaltyNum) / parseFloat(decayNum));
-                document.getElementById('breakeven-result').innerText = breakevenDays.toFixed(2);
-            } else {
-                document.getElementById('breakeven-result').innerText = '0';
+            let result = '0';
+            try {
+                const hardLockNum = validateInteger(hardLock, 0);
+                const initialPenaltyNum = validateInteger(initialPenalty, 0, 100);
+                const decayNum = validateDecimal(decay, 0, 100, 4);
+                if (hardLockNum && initialPenaltyNum && decayNum) {
+                    const breakevenDays = Number(hardLockNum) + (Number(initialPenaltyNum) / Number(decayNum));
+                    result = breakevenDays.toFixed(2);
+                }
+            } catch (e) {
+                console.error(`Breakeven calculation error: ${e.message}`);
             }
+            document.getElementById('breakeven-result').textContent = result;
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
             loadStatusLog();
             await initializeWallets();
             await refreshPools();
+            updateBreakevenFormula();
 
-            if (window.ethereum) {
-                window.ethereum.on('accountsChanged', async (accounts) => {
-                    console.log("Accounts changed:", accounts);
-                    if (accounts.length === 0) {
-                        selectedWallet = null;
-                        userAccount = null;
-                        signer = null;
-                        document.getElementById('wallet-selector').value = "";
-                        localStorage.removeItem('selectedWalletIndex');
-                        logStatus("Wallet disconnected.", 'error');
-                    } else {
-                        await connectWallet();
-                    }
-                    await refreshPools();
+            const inputs = ['hard-lock-duration', 'initial-penalty-percent', 'penalty-decay-percent'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', () => {
+                    document.getElementById(`breakeven-${id}`).value = document.getElementById(id).value;
+                    updateBreakevenFormula();
                 });
-
-                window.ethereum.on('chainChanged', async (chainId) => {
-                    console.log(`Chain changed to: ${chainId}`);
-                    if (parseInt(chainId, 16) !== 1) {
-                        logStatus("Please switch to Ethereum Mainnet.", 'error');
-                        selectedWallet = null;
-                        userAccount = null;
-                        signer = null;
-                        document.getElementById('wallet-selector').value = "";
-                        localStorage.removeItem('selectedWalletIndex');
-                    } else {
-                        await initializeWallets();
-                    }
-                    await refreshPools();
-                });
-            }
+            });
         });
     </script>
 </body>
