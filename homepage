@@ -80,6 +80,7 @@
 
         .cta-button:hover {
             background: linear-gradient(45deg, #2a4a8b, #4878b8);
+            color: #ffffff; /* Ensure text stays white on hover */
             transform: translateY(-3px);
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
         }
@@ -137,20 +138,20 @@
     <script>
         particlesJS("particles-js", {
             particles: {
-                number: { value: 1350, density: { enable: true, value_area: 800 } }, /* 50% more than 900 */
-                color: { value: ["#d4a017", "#a8b5a2", "#3665a8", "#ff6b6b", "#ffffff", "#b0e0e6", "#ffdb58"] }, /* Multicolored */
-                shape: { type: "circle" }, /* Dots only */
+                number: { value: 1350, density: { enable: true, value_area: 800 } },
+                color: { value: ["#d4a017", "#a8b5a2", "#3665a8", "#ff6b6b", "#ffffff", "#b0e0e6", "#ffdb58"] },
+                shape: { type: "circle" },
                 opacity: { value: 0.6, random: true },
-                size: { value: 1.5, random: true, anim: { enable: false } }, /* Mostly very small, varying sizes */
+                size: { value: 1.5, random: true, anim: { enable: false } },
                 move: { 
                     enable: true, 
-                    speed: 1, /* Increased base speed for more variation */
-                    direction: "none", /* Random directions */
+                    speed: 1, 
+                    direction: "none", 
                     random: true, 
                     straight: false, 
                     out_mode: "out" 
-                }, /* Greater speed variation */
-                line_linked: { enable: false } /* No lines */
+                },
+                line_linked: { enable: false }
             },
             interactivity: {
                 detect_on: "canvas",
