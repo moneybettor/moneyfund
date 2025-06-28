@@ -1,0 +1,296 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
+// Uniswap V2 Router Interface
+interface IUniswapV2Router {
+    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
+        external
+        payable
+        returns (uint[] memory amounts);
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+        external
+        returns (uint[] memory amounts);
+    function WETH() external pure returns (address);
+}
+
+contract DAO is ReentrancyGuard {
+    using SafeMath for uint256;
+    using SafeERC20 for IERC20;
+
+    IERC20 public token;
+    uint256 public votingPeriod;
+    uint256 public constant PROPOSAL_COOLDOWN = 24 hours;
+    address public constant UNISWAP_V2_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+    address public factory;
+    uint256 public proposalCount;
+    uint256 public proposalCountPerDay;
+    uint256 public lastProposalTime;
+    bool public countNonRespondersAsYes;
+
+    address public constant TREASURY = 0x9759883ea07e2cA1E2d32E97f42d254841616AB5;
+    uint256 public constant WITHDRAWAL_FEE_PERCENTAGE = 100; // 1% fee (100 basis points)
+
+    struct Proposal {
+        uint256 id;
+        address proposer;
+        string description;
+        ProposalType proposalType;
+        address destination;
+        uint256 amount;
+        address tokenAddress;
+        uint256 yesVotes;
+        uint256 startTime;
+        bool executed;
+    }
+
+    struct DAOInfo {
+        address tokenAddress;
+        uint256 totalSupply; // Will reflect current totalSupply
+        uint256 ethBalance;
+        uint256 tokenBalance;
+        uint256 proposalCount;
+        uint256 activeProposals;
+        Proposal[] proposals;
+        address uniswapRouter;
+        address factory;
+        uint256 proposalCountPerDay;
+        uint256 lastProposalTime;
+    }
+
+    enum ProposalType { SwapETHtoERC20, SwapERC20toETH, WithdrawETH, WithdrawERC20 }
+
+    mapping(uint256 => Proposal) public proposals;
+    mapping(uint256 => mapping(address => bool)) public hasVoted;
+
+    event FeeCollected(address indexed recipient, uint256 amount, address tokenAddress, string reason);
+    event ProposalCreated(uint256 indexed proposalId, address proposer, string description, ProposalType proposalType);
+    event Voted(uint256 indexed proposalId, address voter, bool vote);
+    event ProposalExecuted(uint256 indexed proposalId, bool passed);
+
+    modifier onlyTokenHolders() {
+        uint256 balance = token.balanceOf(msg.sender);
+        require(balance >= 1, "Must hold at least 1 token to participate");
+        _;
+    }
+
+    constructor(
+        address _token,
+        uint256 _votingPeriod,
+        bool _countNonRespondersAsYes
+    ) {
+        require(_token != address(0), "Invalid token address");
+        require(_votingPeriod >= 3600, "Voting period too short"); // Minimum 1 hour
+        token = IERC20(_token);
+        votingPeriod = _votingPeriod;
+        countNonRespondersAsYes = _countNonRespondersAsYes;
+        factory = msg.sender;
+    }
+
+    function getDAOInfo() external view returns (DAOInfo memory) {
+        uint256 activeCount = 0;
+        Proposal[] memory allProposals = new Proposal[](proposalCount);
+        for (uint256 i = 0; i < proposalCount; i++) {
+            allProposals[i] = proposals[i];
+            if (!proposals[i].executed && block.timestamp <= proposals[i].startTime.add(votingPeriod)) {
+                activeCount++;
+            }
+        }
+
+        return DAOInfo({
+            tokenAddress: address(token),
+            totalSupply: token.totalSupply(), // Dynamic totalSupply
+            ethBalance: address(this).balance,
+            tokenBalance: token.balanceOf(address(this)),
+            proposalCount: proposalCount,
+            activeProposals: activeCount,
+            proposals: allProposals,
+            uniswapRouter: UNISWAP_V2_ROUTER,
+            factory: factory,
+            proposalCountPerDay: proposalCountPerDay,
+            lastProposalTime: lastProposalTime
+        });
+    }
+
+    function getVotingWeight(address voter) public view returns (uint256) {
+        uint256 balance = token.balanceOf(voter);
+        if (balance == 0) return 0;
+
+        uint256 currentTotalSupply = token.totalSupply();
+        if (currentTotalSupply == 0) return 0; // Prevent division by zero
+
+        // Calculate weight as a fraction of total supply (scaled to 1e18 for precision)
+        return balance.mul(1e18).div(currentTotalSupply);
+    }
+
+    function createProposal(
+        string memory description,
+        ProposalType proposalType,
+        address destination,
+        uint256 amount,
+        address tokenAddress
+    ) external onlyTokenHolders {
+        if (block.timestamp >= lastProposalTime.add(PROPOSAL_COOLDOWN)) {
+            proposalCountPerDay = 0;
+            lastProposalTime = block.timestamp;
+        }
+        require(proposalCountPerDay < 5, "Max 5 proposals per day");
+        require(proposalType <= ProposalType.WithdrawERC20, "Invalid proposal type");
+
+        uint256 proposalId = proposalCount;
+        Proposal storage newProposal = proposals[proposalId];
+        newProposal.id = proposalId;
+        newProposal.proposer = msg.sender;
+        newProposal.description = description;
+        newProposal.proposalType = proposalType;
+        newProposal.destination = destination;
+        newProposal.amount = amount;
+        newProposal.tokenAddress = tokenAddress;
+        newProposal.startTime = block.timestamp;
+        newProposal.yesVotes = getVotingWeight(msg.sender);
+        hasVoted[proposalId][msg.sender] = true;
+
+        proposalCount++;
+        proposalCountPerDay++;
+        lastProposalTime = block.timestamp;
+        emit ProposalCreated(proposalId, msg.sender, description, proposalType);
+    }
+
+    function vote(uint256 proposalId, bool support) external onlyTokenHolders {
+        require(block.timestamp <= proposals[proposalId].startTime.add(votingPeriod), "Voting period ended");
+        require(!hasVoted[proposalId][msg.sender], "Already voted");
+
+        if (support) {
+            uint256 voterWeight = getVotingWeight(msg.sender);
+            proposals[proposalId].yesVotes = proposals[proposalId].yesVotes.add(voterWeight);
+        }
+        hasVoted[proposalId][msg.sender] = true;
+        emit Voted(proposalId, msg.sender, support);
+    }
+
+    function executeProposal(uint256 proposalId) external nonReentrant {
+        Proposal storage proposal = proposals[proposalId];
+        require(block.timestamp > proposal.startTime.add(votingPeriod), "Voting period not ended");
+        require(!proposal.executed, "Proposal already executed");
+
+        proposal.executed = true;
+        bool passed;
+        uint256 currentTotalSupply = token.totalSupply();
+        if (currentTotalSupply == 0) {
+            passed = false; // No voting possible if no tokens exist
+        } else {
+            uint256 totalVotingPower = 1e18; // Normalized total voting power
+            if (countNonRespondersAsYes) {
+                passed = proposal.yesVotes >= totalVotingPower.mul(51).div(100); // 51% threshold
+            } else {
+                passed = proposal.yesVotes > totalVotingPower.mul(51).div(100); // Strict 51% majority
+            }
+        }
+
+        if (passed) {
+            if (proposal.proposalType == ProposalType.SwapETHtoERC20) {
+                _swapETHtoERC20(proposal.amount, proposal.tokenAddress, proposal.destination);
+            } else if (proposal.proposalType == ProposalType.SwapERC20toETH) {
+                _swapERC20toETH(proposal.amount, proposal.tokenAddress, proposal.destination);
+            } else if (proposal.proposalType == ProposalType.WithdrawETH) {
+                _withdrawETH(proposal.amount, proposal.destination);
+            } else if (proposal.proposalType == ProposalType.WithdrawERC20) {
+                _withdrawERC20(proposal.amount, proposal.tokenAddress, proposal.destination);
+            }
+        }
+
+        emit ProposalExecuted(proposalId, passed);
+    }
+
+    function _swapETHtoERC20(uint256 amountETH, address tokenAddress, address to) internal nonReentrant {
+        address[] memory path = new address[](2);
+        path[0] = IUniswapV2Router(UNISWAP_V2_ROUTER).WETH();
+        path[1] = tokenAddress;
+
+        IUniswapV2Router(UNISWAP_V2_ROUTER).swapExactETHForTokens{value: amountETH}(
+            0,
+            path,
+            to,
+            block.timestamp.add(1 hours)
+        );
+    }
+
+    function _swapERC20toETH(uint256 amountTokens, address tokenAddress, address to) internal nonReentrant {
+        IERC20(tokenAddress).approve(UNISWAP_V2_ROUTER, amountTokens);
+        address[] memory path = new address[](2);
+        path[0] = tokenAddress;
+        path[1] = IUniswapV2Router(UNISWAP_V2_ROUTER).WETH();
+
+        IUniswapV2Router(UNISWAP_V2_ROUTER).swapExactTokensForETH(
+            amountTokens,
+            0,
+            path,
+            to,
+            block.timestamp.add(1 hours)
+        );
+    }
+
+    function _withdrawETH(uint256 amount, address to) internal nonReentrant {
+        require(address(this).balance >= amount, "Insufficient ETH balance");
+        uint256 fee = amount.mul(WITHDRAWAL_FEE_PERCENTAGE).div(10000); // 1% fee
+        uint256 amountAfterFee = amount.sub(fee);
+        payable(TREASURY).transfer(fee); // Send fee to treasury
+        payable(to).transfer(amountAfterFee); // Send remaining amount
+        emit FeeCollected(to, fee, address(0), "ETH withdrawal");
+    }
+
+    function _withdrawERC20(uint256 amount, address tokenAddress, address to) internal nonReentrant {
+        uint256 fee = amount.mul(WITHDRAWAL_FEE_PERCENTAGE).div(10000); // 1% fee
+        uint256 amountAfterFee = amount.sub(fee);
+        IERC20(tokenAddress).safeTransfer(TREASURY, fee); // Send fee to treasury
+        IERC20(tokenAddress).safeTransfer(to, amountAfterFee); // Send remaining amount
+        emit FeeCollected(to, fee, tokenAddress, "ERC20 withdrawal");
+    }
+
+    receive() external payable {}
+}...// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "./DAO.sol";
+
+contract DAOFactory {
+    event DAOCreated(address indexed daoAddress, address indexed token);
+    event DAOInitializationFailed(address indexed token, bytes reason);
+
+    mapping(address => address) public daos;
+    address[] private allDAOs; // Added to store all DAO addresses
+
+    function createDAO(
+        address _token,
+        uint256 _votingPeriod,
+        bool _countNonRespondersAsYes
+    ) external returns (address) {
+        require(_token != address(0), "Invalid token address");
+        require(daos[_token] == address(0), "DAO already exists for this token");
+
+        try new DAO(_token, _votingPeriod, _countNonRespondersAsYes) returns (DAO newDAO) {
+            address daoAddress = address(newDAO);
+            daos[_token] = daoAddress;
+            allDAOs.push(daoAddress); // Add new DAO to the array
+            emit DAOCreated(daoAddress, _token);
+            return daoAddress;
+        } catch (bytes memory reason) {
+            emit DAOInitializationFailed(_token, reason);
+            revert("DAO creation failed");
+        }
+    }
+
+    function getDAO(address _token) external view returns (address) {
+        return daos[_token];
+    }
+
+    // New function to fetch all DAOs
+    function getAllDAOs() external view returns (address[] memory) {
+        return allDAOs;
+    }
+}
