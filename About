@@ -1,1 +1,2960 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyFund</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html[data-theme="dark"] {
+            --bg-start: #0A0C1E;
+            --bg-end: #1F2A44;
+            --card-bg: #374151;
+            --list-bg: rgba(31, 41, 55, 0.6);
+            --text-color: #ffffff;
+            --header-color: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --description-color: #ffffff;
+        }
+
+        html[data-theme="light"] {
+            --bg-start: #0A0C1E;
+            --bg-end: #1F2A44;
+            --card-bg: #374151;
+
+
+            --list-bg: rgba(31, 41, 55, 0.6);
+            --text-color: #ffffff;
+            --header-color: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --description-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(145deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E');
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 10.72px; /* 20px * 0.67 * 0.8 = 33% reduction + 20% further */
+            box-shadow: 0 2px 10px var(--shadow-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+            width: 100%;
+        }
+
+        .card.intro {
+            grid-column: 1 / -1;
+            min-height: 80.4px; /* 150px * 0.67 * 0.8 */
+            padding: 5.36px; /* 10px * 0.67 * 0.8 */
+        }
+
+        .card.contracts, .card.stats {
+            min-height: 221.1px; /* 412.5px * 0.67 * 0.8 */
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            font-size: 9.648px; /* 18px * 0.67 * 0.8 */
+            font-weight: 700;
+            color: var(--header-color);
+            margin-bottom: 6.432px; /* 12px * 0.67 * 0.8 */
+            text-align: center;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .description {
+            font-size: 7.504px; /* 14px * 0.67 * 0.8 */
+            line-height: 1.6;
+            color: var(--description-color);
+            margin-bottom: 10.72px; /* 20px * 0.67 * 0.8 */
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            color: var(--text-color);
+            font-size: 18px;
+            transition: background 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--description-color);
+        }
+
+        /* Contract List Styles */
+        .contract-list {
+            width: 100%;
+            height: 201px; /* 375px * 0.67 * 0.8 */
+            background: var(--list-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            padding: 4.288px; /* 12px * 0.67 * 0.8 / 2 to reduce spacing */
+            overflow: hidden; /* No scrolling */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contract-list h1 {
+            text-align: center;
+            color: var(--header-color);
+            margin: 0 0 4.288px; /* 12px * 0.67 * 0.8 / 2 */
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .contract-item {
+            display: flex;
+            align-items: center;
+            padding: 1.608px 0; /* 4.8px * 0.67 * 0.8 / 2 */
+            border-bottom: 0.5px solid var(--description-color);
+            transition: background 0.3s ease;
+            font-size: 6px; /* Reduced for compactness */
+        }
+
+        .contract-item:last-child {
+            border-bottom: none;
+        }
+
+        .contract-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 8px;
+        }
+
+        .contract-left {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .contract-icon {
+            font-size: 9.648px; /* 18px * 0.67 * 0.8 */
+            margin-right: 4.824px; /* 9px * 0.67 * 0.8 */
+            width: 9.648px;
+            height: 9.648px;
+            line-height: 9.648px;
+            text-align: center;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .contract-item:hover .contract-icon {
+            transform: scale(1.1);
+        }
+
+        .contract-details {
+            flex-grow: 1;
+        }
+
+        .contract-title {
+            font-size: 5.7888px; /* 10.8px * 0.67 * 0.8 */
+            font-weight: 500;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .contract-address {
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            color: #3b82f6;
+            word-break: break-all;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contract-address:hover {
+            color: #ff6b6b;
+            text-decoration: underline;
+        }
+
+        .contract-arrow {
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+            margin: 0 6.432px; /* 12px * 0.67 * 0.8 */
+            width: 9.648px;
+            text-align: center;
+            color: #60a5fa;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .contract-item:hover .contract-arrow {
+            transform: translateX(5px);
+        }
+
+        .contract-description {
+            width: 57.888px; /* 108px * 0.67 * 0.8 */
+            font-size: 4.5024px; /* 8.4px * 0.67 * 0.8 */
+            color: var(--description-color);
+            flex-shrink: 0;
+            text-align: right;
+            font-style: italic;
+        }
+
+        /* Stats Iframe Styles */
+        .iframe-container {
+            width: 100%;
+            height: 201px; /* 375px * 0.67 * 0.8 */
+            background: var(--list-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            padding: 6.432px; /* 12px * 0.67 * 0.8 */
+            overflow: hidden;
+        }
+
+        .iframe-header {
+            text-align: center;
+            color: var(--header-color);
+            margin: 0 0 6.432px; /* 12px * 0.67 * 0.8 */
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        iframe {
+            width: 100%;
+            height: calc(100% - 20.368px); /* Adjusted for reduced header */
+            border: 1px solid var(--description-color);
+            border-radius: 5px;
+        }
+
+        /* Staking Diagram Styles */
+        .diagram-container {
+            width: 128.64px; /* 240px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            margin: 0 auto;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .diagram-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .title {
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+            font-weight: 700;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            color: var(--header-color);
+        }
+
+        .box {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #1e3a8a;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 38.592px; /* 72px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1); /* Scaled */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2); /* Scaled */
+        }
+
+        .box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .pool-box {
+            background: linear-gradient(145deg, #fff3cc, #ffe082);
+            border: 1px solid #f97316;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-weight: bold;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+        }
+
+        .pool-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .pool-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .revenue-box {
+            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+            border: 1px solid #3b82f6;
+            width: 25.728px; /* 48px * 0.67 * 0.8 */
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+        }
+
+        .revenue-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .revenue-box i {
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+        }
+
+        .penalty-box {
+            background: linear-gradient(145deg, #ffe6e6, #fecaca);
+            border: 1px solid #dc2626;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+        }
+
+        .penalty-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .penalty-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .reward-box {
+            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+            border: 1px solid #16a34a;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+        }
+
+        .reward-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .reward-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .arrow {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #60a5fa;
+            margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+            transition: transform 0.3s ease;
+        }
+
+        .arrow:hover {
+            transform: translateY(2px);
+        }
+
+        .arrow-horizontal {
+            display: inline-block;
+            width: 12.864px; /* 24px * 0.67 * 0.8 */
+            text-align: center;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #60a5fa;
+            transition: transform 0.3s ease;
+        }
+
+        .arrow-horizontal:hover {
+            transform: translateX(2px);
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .penalty-reward-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .revenue-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 115.776px; /* 216px * 0.67 * 0.8 */
+            margin: 0 auto 1.9296px; /* 3.6px * 0.67 * 0.8 */
+        }
+
+        .flow-label {
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            color: var(--description-color);
+            margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+            font-style: italic;
+        }
+
+        .flow-label-horizontal {
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            color: var(--description-color);
+            line-height: 1.2;
+            display: block;
+            margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+            font-style: italic;
+        }
+
+        /* DAO Diagram Styles */
+        .dao-diagram-container {
+            width: 128.64px; /* 240px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            margin: 0 auto;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .dao-diagram-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .dao-title {
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+            font-weight: 700;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            color: var(--header-color);
+        }
+
+        .dao-box {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #1e3a8a;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dao-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .dao-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .dao-main-box {
+            background: linear-gradient(145deg, #fff3cc, #ffe082);
+            border: 1px solid #f97316;
+            width: 51.456px; /* 96px * 0.67 * 0.8 */
+            font-weight: bold;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dao-main-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .dao-main-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .dao-input-box {
+            background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
+            border: 1px solid #7c3aed;
+            width: 32.16px; /* 60px * 0.67 * 0.8 */
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dao-input-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .dao-voting-box {
+            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+            border: 1px solid #3b82f6;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dao-voting-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .dao-voting-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .dao-execution-box {
+            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+            border: 1px solid #16a34a;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dao-execution-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .dao-execution-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .dao-arrow {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #60a5fa;
+            margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+            transition: transform 0.3s ease;
+        }
+
+        .dao-arrow:hover {
+            transform: translateY(2px);
+        }
+
+        .dao-arrow-horizontal {
+            display: inline-block;
+            width: 12.864px; /* 24px * 0.67 * 0.8 */
+            text-align: center;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #60a5fa;
+            transition: transform 0.3s ease;
+        }
+
+        .dao-arrow-horizontal:hover {
+            transform: translateX(2px);
+        }
+
+        .dao-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .dao-voting-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .dao-input-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 122.208px; /* 228px * 0.67 * 0.8 */
+            margin: 0 auto 1.9296px; /* 3.6px * 0.67 * 0.8 */
+        }
+
+        .dao-flow-label {
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            color: var(--description-color);
+            margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+            font-style: italic;
+        }
+
+        .dao-flow-label-horizontal {
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            color: var(--description-color);
+            line-height: 1.2;
+            display: block;
+            margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+            font-style: italic;
+        }
+
+        /* Fund Diagram Styles */
+        .fund-diagram-container {
+            width: 128.64px; /* 240px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            margin: 0 auto;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .fund-diagram-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .fund-title {
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+            font-weight: 700;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            color: var(--header-color);
+        }
+
+        .fund-box {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #1e3a8a;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .fund-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .fund-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .fund-main-box {
+            background: linear-gradient(145deg, #fff3cc, #ffe082);
+            border: 1px solid #f97316;
+            width: 51.456px; /* 96px * 0.67 * 0.8 */
+            font-weight: bold;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .fund-main-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .fund-main-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .fund-input-box {
+            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+            border: 1px solid #3b82f6;
+            width: 32.16px; /* 60px * 0.67 * 0.8 */
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .fund-input-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .fund-staking-box {
+            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+            border: 1px solid #16a34a;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .fund-staking-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .fund-staking-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .fund-burn-box {
+            background: linear-gradient(145deg, #ffe6e6, #fecaca);
+            border: 1px solid #dc2626;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .fund-burn-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .fund-burn-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .fund-shane-box {
+            background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
+            border: 1px solid #7c3aed;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .fund-shane-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .fund-shane-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .fund-custom-box {
+            background: linear-gradient(145deg, #fef3ff, #f3d6ff);
+            border: 1px solid #a21caf;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .fund-custom-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .fund-custom-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .fund-arrow {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #60a5fa;
+            margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+            transition: transform 0.3s ease;
+        }
+
+        .fund-arrow:hover {
+            transform: translateY(2px);
+        }
+
+        .fund-arrow-horizontal {
+            display: inline-block;
+            width: 12.864px; /* 24px * 0.67 * 0.8 */
+            text-align: center;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #60a5fa;
+            transition: transform 0.3s ease;
+        }
+
+        .fund-arrow-horizontal:hover {
+            transform: translateX(2px);
+        }
+
+        .fund-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .fund-fee-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .fund-burn-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .fund-input-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 122.208px; /* 228px * 0.67 * 0.8 */
+            margin: 0 auto 1.9296px; /* 3.6px * 0.67 * 0.8 */
+        }
+
+        .fund-flow-label {
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            color: var(--description-color);
+            margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+            font-style: italic;
+        }
+
+        .fund-flow-label-horizontal {
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            color: var(--description-color);
+            line-height: 1.2;
+            display: block;
+            margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+            font-style: italic;
+        }
+
+        /* USDM Diagram Styles */
+        .usdm-diagram-container {
+            width: 160.8px; /* 300px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            margin: 0 auto;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .usdm-diagram-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .usdm-title {
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+            font-weight: 700;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            color: var(--header-color);
+        }
+
+        .usdm-box {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #1e3a8a;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            max-width: 100%;
+        }
+
+        .usdm-box:hover {
+            transform: scale(1.05);
+        }
+
+        .usdm-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .usdm-main-box {
+            background: linear-gradient(145deg, #fff3cc, #ffe082);
+            border: 1px solid #f97316;
+            width: 51.456px; /* 96px * 0.67 * 0.8 */
+            font-weight: bold;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            max-width: 100%;
+        }
+
+        .usdm-main-box:hover {
+            transform: scale(1.05);
+        }
+
+        .usdm-main-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .usdm-input-box {
+            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+            border: 1px solid #3b82f6;
+            width: 32.16px; /* 60px * 0.67 * 0.8 */
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            max-width: 100%;
+        }
+
+        .usdm-input-box:hover {
+            transform: scale(1.05);
+        }
+
+        .usdm-input-box i {
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+        }
+
+        .usdm-staking-box {
+            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+            border: 1px solid #16a34a;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            max-width: 100%;
+        }
+
+        .usdm-staking-box:hover {
+            transform: scale(1.05);
+        }
+
+        .usdm-staking-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .usdm-dao-box {
+            background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
+            border: 1px solid #7c3aed;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            max-width: 100%;
+        }
+
+        .usdm-dao-box:hover {
+            transform: scale(1.05);
+        }
+
+        .usdm-dao-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .usdm-arrow {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #60a5fa;
+            margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+            transition: transform 0.3s ease;
+        }
+
+        .usdm-arrow:hover {
+            transform: translateY(2px);
+        }
+
+        .usdm-arrow-horizontal {
+            display: inline-block;
+            width: 12.864px; /* 24px * 0.67 * 0.8 */
+            text-align: center;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #60a5fa;
+            transition: transform 0.3s ease;
+        }
+
+        .usdm-arrow-horizontal:hover {
+            transform: translateX(2px);
+        }
+
+        .usdm-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .usdm-input-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 154.368px; /* 288px * 0.67 * 0.8 */
+            margin: 0 auto 1.2864px; /* 2.4px * 0.67 * 0.8 */
+        }
+
+        .usdm-fee-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .usdm-flow-label {
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            color: var(--description-color);
+            margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+            font-style: italic;
+        }
+
+        .usdm-flow-label-horizontal {
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            color: var(--description-color);
+            line-height: 1.2;
+            display: block;
+            margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+            font-style: italic;
+        }
+
+        /* Coin Launcher Diagram Styles */
+        .launch-diagram-container {
+            width: 128.64px; /* 240px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            margin: 0 auto;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .launch-diagram-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .launch-title {
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+            font-weight: 700;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            color: var(--header-color);
+        }
+
+        .launch-box {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #1e3a8a;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .launch-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .launch-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .launch-main-box {
+            background: linear-gradient(145deg, #fff3cc, #ffe082);
+            border: 1px solid #f97316;
+            width: 51.456px; /* 96px * 0.67 * 0.8 */
+            font-weight: bold;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .launch-main-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .launch-main-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .launch-input-box {
+            background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+            border: 1px solid #3b82f6;
+            width: 32.16px; /* 60px * 0.67 * 0.8 */
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .launch-input-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .launch-stacking-box {
+            background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+            border: 1px solid #16a34a;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .launch-stacking-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .launch-stacking-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .launch-dao-box {
+            background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
+            border: 1px solid #7c3aed;
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .launch-dao-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .launch-dao-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .launch-arrow {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #60a5fa;
+            margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+            transition: transform 0.3s ease;
+        }
+
+        .launch-arrow:hover {
+            transform: translateY(2px);
+        }
+
+        .launch-arrow-horizontal {
+            display: inline-block;
+            width: 12.864px; /* 24px * 0.67 * 0.8 */
+            text-align: center;
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #60a5fa;
+            transition: transform 0.3s ease;
+        }
+
+        .launch-arrow-horizontal:hover {
+            transform: translateX(2px);
+        }
+
+        .launch-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .launch-fee-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6.432px; /* 12px * 0.67 * 0.8 */
+            margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            max-width: 100%;
+        }
+
+        .launch-input-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 122.208px; /* 228px * 0.67 * 0.8 */
+            margin: 0 auto 1.2864px; /* 2.4px * 0.67 * 0.8 */
+        }
+
+        .launch-flow-label {
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            color: var(--description-color);
+            margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+            font-style: italic;
+        }
+
+        .launch-flow-label-horizontal {
+            font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+            color: var(--description-color);
+            line-height: 1.2;
+            display: block;
+            margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+            font-style: italic;
+        }
+
+        /* DEX Diagram Styles */
+        .dex-diagram-container {
+            width: 128.64px; /* 240px * 0.67 * 0.8 */
+            padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            margin: 0 auto;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .dex-diagram-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .dex-title {
+            font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+            font-weight: 700;
+            margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            color: var(--header-color);
+        }
+
+        .dex-box {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #1e3a8a;
+            border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            width: 45.024px; /* 84px * 0.67 * 0.8 */
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dex-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+        .dex-box i {
+            font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+            color: #000000;
+            margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+        }
+
+        .dex-main-box {
+            background: linear-gradient(145deg, #fff3cc, #ffe082);
+            border: 1px solid #f97316;
+            width: 51.456px; /* 96px * 0.67 * 0.8 */
+            font-weight: bold;
+            font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+            padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+            margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+            text-align: center;
+            box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 100%;
+        }
+
+        .dex-main-box:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+        }
+
+       .dex-main-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dex-input-box {
+    background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+    border: 1px solid #3b82f6;
+    width: 32.16px; /* 60px * 0.67 * 0.8 */
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dex-input-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dex-reward-box {
+    background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+    border: 1px solid #16a34a;
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dex-reward-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dex-reward-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dex-dao-box {
+    background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
+    border: 1px solid #7c3aed;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dex-dao-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dex-dao-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dex-arrow {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+    transition: transform 0.3s ease;
+}
+
+.dex-arrow:hover {
+    transform: translateY(2px);
+}
+
+.dex-arrow-horizontal {
+    display: inline-block;
+    width: 12.864px; /* 24px * 0.67 * 0.8 */
+    text-align: center;
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    transition: transform 0.3s ease;
+}
+
+.dex-arrow-horizontal:hover {
+    transform: translateX(2px);
+}
+
+.dex-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.dex-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6.432px; /* 12px * 0.67 * 0.8 */
+    margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.dex-fee-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6.432px; /* 12px * 0.67 * 0.8 */
+    margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.dex-flow-label {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+.dex-flow-label-horizontal {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    line-height: 1.2;
+    display: block;
+    margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+/* Airdropper Diagram Styles */
+.airdrop-diagram-container {
+    width: 128.64px; /* 240px * 0.67 * 0.8 */
+    padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    margin: 0 auto;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.airdrop-diagram-container:hover {
+    transform: translateY(-5px);
+}
+
+.airdrop-title {
+    font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+    font-weight: 700;
+    margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    color: var(--header-color);
+}
+
+.airdrop-box {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border: 1px solid #1e3a8a;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+}
+
+.airdrop-box:hover {
+    transform: scale(1.05);
+}
+
+.airdrop-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.airdrop-main-box {
+    background: linear-gradient(145deg, #fff3cc, #ffe082);
+    border: 1px solid #f97316;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    width: 51.456px; /* 96px * 0.67 * 0.8 */
+    font-weight: bold;
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+}
+
+.airdrop-main-box:hover {
+    transform: scale(1.05);
+}
+
+.airdrop-main-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.airdrop-input-box {
+    background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+    border: 1px solid #3b82f6;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    width: 32.16px; /* 60px * 0.67 * 0.8 */
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+}
+
+.airdrop-input-box:hover {
+    transform: scale(1.05);
+}
+
+.airdrop-input-box i {
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+}
+
+.airdrop-staking-box {
+    background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+    border: 1px solid #16a34a;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+}
+
+.airdrop-staking-box:hover {
+    transform: scale(1.05);
+}
+
+.airdrop-staking-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.airdrop-dao-box {
+    background: linear-gradient(145deg, #f3e6ff, #ddd6fe);
+    border: 1px solid #7c3aed;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 0.6432px 1.2864px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    max-width: 100%;
+}
+
+.airdrop-dao-box:hover {
+    transform: scale(1.05);
+}
+
+.airdrop-dao-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.airdrop-arrow {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+    transition: transform 0.3s ease;
+}
+
+.airdrop-arrow:hover {
+    transform: translateY(2px);
+}
+
+.airdrop-arrow-horizontal {
+    display: inline-block;
+    width: 12.864px; /* 24px * 0.67 * 0.8 */
+    text-align: center;
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    transition: transform 0.3s ease;
+}
+
+.airdrop-arrow-horizontal:hover {
+    transform: translateX(2px);
+}
+
+.airdrop-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.airdrop-fee-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6.432px; /* 12px * 0.67 * 0.8 */
+    margin-bottom: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.airdrop-flow-label {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+.airdrop-flow-label-horizontal {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    line-height: 1.2;
+    display: block;
+    margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+/* Dividend Launcher Diagram Styles */
+.dividend-diagram-container {
+    width: 128.64px; /* 240px * 0.67 * 0.8 */
+    padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    margin: 0 auto;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.dividend-diagram-container:hover {
+    transform: translateY(-5px);
+}
+
+.dividend-title {
+    font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+    font-weight: 700;
+    margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    color: var(--header-color);
+}
+
+.dividend-box {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border: 1px solid #1e3a8a;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dividend-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dividend-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dividend-main-box {
+    background: linear-gradient(145deg, #fff3cc, #ffe082);
+    border: 1px solid #f97316;
+    width: 51.456px; /* 96px * 0.67 * 0.8 */
+    font-weight: bold;
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dividend-main-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dividend-main-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dividend-input-box {
+    background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+    border: 1px solid #3b82f6;
+    width: 32.16px; /* 60px * 0.67 * 0.8 */
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dividend-input-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dividend-staking-box {
+    background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+    border: 1px solid #16a34a;
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.dividend-staking-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.dividend-staking-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.dividend-arrow {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+    transition: transform 0.3s ease;
+}
+
+.dividend-arrow:hover {
+    transform: translateY(2px);
+}
+
+.dividend-arrow-horizontal {
+    display: inline-block;
+    width: 12.864px; /* 24px * 0.67 * 0.8 */
+    text-align: center;
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    transition: transform 0.3s ease;
+}
+
+.dividend-arrow-horizontal:hover {
+    transform: translateX(2px);
+}
+
+.dividend-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.dividend-input-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 122.208px; /* 228px * 0.67 * 0.8 */
+    margin: 0 auto 1.9296px; /* 3.6px * 0.67 * 0.8 */
+}
+
+.dividend-fee-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6.432px; /* 12px * 0.67 * 0.8 */
+    margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.dividend-flow-label {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+.dividend-flow-label-horizontal {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    line-height: 1.2;
+    display: block;
+    margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+/* DAO Launcher Diagram Styles */
+.daol-diagram-container {
+    width: 128.64px; /* 240px * 0.67 * 0.8 */
+    padding: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    margin: 0 auto;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.daol-diagram-container:hover {
+    transform: translateY(-5px);
+}
+
+.daol-title {
+    font-size: 7.7184px; /* 14.4px * 0.67 * 0.8 */
+    font-weight: 700;
+    margin-bottom: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    color: var(--header-color);
+}
+
+.daol-box {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border: 1px solid #1e3a8a;
+    border-radius: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.daol-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.daol-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.daol-main-box {
+    background: linear-gradient(145deg, #fff3cc, #ffe082);
+    border: 1px solid #f97316;
+    width: 51.456px; /* 96px * 0.67 * 0.8 */
+    font-weight: bold;
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.daol-main-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.daol-main-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.daol-input-box {
+    background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+    border: 1px solid #3b82f6;
+    width: 32.16px; /* 60px * 0.67 * 0.8 */
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.daol-input-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.daol-voting-box {
+    background: linear-gradient(145deg, #e6f3ff, #bfdbfe);
+    border: 1px solid #3b82f6;
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.daol-voting-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.daol-voting-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.daol-execution-box {
+    background: linear-gradient(145deg, #e6ffe6, #bbf7d0);
+    border: 1px solid #16a34a;
+    width: 45.024px; /* 84px * 0.67 * 0.8 */
+    font-size: 5.1456px; /* 9.6px * 0.67 * 0.8 */
+    padding: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+    margin: 1.2864px; /* 2.4px * 0.67 * 0.8 */
+    text-align: center;
+    box-shadow: 0 1.2864px 2.5728px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 100%;
+}
+
+.daol-execution-box:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2.5728px 5.1456px rgba(0, 0, 0, 0.2);
+}
+
+.daol-execution-box i {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #000000;
+    margin-right: 2.5728px; /* 4.8px * 0.67 * 0.8 */
+}
+
+.daol-arrow {
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    margin: 0.6432px 0; /* 1.2px * 0.67 * 0.8 */
+    transition: transform 0.3s ease;
+}
+
+.daol-arrow:hover {
+    transform: translateY(2px);
+}
+
+.daol-arrow-horizontal {
+    display: inline-block;
+    width: 12.864px; /* 24px * 0.67 * 0.8 */
+    text-align: center;
+    font-size: 6.432px; /* 12px * 0.67 * 0.8 */
+    color: #60a5fa;
+    transition: transform 0.3s ease;
+}
+
+.daol-arrow-horizontal:hover {
+    transform: translateX(2px);
+}
+
+.daol-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.daol-voting-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6.432px; /* 12px * 0.67 * 0.8 */
+    margin-bottom: 1.9296px; /* 3.6px * 0.67 * 0.8 */
+    max-width: 100%;
+}
+
+.daol-input-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 122.208px; /* 228px * 0.67 * 0.8 */
+    margin: 0 auto 1.9296px; /* 3.6px * 0.67 * 0.8 */
+}
+
+.daol-flow-label {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    margin-top: -1.2864px; /* -2.4px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+.daol-flow-label-horizontal {
+    font-size: 3.8592px; /* 7.2px * 0.67 * 0.8 */
+    color: var(--description-color);
+    line-height: 1.2;
+    display: block;
+    margin-top: 0.6432px; /* 1.2px * 0.67 * 0.8 */
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .card {
+        background: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+        min-height: auto;
+        transition: none;
+    }
+
+    .card:hover {
+        transform: none;
+    }
+
+    .card.intro {
+        grid-column: 1 / -1;
+    }
+
+    .card h2 {
+        font-size: 24px;
+        margin-bottom: 16px;
+    }
+
+    .description {
+        font-size: 16px;
+        max-width: 100%;
+        text-align: left;
+        margin-bottom: 24px;
+    }
+
+    .contract-list, .iframe-container {
+        background: none;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
+        height: auto;
+    }
+
+    .contract-list h1, .iframe-header {
+        font-size: 18px;
+    }
+
+    .diagram-container, .dao-diagram-container, .fund-diagram-container,
+    .usdm-diagram-container, .launch-diagram-container, .dex-diagram-container,
+    .airdrop-diagram-container, .dividend-diagram-container, .daol-diagram-container {
+        width: 100%;
+        padding: 0;
+    }
+}
+
+@media (max-width: 1080px) {
+    .contract-list, .iframe-container {
+        height: 300px;
+    }
+
+    .contract-list h1, .iframe-header {
+        font-size: 12px;
+    }
+
+    .contract-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 4.8px 0;
+    }
+
+    .contract-title {
+        font-size: 9.6px;
+    }
+
+    .contract-address {
+        font-size: 8.4px;
+    }
+
+    .contract-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        line-height: 15px;
+    }
+
+    .contract-arrow {
+        font-size: 12px;
+        margin: 6px 0;
+        width: 15px;
+    }
+
+    .contract-description {
+        width: 72px;
+        font-size: 7.2px;
+        text-align: left;
+        margin-top: 6px;
+    }
+}
+
+@media (max-width: 300px) {
+    .usdm-diagram-container, .diagram-container, .fund-diagram-container,
+    .dao-diagram-container, .launch-diagram-container, .dex-diagram-container,
+    .airdrop-diagram-container, .dividend-diagram-container, .daol-diagram-container {
+        width: 100%;
+        padding: 4.8px;
+    }
+
+    .usdm-box, .usdm-main-box, .usdm-staking-box, .usdm-dao-box,
+    .box, .pool-box, .fund-box, .fund-main-box, .fund-staking-box,
+    .fund-burn-box, .fund-shane-box, .fund-custom-box,
+    .dao-box, .dao-main-box, .dao-voting-box, .dao-execution-box,
+    .launch-box, .launch-main-box, .launch-stacking-box, .launch-dao-box,
+    .dex-box, .dex-main-box, .dex-reward-box, .dex-dao-box,
+    .airdrop-box, .airdrop-main-box, .airdrop-staking-box, .airdrop-dao-box,
+    .dividend-box, .dividend-main-box, .dividend-staking-box,
+    .daol-box, .daol-main-box, .daol-voting-box, .daol-execution-box {
+        width: 72px;
+        font-size: 8.4px;
+        padding: 3.6px;
+    }
+
+    .usdm-input-box, .fund-input-box, .dao-input-box, .launch-input-box,
+    .dex-input-box, .airdrop-input-box, .dividend-input-box, .daol-input-box {
+        width: 48px;
+        font-size: 6px;
+    }
+
+    .usdm-title, .title, .fund-title, .dao-title, .launch-title, .dex-title, 
+    .airdrop-title, .dividend-title, .daol-title {
+        font-size: 12px;
+    }
+
+    .usdm-arrow, .usdm-arrow-horizontal, .arrow, .arrow-horizontal,
+    .fund-arrow, .fund-arrow-horizontal, .dao-arrow, .dao-arrow-horizontal,
+    .launch-arrow, .launch-arrow-horizontal, .dex-arrow, .dex-arrow-horizontal,
+    .airdrop-arrow, .airdrop-arrow-horizontal, .dividend-arrow, .dividend-arrow-horizontal,
+    .daol-arrow, .daol-arrow-horizontal {
+        font-size: 9.6px;
+    }
+
+    .usdm-arrow-horizontal, .arrow-horizontal, .fund-arrow-horizontal,
+    .dao-arrow-horizontal, .launch-arrow-horizontal, .dex-arrow-horizontal,
+    .airdrop-arrow-horizontal, .dividend-arrow-horizontal, .daol-arrow-horizontal {
+        width: 18px;
+    }
+
+    .usdm-box i, .usdm-main-box i, .usdm-staking-box i, .usdm-dao-box i,
+    .box i, .pool-box i, .penalty-box i, .reward-box i,
+    .fund-box i, .fund-main-box i, .fund-staking-box i, .fund-burn-box i,
+    .fund-shane-box i, .fund-custom-box i,
+    .dao-box i, .dao-main-box i, .dao-voting-box i, .dao-execution-box i,
+    .launch-box i, .launch-main-box i, .launch-stacking-box i, .launch-dao-box i,
+    .dex-box i, .dex-main-box i, .dex-reward-box i, .dex-dao-box i,
+    .airdrop-box i, .airdrop-main-box i, .airdrop-stacking-box i, .airdrop-dao-box i,
+    .dividend-box i, .dividend-main-box i, .dividend-staking-box i,
+    .daol-box i, .daol-main-box i, .daol-voting-box i, .daol-execution-box i {
+        font-size: 9.6px;
+        margin-right: 3.6px;
+    }
+
+    .usdm-input-box i, .fund-input-box i, .dao-input-box i,
+    .launch-input-box i, .dex-input-box i, .airdrop-input-box i,
+    .dividend-input-box i, .daol-input-box i {
+        font-size: 7.2px;
+        margin-right: 2.4px;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card intro">
+            <h2>Introduction</h2>
+            <div class="description">
+                MoneyFund is an Ethereum-based DeFi protocol featuring two assets (MONEY, USDM) and eight Dapps (Coin Launcher, Fund Launcher, Staking Pool Launcher, DAO Launcher, Dividends, DAO, Airdropper, and DEX). MONEY, with a fixed 1 million token supply, serves as the backbone of the ecosystem as it captures value from all eight smart contracts. Revenue is distributed to MONEY holders through staking dividends and DAO treasury allocations. This white paper details MoneyFund's lego-like mechanics and interconnected revenue streams.
+            </div>
+        </div>
+
+        <div class="card contracts">
+            <h2>Contracts</h2>
+            <div class="contract-list">
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-coins"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">MONEY</div>
+                            <a href="https://etherscan.io/address/0x100DB67F41A2dF3c32cC7c0955694b98339B7311" class="contract-address" target="_blank">0x100DB67F41A2dF3c32cC7c0955694b98339B7311</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">MF native token</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-dollar-sign"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">USDM</div>
+                            <a href="https://etherscan.io/address/0x33d5be7c0584f77b3168b1d38e1a6215af242d4f" class="contract-address" target="_blank">0x33d5be7c0584f77b3168b1d38e1a6215af242d4f</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Pegged to USD, basketized, uncensorable.</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-exchange-alt"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">DEX</div>
+                            <a href="https://etherscan.io/address/0x2E24553474bE9136785303689C65aF45c55F0F55" class="contract-address" target="_blank">0x2E24553474bE9136785303689C65aF45c55F0F55</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Decentralized exchange</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-lock"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">Staking</div>
+                            <a href="https://etherscan.io/address/0x9759883ea07e2cA1E2d32E97f42d254841616AB5" class="contract-address" target="_blank">0x9759883ea07e2cA1E2d32E97f42d254841616AB5</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Earn dividends by staking MONEY</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-vote-yea"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">DAO</div>
+                            <a href="https://etherscan.io/address/0x8cF5E3797AabB62698f9C4a3F0234667Fd981754" class="contract-address" target="_blank">0x8cF5E3797AabB62698f9C4a3F0234667Fd981754</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Vote on the MoneyFund treasury</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-rocket"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">Fund Launcher</div>
+                            <a href="https://etherscan.io/address/0xa4a107c5b8de797c32ae701ffe2b306cb9044ba6" class="contract-address" target="_blank">0xa4a107c5b8de797c32ae701ffe2b306cb9044ba6</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Create and manage ETFs</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-coins"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">Coin Launcher</div>
+                            <a href="https://etherscan.io/address/0x3962895a933aa0b1613aed997901e601b2cc0821" class="contract-address" target="_blank">0x3962895a933aa0b1613aed997901e601b2cc0821</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Launch an Eth coin in 30 seconds.</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-parachute-box"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">Airdropper</div>
+                            <a href="https://etherscan.io/address/0x6785cD86A65f3d8336fDC3b0e54C78215501dCa2" class="contract-address" target="_blank">0x6785cD86A65f3d8336fDC3b0e54C78215501dCa2</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Saves over 40% on gas.</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-lock"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">Dividend Launcher</div>
+                            <a href="https://etherscan.io/address/0xd846D1a576776a70412b473d2479362953e4C5d5" class="contract-address" target="_blank">0xd846D1a576776a70412b473d2479362953e4C5d5</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Create custom staking pools</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-vote-yea"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">DAO Launcher</div>
+                            <a href="https://etherscan.io/address/0x4529a19CE3Dd34C878c98AA84d51c8667c665E83" class="contract-address" target="_blank">0x4529a19CE3Dd34C878c98AA84d51c8667c665E83</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Deploy custom DAOs</div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-left">
+                        <span class="contract-icon"><i class="fas fa-globe"></i></span>
+                        <div class="contract-details">
+                            <div class="contract-title">Solana Wormhole</div>
+                            <a href="https://solscan.io/account/Hi3w7Niu46dxwk8not3LihcFT4Aa4yMvLSGECykE9iEp" class="contract-address" target="_blank">Hi3w7Niu46dxwk8not3LihcFT4Aa4yMvLSGECykE9iEp</a>
+                        </div>
+                    </div>
+                    <span class="contract-arrow">→</span>
+                    <div class="contract-description">Cross-chain token bridge</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card stats">
+            <h2>Stats</h2>
+            <div class="iframe-container">
+                <iframe src="https://moneyfund.com/stats" title="MoneyFund Stats Display" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Staking Mechanism</h2>
+            <div class="description">
+                The MoneyFund staking mechanism enables MONEY holders to earn passive income by depositing tokens into a dividend pool. Stakers receive a proportional share of ecosystem revenue from 0.1% DEX swap fees, USDM minting fees, 0.1% of coin launches, 0.1% of fund launches, and 0.1% of airdrops. Staked tokens require a 7-day minimum lock-up. Early withdrawal incurs a 20% penalty to prevent exploitation. Daily dividends, including ETH and ERC20 tokens, are distributed based on each staker’s pool share. For example, 1% of staked tokens yields 1% of daily revenue. A daily claim cooldown ensures fair distribution. The system ties ecosystem activity to holder rewards, aggregating diversified fees from multiple sources. Contributions from these five revenue streams makes staking attractive for investors seeking sustainable returns.
+            </div>
+            <div class="diagram-container">
+                <div class="title">MoneyFund Staking</div>
+                <div class="row">
+                    <div class="box"><i class="fas fa-users"></i>MONEY Holders</div>
+                </div>
+                <div class="arrow">↓<br><span class="flow-label">Stake Tokens</span></div>
+                <div class="penalty-reward-row">
+                    <div class="box penalty-box"><i class="fas fa-exclamation-circle"></i>Early Exit<br>(20% Penalty)</div>
+                    <div class="arrow-horizontal">←<span class="flow-label-horizontal">20% Fee</span></div>
+                    <div class="box pool-box"><i class="fas fa-coins"></i>Dividend Pool<br>(7-day Lock)</div>
+                </div>
+                <div class="arrow">↓<br><span class="flow-label">Revenue</span></div>
+                <div class="revenue-row">
+                    <div class="box revenue-box"><i class="fas fa-exchange-alt"></i>0.1% DEX Fees</div>
+                    <div class="box revenue-box"><i class="fas fa-dollar-sign"></i>USDM Fees</div>
+                    <div class="box revenue-box"><i class="fas fa-coins"></i>0.1% Coins</div>
+                    <div class="box revenue-box"><i class="fas fa-rocket"></i>0.1% Funds</div>
+                    <div class="box revenue-box"><i class="fas fa-parachute-box"></i>0.1% Airdrops</div>
+                </div>
+                <div class="arrow">↓<br><span class="flow-label">Payout</span></div>
+                <div class="row">
+                    <div class="box reward-box"><i class="fas fa-gift"></i>Daily Dividend<br>(1% = 1%)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>DAO</h2>
+            <div class="description">
+                The MoneyFund DAO enables MONEY holders to govern the protocol through a voting system where influence is proportional to MONEY ownership. For example, holding 1% of the 1 million MONEY grants 1% voting power. The DAO treasury is funded by 0.1% per DEX Swap, 0.1% of Coin launches, and 0.1% of airdrops, and USDM minting fees. Up to 5 daily proposals undergo a 24-hour voting period, requiring 51% approval for actions like withdrawing funds or swapping ERC20 tokens. At the end of the voting period, all non-voting weight automatically supports proposals to prevent stagnation. Approved proposals are executed autonomously by the smart contract.
+            </div>
+            <div class="dao-diagram-container">
+                <div class="dao-title">MoneyFund DAO</div>
+                <div class="dao-row">
+                    <div class="dao-box"><i class="fas fa-users"></i>MONEY Holders</div>
+                </div>
+                <div class="dao-arrow">↓<br><span class="dao-flow-label">Ownership</span></div>
+                <div class="dao-row">
+                    <div class="dao-voting-box"><i class="fas fa-vote-yea"></i>Voting Power<br>(1% = 1%)</div>
+                </div>
+                <div class="dao-arrow">↓<br><span class="dao-flow-label">Funds</span></div>
+                <div class="dao-input-row">
+                    <div class="dao-input-box">0.1% DEX Swap</div>
+                    <div class="dao-input-box">0.1% Coins</div>
+                    <div class="dao-input-box">0.1% Airdrops</div>
+                    <div class="dao-input-box">USDM Fees</div>
+                </div>
+                <div class="dao-arrow">↓<br><span class="dao-flow-label">Revenue</span></div>
+                <div class="dao-row">
+                    <div class="dao-main-box"><i class="fas fa-piggy-bank"></i>DAO Treasury</div>
+                </div>
+                <div class="dao-arrow">↓<br><span class="dao-flow-label">Proposals</span></div>
+                <div class="dao-row">
+                    <div class="dao-voting-box"><i class="fas fa-file-alt"></i>Up to 5 Daily<br>Proposals</div>
+                </div>
+                <div class="dao-arrow">↓<br><span class="dao-flow-label">Vote</span></div>
+                <div class="dao-voting-row">
+                    <div class="dao-voting-box"><i class="fas fa-ballot"></i>24-Hour Voting<br>(51% Approval)</div>
+                    <div class="dao-arrow-horizontal">→<span class="dao-flow-label-horizontal">Non-Voters</span></div>
+                    <div class="dao-box">Auto-Support</div>
+                </div>
+                <div class="dao-arrow">↓<br><span class="dao-flow-label">Approved</span></div>
+                <div class="dao-row">
+                    <div class="dao-execution-box"><i class="fas fa-cogs"></i>Smart Contract<br>Execution</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Fund Launcher</h2>
+            <div class="description">
+                The MF Fund Launcher allows users to create custom, ETF-style weighted funds. Users can create hybrid assets that combine any ERC-20 tokens at any weights, so long as they sum to 10,000 basis points. Fund creators are incentivized during the creation process whereby they're able to specify the fee amount (in basis points) and fee receiver of their choice. Additionally, a hardcoded 0.2% fee is collected from all transactions and split equally between the Money staking pool and Shane's wallet at 0.1% each. Similarly, 0.1% of every transaction's USD value is burned in MONEY, furthering deflationary pressure.
+            </div>
+            <div class="fund-diagram-container">
+                <div class="fund-title">Fund Launcher</div>
+                <div class="fund-row">
+                    <div class="fund-box"><i class="fas fa-users"></i>Users</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label"></span></div>
+                <div class="fund-row">
+                    <div class="fund-main-box"><i class="fas fa-rocket"></i>Custom Fund</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Specify</span></div>
+                <div class="fund-input-row">
+                    <div class="fund-input-box">ERC-20 Tokens<br>(10,000 BP)</div>
+                    <div class="fund-input-box">Fee Amount<br>(BP)</div>
+                    <div class="fund-input-box">Fee Receiver</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Create Fund</span></div>
+                <div class="fund-row">
+                    <div class="fund-main-box">Fund Launched</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Transactions</span></div>
+                <div class="fund-row">
+                    <div class="fund-box">0.2% Fee</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Split</span></div>
+                <div class="fund-fee-row">
+                    <div class="fund-staking-box"><i class="fas fa-lock"></i>Money Staking<br>(0.1%)</div>
+                    <div class="fund-arrow-horizontal">←<span class="fund-flow-label-horizontal">0.1% Fee</span></div>
+                    <div class="fund-box">Fee Split</div>
+                    <div class="fund-arrow-horizontal">→<span class="fund-flow-label-horizontal">0.1% Fee</span></div>
+                    <div class="fund-shane-box"><i class="fas fa-wallet"></i>Shane’s Wallet<br>(0.1%)</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Burn & Fee</span></div>
+                <div class="fund-burn-row">
+                    <div class="fund-burn-box"><i class="fas fa-fire"></i>0.1% USD Value<br>MONEY Burn</div>
+                    <div class="fund-custom-box"><i class="fas fa-user-cog"></i>Custom Creator Fee</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>USDM Stablecoin</h2>
+            <div class="description">
+                USDM is a decentralized stablecoin that is pegged 1:1 to the US dollar. Most popular stablecoins have a blacklist mechanism that enables the issuer to render funds used in crimes useless. USDM is uncensorable; Unlike USDC and USDT which have centralized issuers (Circle and Tether respectively), USDM has no issuer and no off switch, as it is managed by smart contracts. Perhaps an even greater advantage of USDM is its hybridized structure. The biggest risk to stablecoins is a black swan event where they depeg from the US Dollar- one example being TerraUSD in 2022 which wiped out 40 billion dollars. Even the world's most popular stablecoin (USDC) has briefly depegged. To mitigate these singular risks, USDM self-collateralizes with four different stablecoins: USDC, DAI, USDP, and GUSD. This equal allocation between the 4 stablecoins spreads the risk across multiple issuers so that no singular black swan event can nuke your entire savings. Minting USDM incurs a small fee (0.2%), split between the staking pool and DAO treasury. To mint USDM you must simultaneously burn MONEY which creates uncapped deflationary pressure on the central token.
+            </div>
+            <div class="usdm-diagram-container">
+                <div class="usdm-title">USDM Stablecoin</div>
+                <div class="usdm-row">
+                    <div class="usdm-box"><i class="fas fa-users"></i>Users</div>
+                </div>
+                <div class="usdm-arrow">↓<br><span class="usdm-flow-label">Burn/Send</span></div>
+                <div class="usdm-row">
+                    <div class="usdm-box"><i class="fas fa-coins"></i>Burn MONEY</div>
+                    <div class="usdm-arrow-horizontal">+<span class="usdm-flow-label-horizontal">and</span></div>
+                    <div class="usdm-box"><i class="fas fa-ethereum"></i>Send ETH</div>
+                </div>
+                <div class="usdm-arrow">↓<br><span class="usdm-flow-label">Collateral</span></div>
+                <div class="usdm-input-row">
+                    <div class="usdm-input-box"><i class="fas fa-circle-dollar-to-slot"></i>MONEY</div>
+                    <div class="usdm-input-box"><i class="fas fa-circle-dollar-to-slot"></i>USDC</div>
+                    <div class="usdm-input-box"><i class="fas fa-circle-dollar-to-slot"></i>DAI</div>
+                    <div class="usdm-input-box"><i class="fas fa-circle-dollar-to-slot"></i>USDP</div>
+                    <div class="usdm-input-box"><i class="fas fa-circle-dollar-to-slot"></i>GUSD</div>
+                </div>
+                <div class="usdm-fee-row">
+                    <div class="usdm-staking-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.1%)</div>
+                    <div class="usdm-arrow-horizontal">←<span class="usdm-flow-label-horizontal">0.1% Fee</span></div>
+                    <div class="usdm-input-box"><i class="fas fa-money-bill"></i>0.2% Fee</div>
+                    <div class="usdm-arrow-horizontal">→<span class="usdm-flow-label-horizontal">0.1% Fee</span></div>
+                    <div class="usdm-dao-box"><i class="fas fa-vote-yea"></i>DAO Treasury<br>(0.1%)</div>
+                </div>
+                <div class="usdm-arrow">↓<br><span class="usdm-flow-label">Mint</span></div>
+                <div class="usdm-row">
+                    <div class="usdm-main-box"><i class="fas fa-dollar-sign"></i>USDM Minting</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Coin Launcher</h2>
+            <div class="description">
+                The MoneyFund Launchpad enables ERC20 token creation in under 30 seconds. Developers specify name, ticker, supply, and image, then hit launch. Additionally, 0.1% of the new token’s supply goes to the staking pool and 0.1% goes to the DAO treasury. Created tokens integrate with the DEX for trading and liquidity provision. The Launchpad simplifies issuance, attracting new Ethereum projects to the ecosystem.
+            </div>
+            <div class="launch-diagram-container">
+                <div class="launch-title">MoneyFund Launchpad</div>
+                <div class="launch-row">
+                    <div class="launch-box"><i class="fas fa-users"></i>Users</div>
+                </div>
+                <div class="launch-arrow">↓<br><span class="launch-flow-label">Access</span></div>
+                <div class="launch-row">
+                    <div class="launch-main-box"><i class="fas fa-rocket"></i>Launchpad</div>
+                </div>
+                <div class="launch-arrow">↓<br><span class="launch-flow-label">Specify</span></div>
+                <div class="launch-input-row">
+                    <div class="launch-input-box">Name, Ticker</div>
+                    <div class="launch-input-box">Supply, Image</div>
+                </div>
+                <div class="launch-arrow">↓<br><span class="launch-flow-label">Launch</span></div>
+                <div class="launch-row">
+                    <div class="launch-box"><i class="fas fa-coins"></i>Token Created</div>
+                </div>
+                <div class="launch-fee-row">
+                    <div class="launch-stacking-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.1%)</div>
+                    <div class="launch-arrow-horizontal">←<span class="launch-flow-label-horizontal">0.1% Supply</span></div>
+                    <div class="launch-input-box">0.2% Supply</div>
+                    <div class="launch-arrow-horizontal">→<span class="launch-flow-label-horizontal">0.1% Supply</span></div>
+                    <div class="launch-dao-box"><i class="fas fa-vote-yea"></i>DAO Treasury<br>(0.1%)</div>
+                </div>
+                <div class="launch-arrow">↓<br><span class="launch-flow-label"></span></div>
+                <div class="launch-row">
+                    <div class="launch-box"><i class="fas fa-exchange-alt"></i>DEX Integration</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>DEX</h2>
+            <div class="description">
+                The MoneyFund DEX, a Uniswap V2-inspired decentralized exchange, facilitates token swaps and liquidity provision for MONEY, USDM, and other assets. It deducts 0.1% per swap for the staking pool and 0.1% for the DAO. Users deposit token pairs, such as MONEY and USDM, to receive LP tokens and earn 0.3% of pool swaps proportional to their contribution. The DEX supports seamless pair creation and liquidity management with an incentive structure that benefits both liquidity providers and MONEY holders.
+            </div>
+            <div class="dex-diagram-container">
+                <div class="dex-title">MoneyFund DEX</div>
+                <div class="dex-row">
+                    <div class="dex-box"><i class="fas fa-users"></i>Users</div>
+                </div>
+                <div class="dex-arrow">↓<br><span class="dex-flow-label">Interact</span></div>
+                <div class="dex-row">
+                    <div class="dex-main-box"><i class="fas fa-exchange-alt"></i>DEX</div>
+                </div>
+                <div class="dex-action-row">
+                    <div class="dex-input-box">Token Swaps</div>
+                    <div class="dex-arrow-horizontal">←<span class="dex-flow-label-horizontal">Swaps</span></div>
+                    <div class="dex-box">Actions</div>
+                    <div class="dex-arrow-horizontal">→<span class="dex-flow-label-horizontal">Liquidity</span></div>
+                    <div class="dex-input-box">Pair Creation</div>
+                </div>
+                <div class="dex-fee-row">
+                    <div class="dex-reward-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.1%)</div>
+                    <div class="dex-arrow-horizontal">←<span class="dex-flow-label-horizontal">0.1% Fee</span></div>
+                    <div class="dex-input-box">0.2% Fee</div>
+                    <div class="dex-arrow-horizontal">→<span class="dex-flow-label-horizontal">0.1% Fee</span></div>
+                    <div class="dex-dao-box"><i class="fas fa-vote-yea"></i>DAO<br>(0.1%)</div>
+                </div>
+                <div class="dex-arrow">↓<br><span class="dex-flow-label">Deposit</span></div>
+                <div class="dex-row">
+                    <div class="dex-input-box">Token Pairs</div>
+                </div>
+                <div class="dex-arrow">↓<br><span class="dex-flow-label"></span></div>
+                <div class="dex-row">
+                    <div class="dex-main-box"><i class="fas fa-coins"></i>LP Tokens</div>
+                </div>
+                <div class="dex-arrow">↓<br><span class="dex-flow-label">Earn</span></div>
+                <div class="dex-row">
+                    <div class="dex-reward-box"><i class="fas fa-gift"></i>0.3% Pool Fees</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Dividend Launcher</h2>
+            <div class="description">
+                The MoneyFund Dividend Launcher allows users to create custom staking pools for any ERC20 token, enabling flexible reward distribution systems. Users specify the token address, reward rate, and lock-up period. A 0.1% fee on staking rewards is split equally between the MoneyFund staking pool and DAO treasury, incentivizing ecosystem participation. The launcher simplifies the creation of tailored staking mechanisms, enhancing token utility and user engagement within the MoneyFund ecosystem.
+            </div>
+            <div class="dividend-diagram-container">
+                <div class="dividend-title">MoneyFund Dividend Launcher</div>
+                <div class="dividend-row">
+                    <div class="dividend-box"><i class="fas fa-users"></i>Users</div>
+                </div>
+                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Access</span></div>
+                <div class="dividend-row">
+                    <div class="dividend-main-box"><i class="fas fa-lock"></i>Dividend Launcher</div>
+                </div>
+                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Specify</span></div>
+                <div class="dividend-input-row">
+                    <div class="dividend-input-box">Token Address</div>
+                    <div class="dividend-input-box">Reward Rate</div>
+                    <div class="dividend-input-box">Lock-up Period</div>
+                </div>
+                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Deploy</span></div>
+                <div class="dividend-row">
+                    <div class="dividend-box"><i class="fas fa-coins"></i>Custom Staking Pool</div>
+                </div>
+                <div class="dividend-arrow">↓<br><span class="dividend-flow-label">Rewards</span></div>
+                <div class="dividend-fee-row">
+                    <div class="dividend-staking-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.05%)</div>
+                    <div class="dividend-arrow-horizontal">←<span class="dividend-flow-label-horizontal">0.05% Fee</span></div>
+                    <div class="dividend-input-box">0.1% Fee</div>
+                    <div class="dividend-arrow-horizontal">→<span class="dividend-flow-label-horizontal">0.05% Fee</span></div>
+                    <div class="dividend-box"><i class="fas fa-vote-yea"></i>DAO Treasury<br>(0.05%)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>DAO Launcher</h2>
+            <div class="description">
+                The MoneyFund DAO Launcher empowers users to deploy custom DAOs with configurable governance parameters. Users define the token address, token supply, voting period, and mode (Rape or Standard). In Rape mode, non-votes count as approvals, ensuring efficient decision-making. Deployed DAOs support up to 5 daily proposals with a 51% approval threshold for execution. The launcher fosters decentralized governance tailored to specific project needs within the MoneyFund ecosystem.
+            </div>
+            <div class="daol-diagram-container">
+                <div class="daol-title">MoneyFund DAO Launcher</div>
+                <div class="daol-row">
+                    <div class="daol-box"><i class="fas fa-users"></i>Users</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Access</span></div>
+                <div class="daol-row">
+                    <div class="daol-main-box"><i class="fas fa-vote-yea"></i>DAO Launcher</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Specify</span></div>
+                <div class="daol-input-row">
+                    <div class="daol-input-box">Token Address</div>
+                    <div class="daol-input-box">Token Supply</div>
+                    <div class="daol-input-box">Voting Period</div>
+                    <div class="daol-input-box">Rape/Standard Mode</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Deploy</span></div>
+                <div class="daol-row">
+                    <div class="daol-box"><i class="fas fa-vote-yea"></i>Custom DAO</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Proposals</span></div>
+                <div class="daol-row">
+                    <div class="daol-voting-box"><i class="fas fa-file-alt"></i>Proposals</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Vote</span></div>
+                <div class="daol-voting-row">
+                    <div class="daol-voting-box"><i class="fas fa-ballot"></i>Voting Period<br>(51% Approval)</div>
+                    <div class="daol-arrow-horizontal">→<span class="daol-flow-label-horizontal">Rape Mode</span></div>
+                    <div class="daol-box">Non-Votes = Yes</div>
+                </div>
+                <div class="daol-arrow">↓<br><span class="daol-flow-label">Approved</span></div>
+                <div class="daol-row">
+                    <div class="daol-execution-box"><i class="fas fa-cogs"></i>Smart Contract<br>Execution</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Airdropper</h2>
+            <div class="description">
+                The MoneyFund Airdropper streamlines token distribution to multiple addresses, saving over 40% on gas costs compared to traditional methods. Users deposit MONEY and other ERC20 tokens, which are then distributed proportionally to specified wallets. A 0.1% fee per airdrop is split between the staking pool and DAO treasury, incentivizing ecosystem participation while maintaining efficiency.
+            </div>
+            <div class="airdrop-diagram-container">
+                <div class="airdrop-title">MoneyFund Airdropper</div>
+                <div class="airdrop-row">
+                    <div class="airdrop-box"><i class="fas fa-users"></i>Users</div>
+                </div>
+                <div class="airdrop-arrow">↓<br><span class="airdrop-flow-label">Deposit</span></div>
+                <div class="airdrop-row">
+                    <div class="airdrop-main-box"><i class="fas fa-parachute-box"></i>Airdropper</div>
+                </div>
+                <div class="airdrop-arrow">↓<br><span class="airdrop-flow-label">Tokens</span></div>
+                <div class="airdrop-fee-row">
+                    <div class="airdrop-input-box">MONEY</div>
+                    <div class="airdrop-input-box">ERC20 Tokens</div>
+                </div>
+                <div class="airdrop-arrow">↓<br><span class="airdrop-flow-label">Fee</span></div>
+                <div class="airdrop-fee-row">
+                    <div class="airdrop-staking-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.05%)</div>
+                    <div class="airdrop-arrow-horizontal">←<span class="airdrop-flow-label-horizontal">0.05% Fee</span></div>
+                    <div class="airdrop-input-box">0.1% Fee</div>
+                    <div class="airdrop-arrow-horizontal">→<span class="airdrop-flow-label-horizontal">0.05% Fee</span></div>
+                    <div class="airdrop-dao-box"><i class="fas fa-vote-yea"></i>DAO Treasury<br>(0.05%)</div>
+                </div>
+                <div class="airdrop-arrow">↓<br><span class="airdrop-flow-label">Distribute</span></div>
+                <div class="airdrop-row">
+                    <div class="airdrop-box"><i class="fas fa-wallet"></i>Recipient Wallets</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Wallets</h2>
+            <div class="description">
+                MoneyFund wallets are fully non-custodial which means that you are the only person with access to your private key- there’s no 3rd party database that can recover it for you. With great security comes great responsibility…don’t lose your key. The platform supports standard + vanity wallet address creation, as well as built in .eth domain registration.
+            </div>
+            <div class="fund-diagram-container">
+                <div class="fund-title">Wallet Distribution</div>
+                <div class="fund-row">
+                    <div class="fund-box"><i class="fas fa-exchange-alt"></i>Transactions</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Fees</span></div>
+                <div class="fund-fee-row">
+                    <div class="fund-staking-box"><i class="fas fa-lock"></i>Staking Pool<br>(0.1% / 0.05%)</div>
+                    <div class="fund-arrow-horizontal">←<span class="fund-flow-label-horizontal">Fees</span></div>
+                    <div class="fund-box">Fee Split</div>
+                    <div class="fund-arrow-horizontal">→<span class="fund-flow-label-horizontal">Fees</span></div>
+                    <div class="fund-shane-box"><i class="fas fa-wallet"></i>Shane’s Wallet<br>(0.1% Funds)</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Burn & DAO</span></div>
+                <div class="fund-burn-row">
+                    <div class="fund-burn-box"><i class="fas fa-fire"></i>MONEY Burn<br>(0.1% USD)</div>
+                    <div class="fund-arrow-horizontal">←<span class="fund-flow-label-horizontal">Distribution</span></div>
+                    <div class="fund-custom-box">Fees</div>
+                    <div class="fund-arrow-horizontal">→<span class="fund-flow-label-horizontal">0.1% / 0.05%</span></div>
+                    <div class="fund-shane-box"><i class="fas fa-vote-yea"></i>DAO Treasury</div>
+                </div>
+                <div class="fund-arrow">↓<br><span class="fund-flow-label">Payout</span></div>
+                <div class="fund-row">
+                    <div class="fund-box"><i class="fas fa-gift"></i>Staker Dividends</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            const icon = document.querySelector('.theme-toggle i');
+            icon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Set default theme based on system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.querySelector('.theme-toggle i').className = 'fas fa-moon';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.querySelector('.theme-toggle i').className = 'fas fa-sun';
+        }
+    </script>
+</body>
+</html> 
