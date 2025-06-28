@@ -309,6 +309,41 @@
             overflow-wrap: break-word;
         }
 
+        .dao-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .proposal-form, .vote-form {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(31, 41, 55, 0.6);
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .proposal-form input, .proposal-form select,
+        .vote-form input, .vote-form select {
+            margin-bottom: 8px;
+        }
+
+        .proposals-list {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(31, 41, 55, 0.6);
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            font-size: 0.8em;
+        }
+
+        .proposal-item {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+        }
+
         @media (max-width: 768px) {
             .flex-container {
                 flex-direction: column;
@@ -389,8 +424,6 @@
             <h2>Deploy a DAO</h2>
             <label for="token-address">Token Address:</label>
             <input id="token-address" type="text" placeholder="e.g., 0xToken" />
-            <label for="total-supply">Total Supply:</label>
-            <input id="total-supply" type="number" placeholder="e.g., 1000000" min="1" />
             <label for="voting-period">Voting Period (days):</label>
             <input id="voting-period" type="number" placeholder="e.g., 1" min="1" step="1" />
             <label for="count-non-responders">Non-Responders Vote Yes:</label>
@@ -426,8 +459,8 @@
     </div>
 
     <script>
-        // Contract address (Ethereum Mainnet)
-        const FACTORY_ADDRESS = "0x4529a19CE3Dd34C878c98AA84d51c8667c665E83";
+        // Updated contract address
+        const FACTORY_ADDRESS = "0xaa80768dcd0e97e818bf624e5b1e4ca0a7cb5c82";
 
         // Hardcoded RPC configuration for Ethereum Mainnet
         const RPC_ENDPOINTS = [
@@ -487,11 +520,6 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "_totalSupply",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
                         "name": "_votingPeriod",
                         "type": "uint256"
                     },
@@ -532,6 +560,19 @@
                 "type": "function"
             },
             {
+                "inputs": [],
+                "name": "getAllDAOs",
+                "outputs": [
+                    {
+                        "internalType": "address[]",
+                        "name": "",
+                        "type": "address[]"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
                 "inputs": [
                     {
                         "internalType": "address",
@@ -560,11 +601,6 @@
                         "internalType": "address",
                         "name": "_token",
                         "type": "address"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "_totalSupply",
-                        "type": "uint256"
                     },
                     {
                         "internalType": "uint256",
@@ -601,16 +637,19 @@
                         "type": "address"
                     },
                     {
+                        "indexed": false,
                         "internalType": "uint256",
                         "name": "amount",
                         "type": "uint256"
                     },
                     {
+                        "indexed": false,
                         "internalType": "address",
                         "name": "tokenAddress",
                         "type": "address"
                     },
                     {
+                        "indexed": false,
                         "internalType": "string",
                         "name": "reason",
                         "type": "string"
@@ -629,6 +668,7 @@
                         "type": "uint256"
                     },
                     {
+                        "indexed": false,
                         "internalType": "address",
                         "name": "proposer",
                         "type": "address"
@@ -639,6 +679,7 @@
                         "type": "string"
                     },
                     {
+                        "indexed": false,
                         "internalType": "enum DAO.ProposalType",
                         "name": "proposalType",
                         "type": "uint8"
@@ -657,6 +698,7 @@
                         "type": "uint256"
                     },
                     {
+                        "indexed": false,
                         "internalType": "bool",
                         "name": "passed",
                         "type": "bool"
@@ -675,11 +717,13 @@
                         "type": "uint256"
                     },
                     {
+                        "indexed": false,
                         "internalType": "address",
                         "name": "voter",
                         "type": "address"
                     },
                     {
+                        "indexed": false,
                         "internalType": "bool",
                         "name": "vote",
                         "type": "bool"
@@ -716,7 +760,20 @@
             },
             {
                 "inputs": [],
-                "name": "WITHDRAWAL_FEE_AMOUNT",
+                "name": "UNISWAP_V2_ROUTER",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "WITHDRAWAL_FEE_PERCENTAGE",
                 "outputs": [
                     {
                         "internalType": "uint256",
@@ -784,6 +841,19 @@
                 "name": "executeProposal",
                 "outputs": [],
                 "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "factory",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
                 "type": "function"
             },
             {
@@ -880,6 +950,16 @@
                                 "type": "tuple[]"
                             },
                             {
+                                "internalType": "address",
+                                "name": "uniswapRouter",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "factory",
+                                "type": "address"
+                            },
+                            {
                                 "internalType": "uint256",
                                 "name": "proposalCountPerDay",
                                 "type": "uint256"
@@ -888,16 +968,6 @@
                                 "internalType": "uint256",
                                 "name": "lastProposalTime",
                                 "type": "uint256"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "votingPeriod",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "bool",
-                                "name": "nonResponseYes",
-                                "type": "bool"
                             }
                         ],
                         "internalType": "struct DAO.DAOInfo",
@@ -1062,19 +1132,6 @@
                         "internalType": "contract IERC20",
                         "name": "",
                         "type": "address"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [],
-                "name": "totalSupply",
-                "outputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "",
-                        "type": "uint256"
                     }
                 ],
                 "stateMutability": "view",
@@ -1405,13 +1462,12 @@
                 logMessage(`Wallet connected: ${userAccount}`);
 
                 const tokenAddress = document.getElementById("token-address").value.trim();
-                const totalSupply = document.getElementById("total-supply").value.trim();
                 const votingPeriodDays = document.getElementById("voting-period").value.trim();
                 const countNonRespondersAsYes = document.getElementById("count-non-responders").value === "true";
 
-                logMessage(`Inputs: token=${tokenAddress}, totalSupply=${totalSupply}, votingPeriod=${votingPeriodDays} days, countNonRespondersAsYes=${countNonRespondersAsYes}`);
+                logMessage(`Inputs: token=${tokenAddress}, votingPeriod=${votingPeriodDays} days, countNonRespondersAsYes=${countNonRespondersAsYes}`);
 
-                if (!tokenAddress || !totalSupply || !votingPeriodDays) {
+                if (!tokenAddress || !votingPeriodDays) {
                     logMessage("Missing input fields");
                     error.innerText = "Please fill in all fields.";
                     status.innerText = "";
@@ -1421,14 +1477,6 @@
                 if (!web3.utils.isAddress(tokenAddress)) {
                     logMessage(`Invalid token address: ${tokenAddress}`);
                     error.innerText = `Invalid token address: ${tokenAddress}`;
-                    status.innerText = "";
-                    return;
-                }
-
-                const totalSupplyNum = parseInt(totalSupply);
-                if (isNaN(totalSupplyNum) || totalSupplyNum <= 0) {
-                    logMessage("Invalid total supply");
-                    error.innerText = "Total supply must be a positive number.";
                     status.innerText = "";
                     return;
                 }
@@ -1451,7 +1499,7 @@
                 try {
                     logMessage("Estimating gas");
                     gasEstimate = await withRetry(() =>
-                        factory.methods.createDAO(tokenAddress, totalSupplyNum, votingPeriodSeconds, countNonRespondersAsYes).estimateGas({ from: userAccount })
+                        factory.methods.createDAO(tokenAddress, votingPeriodSeconds, countNonRespondersAsYes).estimateGas({ from: userAccount })
                     );
                     gasEstimate = Math.ceil(Number(gasEstimate) * 1.2);
                     logMessage(`Estimated gas limit: ${gasEstimate}`);
@@ -1467,6 +1515,7 @@
                 logMessage("Initiating transaction");
 
                 let tx;
+                let daoAddress;
                 if (selectedWallet.isMetaMask) {
                     logMessage("Using MetaMask for transaction");
                     if (!signer && window.ethereum) {
@@ -1478,15 +1527,40 @@
                         throw new Error("MetaMask signer not available");
                     }
                     const factoryEthers = new ethers.Contract(FACTORY_ADDRESS, daoFactoryAbi, signer);
-                    tx = await factoryEthers.createDAO(tokenAddress, totalSupplyNum, votingPeriodSeconds, countNonRespondersAsYes, {
+                    tx = await factoryEthers.createDAO(tokenAddress, votingPeriodSeconds, countNonRespondersAsYes, {
                         gasLimit: gasEstimate,
                         gasPrice: gasPrice
                     });
                     logMessage("Waiting for transaction confirmation");
-                    await tx.wait();
+                    const receipt = await tx.wait();
+                    if (receipt.status !== 1) {
+                        throw new Error(`Transaction failed with status ${receipt.status}. Tx: ${receipt.transactionHash}`);
+                    }
+                    logMessage(`Transaction confirmed. Tx: ${receipt.transactionHash}, Logs: ${receipt.logs.length}`);
+                    const iface = new ethers.utils.Interface(daoFactoryAbi);
+                    const daoCreatedLog = receipt.logs.find(log => {
+                        try {
+                            const parsedLog = iface.parseLog(log);
+                            return parsedLog.name === 'DAOCreated';
+                        } catch (e) {
+                            logMessage(`Failed to parse log: ${e.message}`);
+                            return false;
+                        }
+                    });
+                    if (!daoCreatedLog) {
+                        throw new Error(`DAOCreated event not found in transaction logs. Tx: ${receipt.transactionHash}, Logs: ${JSON.stringify(receipt.logs)}`);
+                    }
+                    daoAddress = daoCreatedLog.args[0]; // DAOCreated event's first argument is daoAddress
                 } else {
                     logMessage("Using MoneyFund wallet for transaction");
-                    const txData = factory.methods.createDAO(tokenAddress, totalSupplyNum, votingPeriodSeconds, countNonRespondersAsYes).encodeABI();
+                    if (!selectedWallet.privateKey) {
+                        throw new Error("No private key available for MoneyFund wallet");
+                    }
+                    const account = web3.eth.accounts.privateKeyToAccount(selectedWallet.privateKey);
+                    if (account.address.toLowerCase() !== userAccount.toLowerCase()) {
+                        throw new Error("Private key does not match selected wallet address");
+                    }
+                    const txData = factory.methods.createDAO(tokenAddress, votingPeriodSeconds, countNonRespondersAsYes).encodeABI();
                     const nonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
                     const transactionObject = {
                         from: userAccount,
@@ -1498,21 +1572,28 @@
                     };
                     const signedTx = await web3.eth.accounts.signTransaction(transactionObject, selectedWallet.privateKey);
                     tx = await withRetry(() => web3.eth.sendSignedTransaction(signedTx.rawTransaction));
-                    logMessage("Transaction sent and confirmed");
+                    logMessage(`Transaction confirmed. Tx: ${tx.transactionHash}, Logs: ${tx.logs.length}`);
+                    if (!tx.status) {
+                        throw new Error(`Transaction failed with status ${tx.status}. Tx: ${tx.transactionHash}`);
+                    }
+                    const iface = new ethers.utils.Interface(daoFactoryAbi);
+                    const daoCreatedLog = tx.logs.find(log => {
+                        try {
+                            const parsedLog = iface.parseLog(log);
+                            return parsedLog.name === 'DAOCreated';
+                        } catch (e) {
+                            logMessage(`Failed to parse log: ${e.message}`);
+                            return false;
+                        }
+                    });
+                    if (!daoCreatedLog) {
+                        throw new Error(`DAOCreated event not found in transaction logs. Tx: ${tx.transactionHash}, Logs: ${JSON.stringify(tx.logs)}`);
+                    }
+                    daoAddress = daoCreatedLog.args[0]; // DAOCreated event's first argument is daoAddress
                 }
 
-                const daoAddress = tx.logs.find(log => {
-                    try {
-                        const iface = new ethers.utils.Interface(daoFactoryAbi);
-                        const parsedLog = iface.parseLog(log);
-                        return parsedLog.name === 'DAOCreated';
-                    } catch (e) {
-                        return false;
-                    }
-                })?.args.daoAddress;
-
                 if (!web3.utils.isAddress(daoAddress)) {
-                    throw new Error("Invalid DAO address received.");
+                    throw new Error(`Invalid DAO address received: ${daoAddress}. Tx: ${tx.transactionHash}`);
                 }
 
                 const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
@@ -1530,10 +1611,253 @@
                 await refreshDAOs();
             } catch (err) {
                 logMessage(`DAO creation failed: ${err.message}`);
-                document.getElementById("create-error").innerText = `DAO creation failed: ${err.message}`;
+                document.getElementById("create-error").innerText = `DAO creation failed: ${err.message}. Check transaction logs or verify contract at ${FACTORY_ADDRESS}.`;
                 document.getElementById("create-error").className = "error-message";
                 document.getElementById("create-status").innerText = "";
                 alert(`Failed to create DAO: ${err.message}. Check the console and log for details.`);
+            }
+        }
+
+        async function createProposal(daoAddress) {
+            try {
+                logMessage(`Creating proposal for DAO: ${daoAddress}`);
+                const status = document.getElementById("dao-status");
+                status.innerText = "Initiating proposal creation...";
+                status.className = "status-message";
+
+                if (!selectedWallet || !userAccount) {
+                    logMessage("No wallet selected or connected");
+                    status.innerText = "Please connect and select a wallet first.";
+                    status.className = "error-message";
+                    return;
+                }
+
+                const description = document.getElementById(`proposal-description-${daoAddress}`).value.trim();
+                const proposalType = parseInt(document.getElementById(`proposal-type-${daoAddress}`).value);
+                const destination = document.getElementById(`proposal-destination-${daoAddress}`).value.trim();
+                const amount = document.getElementById(`proposal-amount-${daoAddress}`).value.trim();
+                const tokenAddress = document.getElementById(`proposal-token-address-${daoAddress}`).value.trim();
+
+                logMessage(`Proposal inputs: description=${description}, type=${proposalType}, destination=${destination}, amount=${amount}, tokenAddress=${tokenAddress}`);
+
+                if (!description || isNaN(proposalType) || !destination || !amount || !tokenAddress) {
+                    logMessage("Missing proposal fields");
+                    status.innerText = "Please fill in all proposal fields.";
+                    status.className = "error-message";
+                    return;
+                }
+
+                if (!web3.utils.isAddress(destination) || !web3.utils.isAddress(tokenAddress)) {
+                    logMessage("Invalid address in proposal inputs");
+                    status.innerText = "Invalid destination or token address.";
+                    status.className = "error-message";
+                    return;
+                }
+
+                const amountWei = web3.utils.toWei(amount, 'ether'); // Assuming 18 decimals
+                if (isNaN(amountWei) || Number(amountWei) <= 0) {
+                    logMessage("Invalid proposal amount");
+                    status.innerText = "Amount must be a positive number.";
+                    status.className = "error-message";
+                    return;
+                }
+
+                if (proposalType < 0 || proposalType > 3) {
+                    logMessage("Invalid proposal type");
+                    status.innerText = "Invalid proposal type.";
+                    status.className = "error-message";
+                    return;
+                }
+
+                const daoContract = new web3.eth.Contract(daoAbi, daoAddress);
+                let gasEstimate;
+                try {
+                    logMessage("Estimating gas for proposal creation");
+                    gasEstimate = await withRetry(() =>
+                        daoContract.methods.createProposal(description, proposalType, destination, amountWei, tokenAddress).estimateGas({ from: userAccount })
+                    );
+                    gasEstimate = Math.ceil(Number(gasEstimate) * 1.2);
+                    logMessage(`Estimated gas limit: ${gasEstimate}`);
+                } catch (err) {
+                    gasEstimate = 500000;
+                    logMessage(`Gas estimation failed, using default ${gasEstimate}: ${err.message}`);
+                }
+
+                const gasPrice = await getGasPrice();
+                logMessage(`Gas price: ${web3.utils.fromWei(gasPrice, 'gwei')} Gwei`);
+
+                status.innerText = selectedWallet.isMetaMask ? "Creating proposal... Please confirm in MetaMask." : "Creating proposal... Signing with MoneyFund wallet.";
+                logMessage("Initiating proposal transaction");
+
+                let tx;
+                if (selectedWallet.isMetaMask) {
+                    if (!signer && window.ethereum) {
+                        const provider = new ethers.providers.Web3Provider(window.ethereum);
+                        signer = provider.getSigner();
+                        logMessage("Initialized signer from MetaMask provider");
+                    }
+                    if (!signer) {
+                        throw new Error("MetaMask signer not available");
+                    }
+                    const daoEthers = new ethers.Contract(daoAddress, daoAbi, signer);
+                    tx = await daoEthers.createProposal(description, proposalType, destination, amountWei, tokenAddress, {
+                        gasLimit: gasEstimate,
+                        gasPrice: gasPrice
+                    });
+                    logMessage("Waiting for proposal transaction confirmation");
+                    const receipt = await tx.wait();
+                    if (receipt.status !== 1) {
+                        throw new Error(`Proposal transaction failed with status ${receipt.status}. Tx: ${receipt.transactionHash}`);
+                    }
+                    logMessage(`Proposal transaction confirmed. Tx: ${receipt.transactionHash}`);
+                } else {
+                    logMessage("Using MoneyFund wallet for proposal transaction");
+                    if (!selectedWallet.privateKey) {
+                        throw new Error("No private key available for MoneyFund wallet");
+                    }
+                    const account = web3.eth.accounts.privateKeyToAccount(selectedWallet.privateKey);
+                    if (account.address.toLowerCase() !== userAccount.toLowerCase()) {
+                        throw new Error("Private key does not match selected wallet address");
+                    }
+                    const txData = daoContract.methods.createProposal(description, proposalType, destination, amountWei, tokenAddress).encodeABI();
+                    const nonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
+                    const transactionObject = {
+                        from: userAccount,
+                        to: daoAddress,
+                        data: txData,
+                        gas: gasEstimate,
+                        gasPrice: gasPrice,
+                        nonce: nonce
+                    };
+                    const signedTx = await web3.eth.accounts.signTransaction(transactionObject, selectedWallet.privateKey);
+                    tx = await withRetry(() => web3.eth.sendSignedTransaction(signedTx.rawTransaction));
+                    logMessage(`Proposal transaction confirmed. Tx: ${tx.transactionHash}`);
+                    if (!tx.status) {
+                        throw new Error(`Proposal transaction failed with status ${tx.status}. Tx: ${tx.transactionHash}`);
+                    }
+                }
+
+                status.innerText = `Proposal created successfully for DAO: ${daoAddress}! Tx: ${tx.transactionHash || tx.hash}`;
+                logMessage(`Proposal created: ${description} for DAO: ${daoAddress}, Tx: ${tx.transactionHash || tx.hash}`);
+                await refreshDAOs();
+            } catch (err) {
+                logMessage(`Proposal creation failed: ${err.message}`);
+                status.innerText = `Proposal creation failed: ${err.message}. Check transaction logs.`;
+                status.className = "error-message";
+                alert(`Failed to create proposal: ${err.message}. Check the console and log for details.`);
+            }
+        }
+
+        async function voteOnProposal(daoAddress) {
+            try {
+                logMessage(`Voting on proposal for DAO: ${daoAddress}`);
+                const status = document.getElementById("dao-status");
+                status.innerText = "Initiating vote...";
+                status.className = "status-message";
+
+                if (!selectedWallet || !userAccount) {
+                    logMessage("No wallet selected or connected");
+                    status.innerText = "Please connect and select a wallet first.";
+                    status.className = "error-message";
+                    return;
+                }
+
+                const proposalId = document.getElementById(`vote-proposal-id-${daoAddress}`).value.trim();
+                const support = document.getElementById(`vote-support-${daoAddress}`).value === "true";
+
+                logMessage(`Vote inputs: proposalId=${proposalId}, support=${support}`);
+
+                if (!proposalId) {
+                    logMessage("Missing proposal ID");
+                    status.innerText = "Please enter a proposal ID.";
+                    status.className = "error-message";
+                    return;
+                }
+
+                const proposalIdNum = parseInt(proposalId);
+                if (isNaN(proposalIdNum) || proposalIdNum < 0) {
+                    logMessage("Invalid proposal ID");
+                    status.innerText = "Proposal ID must be a non-negative number.";
+                    status.className = "error-message";
+                    return;
+                }
+
+                const daoContract = new web3.eth.Contract(daoAbi, daoAddress);
+                let gasEstimate;
+                try {
+                    logMessage("Estimating gas for vote");
+                    gasEstimate = await withRetry(() =>
+                        daoContract.methods.vote(proposalIdNum, support).estimateGas({ from: userAccount })
+                    );
+                    gasEstimate = Math.ceil(Number(gasEstimate) * 1.2);
+                    logMessage(`Estimated gas limit: ${gasEstimate}`);
+                } catch (err) {
+                    gasEstimate = 200000;
+                    logMessage(`Gas estimation failed, using default ${gasEstimate}: ${err.message}`);
+                }
+
+                const gasPrice = await getGasPrice();
+                logMessage(`Gas price: ${web3.utils.fromWei(gasPrice, 'gwei')} Gwei`);
+
+                status.innerText = selectedWallet.isMetaMask ? "Voting... Please confirm in MetaMask." : "Voting... Signing with MoneyFund wallet.";
+                logMessage("Initiating vote transaction");
+
+                let tx;
+                if (selectedWallet.isMetaMask) {
+                    if (!signer && window.ethereum) {
+                        const provider = new ethers.providers.Web3Provider(window.ethereum);
+                        signer = provider.getSigner();
+                        logMessage("Initialized signer from MetaMask provider");
+                    }
+                    if (!signer) {
+                        throw new Error("MetaMask signer not available");
+                    }
+                    const daoEthers = new ethers.Contract(daoAddress, daoAbi, signer);
+                    tx = await daoEthers.vote(proposalIdNum, support, {
+                        gasLimit: gasEstimate,
+                        gasPrice: gasPrice
+                    });
+                    logMessage("Waiting for vote transaction confirmation");
+                    const receipt = await tx.wait();
+                    if (receipt.status !== 1) {
+                        throw new Error(`Vote transaction failed with status ${receipt.status}. Tx: ${receipt.transactionHash}`);
+                    }
+                    logMessage(`Vote transaction confirmed. Tx: ${receipt.transactionHash}`);
+                } else {
+                    logMessage("Using MoneyFund wallet for vote transaction");
+                    if (!selectedWallet.privateKey) {
+                        throw new Error("No private key available for MoneyFund wallet");
+                    }
+                    const account = web3.eth.accounts.privateKeyToAccount(selectedWallet.privateKey);
+                    if (account.address.toLowerCase() !== userAccount.toLowerCase()) {
+                        throw new Error("Private key does not match selected wallet address");
+                    }
+                    const txData = daoContract.methods.vote(proposalIdNum, support).encodeABI();
+                    const nonce = await withRetry(() => web3.eth.getTransactionCount(userAccount, 'latest'));
+                    const transactionObject = {
+                        from: userAccount,
+                        to: daoAddress,
+                        data: txData,
+                        gas: gasEstimate,
+                        gasPrice: gasPrice,
+                        nonce: nonce
+                    };
+                    const signedTx = await web3.eth.accounts.signTransaction(transactionObject, selectedWallet.privateKey);
+                    tx = await withRetry(() => web3.eth.sendSignedTransaction(signedTx.rawTransaction));
+                    logMessage(`Vote transaction confirmed. Tx: ${tx.transactionHash}`);
+                    if (!tx.status) {
+                        throw new Error(`Vote transaction failed with status ${tx.status}. Tx: ${tx.transactionHash}`);
+                    }
+                }
+
+                status.innerText = `Voted ${support ? 'Yes' : 'No'} on proposal ${proposalId} for DAO: ${daoAddress}! Tx: ${tx.transactionHash || tx.hash}`;
+                logMessage(`Voted ${support ? 'Yes' : 'No'} on proposal ${proposalId} for DAO: ${daoAddress}, Tx: ${tx.transactionHash || tx.hash}`);
+                await refreshDAOs();
+            } catch (err) {
+                logMessage(`Vote failed: ${err.message}`);
+                status.innerText = `Vote failed: ${err.message}. Check transaction logs.`;
+                status.className = "error-message";
+                alert(`Failed to vote: ${err.message}. Check the console and log for details.`);
             }
         }
 
@@ -1542,58 +1866,94 @@
             statusMessage.innerText = "Loading DAOs...";
             statusMessage.className = "status-message";
 
+            // Check if a wallet is selected
+            if (!selectedWallet || !userAccount) {
+                logMessage("No wallet selected, skipping DAO refresh.");
+                statusMessage.innerText = "Please select a wallet to view DAOs.";
+                statusMessage.className = "error-message";
+                document.getElementById("dao-card-container").innerHTML = '<p style="text-align: center; color: #E5E7EB;">Please select a wallet to view DAOs.</p>';
+                return;
+            }
+
             try {
                 const factory = new web3.eth.Contract(daoFactoryAbi, FACTORY_ADDRESS);
                 const cardContainer = document.getElementById("dao-card-container");
                 cardContainer.innerHTML = "";
 
-                const tokenAddresses = [];
-                const storedTokens = JSON.parse(localStorage.getItem('knownTokens') || '[]');
-                tokenAddresses.push(...storedTokens);
-
-                if (tokenAddresses.length === 0) {
-                    cardContainer.innerHTML = '<p style="text-align: center; color: #E5E7EB;">No DAOs found. Deploy one or add token addresses.</p>';
+                // Fetch all DAO addresses using getAllDAOs
+                const daoAddresses = await withRetry(() => factory.methods.getAllDAOs().call());
+                if (daoAddresses.length === 0) {
+                    cardContainer.innerHTML = '<p style="text-align: center; color: #E5E7EB;">No DAOs found. Deploy one to get started.</p>';
                     statusMessage.innerText = "No DAOs available.";
                     statusMessage.className = "status-message";
                     return;
                 }
 
                 const daos = [];
-                for (const token of tokenAddresses) {
+                for (const daoAddress of daoAddresses) {
                     try {
-                        const daoAddress = await withRetry(() => factory.methods.getDAO(token).call());
-                        if (daoAddress !== "0x0000000000000000000000000000000000000000") {
-                            const daoContract = new web3.eth.Contract(daoAbi, daoAddress);
-                            const daoInfo = await withRetry(() => daoContract.methods.getDAOInfo().call());
-                            const tokenContract = new web3.eth.Contract(tokenAbi, token);
-                            let tokenName = "Unknown";
-                            let tokenSymbol = "UNK";
-                            try {
-                                tokenName = await withRetry(() => tokenContract.methods.name().call());
-                                tokenSymbol = await withRetry(() => tokenContract.methods.symbol().call());
-                            } catch (error) {
-                                logMessage(`Failed to fetch token name/symbol for ${token}: ${error.message}`);
-                            }
-                            daos.push({ daoAddress, token, tokenName, tokenSymbol, daoInfo });
+                        if (daoAddress === "0x0000000000000000000000000000000000000000") {
+                            logMessage(`Skipping invalid DAO address: ${daoAddress}`);
+                            continue;
                         }
+                        const daoContract = new web3.eth.Contract(daoAbi, daoAddress);
+                        const daoInfo = await withRetry(() => daoContract.methods.getDAOInfo().call());
+                        const countNonRespondersAsYes = await withRetry(() => daoContract.methods.countNonRespondersAsYes().call());
+                        const votingPeriod = await withRetry(() => daoContract.methods.votingPeriod().call());
+                        const tokenAddress = daoInfo.tokenAddress;
+                        const tokenContract = new web3.eth.Contract(tokenAbi, tokenAddress);
+                        let tokenName = "Unknown";
+                        let tokenSymbol = "UNK";
+                        try {
+                            tokenName = await withRetry(() => tokenContract.methods.name().call());
+                            tokenSymbol = await withRetry(() => tokenContract.methods.symbol().call());
+                        } catch (error) {
+                            logMessage(`Failed to fetch token name/symbol for ${tokenAddress}: ${error.message}`);
+                        }
+                        daos.push({ daoAddress, token: tokenAddress, tokenName, tokenSymbol, daoInfo, countNonRespondersAsYes, votingPeriod });
                     } catch (error) {
-                        logMessage(`Failed to fetch DAO for token ${token}: ${error.message}`);
+                        logMessage(`Failed to fetch DAO info for ${daoAddress}: ${error.message}`);
                     }
                 }
 
                 if (daos.length === 0) {
-                    cardContainer.innerHTML = '<p style="text-align: center; color: #E5E7EB;">No DAOs found.</p>';
+                    cardContainer.innerHTML = '<p style="text-align: center; color: #E5E7EB;">No valid DAOs found.</p>';
                     statusMessage.innerText = "No DAOs available.";
                     statusMessage.className = "status-message";
                     return;
                 }
 
                 for (const dao of daos) {
-                    const { daoAddress, token, tokenName, tokenSymbol, daoInfo } = dao;
+                    const { daoAddress, token, tokenName, tokenSymbol, daoInfo, countNonRespondersAsYes, votingPeriod } = dao;
                     const ethBalance = web3.utils.fromWei(daoInfo.ethBalance, 'ether');
                     const tokenBalance = daoInfo.tokenBalance ? web3.utils.fromWei(daoInfo.tokenBalance, 'ether') : '0';
-                    const votingPeriodDays = (Number(daoInfo.votingPeriod) / (24 * 60 * 60)).toFixed(2);
+                    const votingPeriodDays = (Number(votingPeriod) / (24 * 60 * 60)).toFixed(2);
                     const lastProposalTime = daoInfo.lastProposalTime > 0 ? new Date(Number(daoInfo.lastProposalTime) * 1000).toLocaleDateString() : "None";
+
+                    // Format proposals
+                    let proposalsHtml = '<div class="proposals-list"><h3>Proposals</h3>';
+                    if (daoInfo.proposals.length === 0) {
+                        proposalsHtml += '<p>No proposals found.</p>';
+                    } else {
+                        for (const proposal of daoInfo.proposals) {
+                            const proposalTypeStr = ['Swap ETH to ERC20', 'Swap ERC20 to ETH', 'Withdraw ETH', 'Withdraw ERC20'][proposal.proposalType] || 'Unknown';
+                            const status = proposal.executed ? (proposal.yesVotes > (Number(daoInfo.totalSupply) / 2) ? 'Passed' : 'Failed') : 'Active';
+                            proposalsHtml += `
+                                <div class="proposal-item">
+                                    <label>ID: ${proposal.id}</label>
+                                    <span>Description: ${proposal.description}</span>
+                                    <span>Type: ${proposalTypeStr}</span>
+                                    <span>Destination: ${proposal.destination.slice(0, 6)}...${proposal.destination.slice(-4)}</span>
+                                    <span>Amount: ${web3.utils.fromWei(proposal.amount, 'ether')}</span>
+                                    <span>Token: ${proposal.tokenAddress.slice(0, 6)}...${proposal.tokenAddress.slice(-4)}</span>
+                                    <span>Yes Votes: ${web3.utils.fromWei(proposal.yesVotes, 'ether')}</span>
+                                    <span>Start Time: ${new Date(Number(proposal.startTime) * 1000).toLocaleString()}</span>
+                                    <span>Status: ${status}</span>
+                                </div>
+                            `;
+                        }
+                    }
+                    proposalsHtml += '</div>';
 
                     const card = document.createElement("div");
                     card.className = "dao-card";
@@ -1602,63 +1962,95 @@
                             <h3>${tokenName}</h3>
                             <span>${tokenSymbol}</span>
                         </div>
-                        <div class="dao-card-details">
-                            <div>
-                                <label>DAO Address</label>
-                                <span>${daoAddress.slice(0, 6)}...${daoAddress.slice(-4)}</span>
-                            </div>
-                            <div>
-                                <label>Address</label>
-                                <span>${token.slice(0, 6)}...${token.slice(-4)}</span>
-                            </div>
-                            <div>
-                                <label>Total Supply</label>
-                                <span>${Number(daoInfo.totalSupply).toLocaleString()}</span>
-                            </div>
-                            <div>
-                                <label>ETH Balance</label>
-                                <span>${Number(ethBalance).toFixed(4)} ETH</span>
-                            </div>
-                            <div>
-                                <label>Token Balance</label>
-                                <span>${Number(tokenBalance).toFixed(4)}</span>
-                            </div>
-                            <div>
-                                <label>Voting Period</label>
-                                <span>${votingPeriodDays} days</span>
-                            </div>
-                            <div>
-                                <label>Non-Responders Vote Yes</label>
-                                <span>${daoInfo.nonResponseYes ? "Yes" : "No"}</span>
-                            </div>
-                            <div>
-                                <label>Proposal Count</label>
-                                <span>${daoInfo.proposalCount}</span>
-                            </div>
-                            <div>
-                                <label>Active Proposals</label>
-                                <span>${daoInfo.activeProposals}</span>
-                            </div>
-                            <div>
-                                <label>Proposals Per Day</label>
-                                <span>${daoInfo.proposalCountPerDay}</span>
-                            </div>
-                            <div>
-                                <label>Last Proposal</label>
-                                <span>${lastProposalTime}</span>
-                            </div>
-                        </div>
-                    `;
+                       <div class="dao-card-details">
+    <div>
+        <label>DAO Address</label>
+        <span>${daoAddress.slice(0, 6)}...${daoAddress.slice(-4)}</span>
+    </div>
+    <div>
+        <label>Token Address</label>
+        <span>${token.slice(0, 6)}...${token.slice(-4)}</span>
+    </div>
+    <div>
+        <label>Total Supply</label>
+        <span>${Number(daoInfo.totalSupply).toLocaleString()}</span>
+    </div>
+    <div>
+        <label>ETH Balance</label>
+        <span>${Number(ethBalance).toFixed(4)} ETH</span>
+    </div>
+    <div>
+        <label>Token Balance</label>
+        <span>${Number(tokenBalance).toFixed(4)}</span>
+    </div>
+    <div>
+        <label>Voting Period</label>
+        <span>${votingPeriodDays} days</span>
+    </div>
+    <div>
+        <label>Non-Responders Vote Yes</label>
+        <span>${countNonRespondersAsYes ? "Yes" : "No"}</span>
+    </div>
+    <div>
+        <label>Proposal Count</label>
+        <span>${daoInfo.proposalCount}</span>
+    </div>
+    <div>
+        <label>Active Proposals</label>
+        <span>${daoInfo.activeProposals}</span>
+    </div>
+    <div>
+        <label>Proposals Per Day</label>
+        <span>${daoInfo.proposalCountPerDay}</span>
+    </div>
+    <div>
+        <label>Last Proposal</label>
+        <span>${lastProposalTime}</span>
+    </div>
+</div>
+<div class="dao-actions">
+    <button onclick="document.getElementById('proposal-form-${daoAddress}').style.display='block';">Create Proposal</button>
+    <button onclick="document.getElementById('vote-form-${daoAddress}').style.display='block';">Vote</button>
+</div>
+<div class="proposal-form" id="proposal-form-${daoAddress}" style="display: none;">
+    <label for="proposal-description-${daoAddress}">Description:</label>
+    <input id="proposal-description-${daoAddress}" type="text" placeholder="e.g., Swap ETH for tokens" />
+    <label for="proposal-type-${daoAddress}">Proposal Type:</label>
+    <select id="proposal-type-${daoAddress}">
+        <option value="0">Swap ETH to ERC20</option>
+        <option value="1">Swap ERC20 to ETH</option>
+        <option value="2">Withdraw ETH</option>
+        <option value="3">Withdraw ERC20</option>
+    </select>
+    <label for="proposal-destination-${daoAddress}">Destination Address:</label>
+    <input id="proposal-destination-${daoAddress}" type="text" placeholder="e.g., 0xDestination" />
+    <label for="proposal-amount-${daoAddress}">Amount (in tokens or ETH):</label>
+    <input id="proposal-amount-${daoAddress}" type="number" placeholder="e.g., 1" step="0.0001" />
+    <label for="proposal-token-address-${daoAddress}">Token Address:</label>
+    <input id="proposal-token-address-${daoAddress}" type="text" placeholder="e.g., 0xToken" />
+    <button onclick="createProposal('${daoAddress}')">Submit Proposal</button>
+</div>
+<div class="vote-form" id="vote-form-${daoAddress}" style="display: none;">
+    <label for="vote-proposal-id-${daoAddress}">Proposal ID:</label>
+    <input id="vote-proposal-id-${daoAddress}" type="number" placeholder="e.g., 0" min="0" step="1" />
+    <label for="vote-support-${daoAddress}">Vote:</label>
+    <select id="vote-support-${daoAddress}">
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+    </select>
+    <button onclick="voteOnProposal('${daoAddress}')">Submit Vote</button>
+</div>
+${proposalsHtml}
+`;
                     cardContainer.appendChild(card);
                 }
 
                 statusMessage.innerText = `Loaded ${daos.length} DAOs successfully!`;
                 statusMessage.className = "status-message";
-                localStorage.setItem('knownTokens', JSON.stringify(tokenAddresses));
             } catch (error) {
                 console.log("Refresh DAOs error details:", error);
                 logMessage(`Failed to load DAOs: ${error.message}`);
-                statusMessage.innerText = `Failed to load DAOs: ${error.message}. Try refreshing the page.`;
+                statusMessage.innerText = `Failed to load DAOs: ${error.message}. Ensure contract is accessible at ${FACTORY_ADDRESS}.`;
                 statusMessage.className = "error-message";
             }
         }
