@@ -15,36 +15,49 @@
 
         body {
             overflow-x: hidden;
-            background: #0a1426;
             color: #ffffff;
-            position: relative;
-        }
-
-        #particles-js {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
+            background: #001100; /* Dark green fallback */
         }
 
         .content {
-            position: relative;
-            z-index: 2;
             text-align: center;
             padding: 50px 20px;
         }
 
         .hero {
             padding: 73.6px 27.6px;
-            background: #0a2f2a url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.03"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E');
-            border-radius: 12px;
-            border: 2px solid rgba(232, 185, 35, 0.25);
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4), 0 0 10px rgba(46, 79, 63, 0.2);
+            background: linear-gradient(145deg, rgba(10, 14, 43, 0.9) 0%, rgba(28, 20, 58, 0.8) 100%) url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" opacity="0.04"%3E%3Cdefs%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/%3E%3C/filter%3E%3C/defs%3E%3Crect width="100%" height="100%" filter="url(%23noise)"/%3E%3C/svg%3E');
+            border-radius: 18px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 215, 0, 0.2);
             max-width: 828px;
             margin: 0 auto;
             margin-top: 70px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 18px;
+            padding: 2px;
+            background: linear-gradient(45deg, #ffd700, #b8860b, #ffd700);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            z-index: -1;
+            animation: metallic-glow 4s ease-in-out infinite;
+        }
+
+        @keyframes metallic-glow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.9; }
         }
 
         .hero h2 {
@@ -52,37 +65,54 @@
             font-weight: 700;
             margin-bottom: 20px;
             color: #ffffff;
-            letter-spacing: -0.03em;
-            /* Removed text-transform: uppercase */
+            letter-spacing: -0.02em;
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.4), 0 0 6px rgba(255, 255, 255, 0.2);
         }
 
         .hero p {
             font-size: 1.1776rem;
             font-weight: 400;
             margin-bottom: 40px;
-            color: #ffffff;
+            color: #e6e6fa;
             line-height: 1.6;
+            text-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
         }
 
         .cta-button {
             display: inline-block;
             padding: 16.56px 36.8px;
-            background: linear-gradient(45deg, #1a3a6b, #3665a8);
-            color: #ffffff;
+            background: linear-gradient(45deg, #b8860b, #ffd700);
+            color: #1c143a;
             text-decoration: none;
             font-weight: 600;
             font-size: 0.8464rem;
-            border-radius: 8px;
-            border: 2px solid rgba(232, 185, 35, 0.35);
-            transition: background 0.3s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease, box-shadow 0.3s ease;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 2px solid rgba(255, 215, 0, 0.6);
+            transition: all 0.3s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .cta-button:hover::after {
+            left: 100%;
         }
 
         .cta-button:hover {
-            background: linear-gradient(45deg, #2a4a8b, #4878b8);
-            color: #ffffff;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, #d4a017, #ffe066);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 15px rgba(255, 255, 255, 0.3);
         }
 
         .cta-button.slide-out {
@@ -104,62 +134,35 @@
                 padding: 46px 18.4px;
                 margin: 0 auto;
                 margin-top: 40px;
-                border-radius: 10px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                border-radius: 14px;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
             }
 
             .hero h2 {
-                font-size: 1.7664rem;
+                font-size: 1.4131rem; /* 20% smaller than 1.7664rem */
             }
 
             .hero p {
-                font-size: 1.0304rem;
+                font-size: 0.8243rem; /* 20% smaller than 1.0304rem */
                 margin-bottom: 30px;
             }
 
             .cta-button {
                 padding: 12.88px 25.76px;
-                font-size: 0.736rem;
-                border-radius: 6px;
+                font-size: 0.5888rem; /* 20% smaller than 0.736rem */
+                border-radius: 10px;
             }
         }
     </style>
 </head>
 <body>
-    <div id="particles-js"></div>
     <div class="content">
         <div class="hero">
             <h2>World's Biggest Hedge Fun</h2>
-            <p>The Ticker is MONEY</p>
             <a href="https://moneyfund.com/aboutmoney" class="cta-button" id="cta-button">Read The Whitepaper</a>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        particlesJS("particles-js", {
-            particles: {
-                number: { value: 1350, density: { enable: true, value_area: 800 } },
-                color: { value: ["#d4a017", "#a8b5a2", "#3665a8", "#ff6b6b", "#ffffff", "#b0e0e6", "#ffdb58"] },
-                shape: { type: "circle" },
-                opacity: { value: 0.6, random: true },
-                size: { value: 1.5, random: true, anim: { enable: false } },
-                move: { 
-                    enable: true, 
-                    speed: 1, 
-                    direction: "none", 
-                    random: true, 
-                    straight: false, 
-                    out_mode: "out" 
-                },
-                line_linked: { enable: false }
-            },
-            interactivity: {
-                detect_on: "canvas",
-                events: { onhover: { enable: false }, onclick: { enable: false } },
-                modes: {}
-            }
-        });
-
         const buttons = [
             { text: "Read The Whitepaper", href: "https://moneyfund.com/aboutmoney" },
             { text: "Create a Wallet", href: "/wallets" },
@@ -167,12 +170,15 @@
             { text: "Launch a Fund", href: "/launcher" },
             { text: "Launch a DAO", href: "/voter" },
             { text: "Launch a Dividend Pool", href: "/stake" },
-            { text: "Swap Tokens", href: "/DEX" },
+            { text: "Swap Tokens", href: "/dex" },
             { text: "Vote", href: "/vote" },
             { text: "Claim Dividends", href: "/dividends" },
-            { text: "Mass Airdrop", href: "/Airdropper" },
+            { text: "Airdrop", href: "/Airdropper" },
             { text: "Gamble", href: "/blackjack" },
-            { text: "Chat", href: "/chat" }
+            { text: "Chat", href: "/chat" },
+            { text: "Mint USDM", href: "/dollar" },
+            { text: "Run Volume", href: "/volume" },
+            { text: "Get ENS", href: "/etf" }
         ];
 
         let currentButtonIndex = 0;
